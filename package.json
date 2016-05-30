@@ -1,0 +1,68 @@
+{
+  "name": "fu-marketplace-api",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "gulp mocha",
+    "test:watch": "gulp",
+    "test:file": "NODE_ENV=test mocha",
+    "test:debug": "NODE_ENV=test mocha --debug-brk",
+    "db:migrate": "sequelize db:migrate",
+    "db:seed:all": "sequelize db:seed:all",
+    "nsp": "nsp check"
+  },
+  "dependencies": {
+    "bcrypt": "^0.8.6",
+    "bcrypt-nodejs": "^0.0.3",
+    "bluebird": "^3.4.0",
+    "body-parser": "^1.15.1",
+    "compression": "^1.6.2",
+    "dotenv": "^2.0.0",
+    "errorhandler": "^1.4.3",
+    "express": "^4.13.4",
+    "express-flash": "^0.0.2",
+    "express-session": "^1.13.0",
+    "express-validator": "^2.20.4",
+    "jsonwebtoken": "^7.0.0",
+    "lodash": "^4.12.0",
+    "moment": "^2.13.0",
+    "morgan": "^1.7.0",
+    "mustbe": "^0.4.0",
+    "passport": "0.3.2",
+    "passport-google-oauth": "^1.0.0",
+    "pg": "^4.5.5",
+    "pg-hstore": "^2.3.2",
+    "request": "^2.72.0",
+    "sequelize": "^3.23.3",
+    "sequelize-cli": "^2.4.0",
+    "umzug": "^1.11.0",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "eslint": "^2.10.2",
+    "faker": "^3.1.0",
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^2.2.0",
+    "install": "^0.8.1",
+    "mocha": "^2.4.5",
+    "node-mocks-http": "^1.5.2",
+    "npm": "^3.9.3",
+    "nsp": "^2.4.0",
+    "rewire": "^2.5.1",
+    "sinon": "^1.17.4",
+    "sinon-as-promised": "^4.0.0",
+    "supertest": "^1.2.0",
+    "timekeeper": "0.0.5"
+  },
+  "engines": {
+    "node": "5.11.1"
+  },
+  "license": "MIT"
+}
