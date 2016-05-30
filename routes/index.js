@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('./auth.js');
+const auth = require('../controllers/auth');
 const users = require('../controllers/users');
 
 const _mustBe = require('mustbe');
@@ -12,6 +12,7 @@ const mustBe = _mustBe.routeHelpers();
  * Routes that can be accessed by any one
  */
 router.post('/login', auth.login);
+router.get('/auth/google/callback', auth.loginWithGoogle);
 
 /*
  * Routes that can be accessed only by autheticated users

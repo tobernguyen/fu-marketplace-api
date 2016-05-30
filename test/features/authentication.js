@@ -48,6 +48,27 @@ describe('POST /login', () => {
   });
 });
 
+describe.skip('POST /login/google', () => {
+  describe('with valid code', () => {
+    describe('with valid email', () => {
+      it('should return access token and user info', done => {
+        request(app)
+          .post('/login/google')
+          .field('code', 'validCode')
+          .expect(res => {
+            let resBody = res.body;
+            let userInfo = resBody.user;
+            expect(resBody.token).to.be.ok;
+            expect(userInfo).to.be.ok;
+            expect(userInfo.id).to.be.ok;
+            expect(userInfo.fullName).to.be.ok;
+            expect(userInfo.email).to.be.ok;
+          });
+      });
+    });
+  });
+});
+
 describe('GET /api/v1/users/me', () => {
   let user, accessToken;
   

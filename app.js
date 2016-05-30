@@ -5,9 +5,9 @@ const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
-const logger = require('morgan');
+const morgan = require('morgan');
 const errorHandler = require('errorhandler');
-const winston = require('winston');
+const logger = require('./libs/logger');
 const dotenv = require('dotenv');
 
 /**
@@ -25,7 +25,7 @@ const app = express();
  */
 app.set('port', process.env.PORT || 3000);
 app.use(compression());
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(expressValidator());
 app.all('/*', function(req, res, next) {
@@ -65,7 +65,7 @@ app.use(errorHandler());
  */
 if (require.main === module) {
   app.listen(app.get('port'), () => {
-    winston.info('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
+    logger.info('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
   });
 }
 

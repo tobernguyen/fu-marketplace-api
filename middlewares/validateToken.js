@@ -2,7 +2,7 @@
 
 var Promise = require('bluebird');
 var jwt = Promise.promisifyAll(require('jsonwebtoken'));
-var validateUser = require('../routes/auth').validateUser;
+var validateUser = require('../controllers/auth').validateUser;
 
 module.exports = function(req, res, next) {
   var token = (req.body && req.body.access_token) || (req.query && req.query.access_token) || req.headers['x-access-token'];

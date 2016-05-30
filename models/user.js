@@ -8,7 +8,8 @@ const hashPassword = (password) => {
   return bcrypt.hashAsync(password, saltRound);
 };
 
-var IGNORE_ATTRIBUTES = ['password', 'updatedAt', 'createdAt', 'seller', 'admin', 'acceptTokenAfter'];
+var IGNORE_ATTRIBUTES = ['password', 'updatedAt', 'createdAt', 'acceptTokenAfter', 'ban'];
+var EXPOSE_ATTRIBUTES_ON_TRUTHY = ['admin', 'seller'];
 
 module.exports = function(sequelize, DataTypes) {
   let User = sequelize.define('User', {
@@ -36,6 +37,21 @@ module.exports = function(sequelize, DataTypes) {
     },
     acceptTokenAfter: {
       type: DataTypes.DATE
+    },
+    phone: {
+      type: DataTypes.STRING
+    },
+    room: {
+      type: DataTypes.STRING
+    },
+    avatar: {
+      type: DataTypes.STRING
+    },
+    gender: {
+      type: DataTypes.STRING
+    },
+    ban: {
+      type: DataTypes.BOOLEAN
     }
   }, {
     hooks: {
@@ -59,9 +75,15 @@ module.exports = function(sequelize, DataTypes) {
     instanceMethods: {
       toJSON: function () {
         var values = this.get();
+        
         IGNORE_ATTRIBUTES.forEach(attr => {
           delete values[attr];
         });
+        
+        EXPOSE_ATTRIBUTES_ON_TRUTHY.forEach(attr => {
+          if (!values[attr]) delete values[attr];
+        });
+        
         return values;
       },
       verifyPassword: function(inputPassword) {
