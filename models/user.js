@@ -8,8 +8,19 @@ const hashPassword = (password) => {
   return bcrypt.hashAsync(password, saltRound);
 };
 
-var IGNORE_ATTRIBUTES = ['password', 'updatedAt', 'createdAt', 'acceptTokenAfter', 'ban'];
-var EXPOSE_ATTRIBUTES_ON_TRUTHY = ['admin', 'seller'];
+var IGNORE_ATTRIBUTES = [
+  'password', 
+  'updatedAt', 
+  'createdAt', 
+  'acceptTokenAfter', 
+  'ban', 
+  'googleId'
+];
+
+var EXPOSE_ATTRIBUTES_ON_TRUTHY = [
+  'admin', 
+  'seller'
+];
 
 module.exports = function(sequelize, DataTypes) {
   let User = sequelize.define('User', {
@@ -37,6 +48,9 @@ module.exports = function(sequelize, DataTypes) {
     },
     acceptTokenAfter: {
       type: DataTypes.DATE
+    },
+    googleId: {
+      type: DataTypes.STRING
     },
     phone: {
       type: DataTypes.STRING

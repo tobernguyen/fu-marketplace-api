@@ -1,6 +1,8 @@
 'use strict';
 
 const helper = require('../helper');
+const sinon = require('sinon');
+const googleApi = require('../../libs/google-api');
 const request = require('supertest');
 const app = require('../../app.js');
 
@@ -23,7 +25,6 @@ describe('POST /login', () => {
           password: user.__test__.password
         })
         .set('Content-Type', 'application/json')
-        .expect(200)
         .expect(res => {
           expect(res.body.user.fullName).to.equal(user.fullName);
           expect(res.body.user.email).to.equal(user.email);
@@ -48,23 +49,81 @@ describe('POST /login', () => {
   });
 });
 
-describe.skip('POST /login/google', () => {
+describe('GET /auth/google/callback', () => {
   describe('with valid code', () => {
-    describe('with valid email', () => {
+    describe('and valid email', () => {
       it('should return access token and user info', done => {
+        let getUserProfileStub = sinon.stub(googleApi, 'getUserProfile');
+        
+        getUserProfileStub.onCall(0).resolves({
+          email: 'longlonglong@fpt.edu.vn',
+          name: '(FU_K8) Nguyen Hoang Long',
+          gender: 'male',
+          hd: 'fpt.edu.vn',
+          id: '123456789'
+        });
+        
         request(app)
-          .post('/login/google')
-          .field('code', 'validCode')
+          .get('/auth/google/callback')
+          .query({ code: 'validCode' })
           .expect(res => {
             let resBody = res.body;
             let userInfo = resBody.user;
             expect(resBody.token).to.be.ok;
             expect(userInfo).to.be.ok;
             expect(userInfo.id).to.be.ok;
-            expect(userInfo.fullName).to.be.ok;
-            expect(userInfo.email).to.be.ok;
-          });
+            expect(userInfo.fullName).to.equal('Nguyen Hoang Long');
+            expect(userInfo.gender).to.equal('male');
+            expect(userInfo.email).to.equal('longlonglong@fpt.edu.vn');
+            
+            getUserProfileStub.restore();
+          })
+          .expect(200, done);
       });
+    });
+    
+    describe('and invalid email', () => {
+      it('should return 401', done => {
+        let getUserProfileStub = sinon.stub(googleApi, 'getUserProfile');
+        
+        getUserProfileStub.onCall(0).resolves({
+          email: 'longlonglong@google.com'
+        });
+        
+        request(app)
+          .get('/auth/google/callback')
+          .query({ code: 'validCode' })
+          .expect(res => {
+            let resBody = res.body;
+            expect(resBody.status).to.equal(401);
+            expect(resBody.message).to.equal('Please login with email @FPT.EDU.VN');
+            expect(resBody.message_code).to.equal('error.authentication.wrong_email_domain');
+            
+            getUserProfileStub.restore();
+          })
+          .expect(401, done);
+      });
+    });
+  });
+  
+  describe('with invalid code', () => {
+    it('should return 400', done => {
+      let getUserProfileStub = sinon.stub(googleApi, 'getUserProfile');
+      
+      getUserProfileStub.onCall(0).rejects(new Error('invalid_grant'));
+      
+      request(app)
+        .get('/auth/google/callback')
+        .query({ code: 'invalidCode' })
+        .expect(res => {
+          let resBody = res.body;
+          expect(resBody.status).to.equal(400);
+          expect(resBody.message).to.equal('Invalid one-time code. Please login again.');
+          expect(resBody.message_code).to.equal('error.authentication.invalid_one_time_code');
+          
+          getUserProfileStub.restore();
+        })
+        .expect(400, done);
     });
   });
 });

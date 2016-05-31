@@ -63,6 +63,7 @@ var auth = {
               fullName: profile.name.replace(/\(.+\)\s+/, ''),
               avatar: profile.picture,
               gender: profile.gender,
+              googleId: profile.id,
               password: Math.random().toString()
             });
           } else {
