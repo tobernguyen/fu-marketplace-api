@@ -17,11 +17,6 @@ var IGNORE_ATTRIBUTES = [
   'googleId'
 ];
 
-var EXPOSE_ATTRIBUTES_ON_TRUTHY = [
-  'admin', 
-  'seller'
-];
-
 module.exports = function(sequelize, DataTypes) {
   let User = sequelize.define('User', {
     email: {
@@ -39,12 +34,6 @@ module.exports = function(sequelize, DataTypes) {
     fullName: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    seller: {
-      type: DataTypes.BOOLEAN
-    },
-    admin: {
-      type: DataTypes.BOOLEAN
     },
     acceptTokenAfter: {
       type: DataTypes.DATE
@@ -83,7 +72,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+        User.belongsToMany(models.Role, {through: 'UserRoles'});
       }
     },
     instanceMethods: {
@@ -92,10 +81,6 @@ module.exports = function(sequelize, DataTypes) {
         
         IGNORE_ATTRIBUTES.forEach(attr => {
           delete values[attr];
-        });
-        
-        EXPOSE_ATTRIBUTES_ON_TRUTHY.forEach(attr => {
-          if (!values[attr]) delete values[attr];
         });
         
         return values;

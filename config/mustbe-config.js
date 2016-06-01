@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 module.exports = function(config){
   config.routeHelpers(function(rh){
     // get the current user from the request object
@@ -23,12 +25,18 @@ module.exports = function(config){
     // configure an activity with an authorization check
     activities.can('admin', function(identity, params, cb){
       let user = identity.user;
-      cb(null, !!user.admin);
+      user.getRoles().then(roles => {
+        let roleNames = _.map(roles, r => r.name);
+        cb(null, _.includes(roleNames, 'admin'));
+      });
     });
 
     activities.can('seller', function(identity, params, cb){
       let user = identity.user;
-      cb(null, !!user.seller);
+      user.getRoles().then(roles => {
+        let roleNames = _.map(roles, r => r.name);
+        cb(null, _.includes(roleNames, 'seller'));
+      });
     });
   });
 };

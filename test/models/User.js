@@ -5,13 +5,14 @@ const User = require('../../models').User;
 const bcrypt = require('bcrypt');
 const rewire = require('rewire');
 const tk = require('timekeeper');
+const _ = require('lodash');
 
 describe('User Model', () => {
   describe('factory', () => {
     it('should be valid', done => {
       let createdUser;
       
-      helper.factory.createUser({seller: true}).then(user => {
+      helper.factory.createUser().then(user => {
         createdUser = user;
         expect(user).to.be.ok;
         
@@ -19,9 +20,22 @@ describe('User Model', () => {
       }).then(userFromDb => {
         expect(createdUser.fullname).to.equal(userFromDb.fullname);
         expect(createdUser.email).to.equal(userFromDb.email);
-        expect(userFromDb.seller).to.be.true;
         done();
       }, done);
+    });
+    
+    describe('#createUserWithRole', () => {      
+      it('should create user with correct role', done => {
+        helper.factory.createUserWithRole({}, 'admin').then(user => {
+          expect(user).to.be.ok;
+          
+          return user.getRoles();
+        }).then(roles => {
+          let roleNames = _.map(roles, r => r.name);
+          expect(roleNames).to.include('admin');
+          done();
+        });
+      });
     });
   });
   

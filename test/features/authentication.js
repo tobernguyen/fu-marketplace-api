@@ -132,7 +132,7 @@ describe('GET /api/v1/users/me', () => {
   let user, accessToken;
   
   before(done => {
-    helper.factory.createUser().then(u => {
+    helper.factory.createUserWithRole({}, 'seller').then(u => {
       user = u;
       accessToken = helper.createAccessTokenForUserId(u.id);
       done();
@@ -156,6 +156,7 @@ describe('GET /api/v1/users/me', () => {
           expect(res.body.email).to.equal(user.email);
           expect(res.body.fullName).to.equal(user.fullName);
           expect(res.body.id).to.equal(user.id);
+          expect(res.body.roles).to.include('seller');
         })
         .expect(200, done);
     });

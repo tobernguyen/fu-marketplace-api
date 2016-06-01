@@ -3,6 +3,7 @@
 var dotenv = require('dotenv');
 dotenv.load({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
+var Promise = require('bluebird');
 var Sequelize = require('sequelize');
 var models = require('../models');
 var _sequelize = models.sequelize;
@@ -74,12 +75,32 @@ var createUser = (attrs) => {
   return createModel('User', {
     fullName: attrs.fullname || faker.name.findName(),
     email: attrs.email || faker.internet.email(),
-    password: password,
-    seller: attrs.seller,
-    admin: attrs.admin
+    password: password
   }).then(u => {
     u['__test__'] = {password: password}; // inject testing data into user object
     return Promise.resolve(u);
+  });
+};
+
+const assignRoleToUser = (user, roleName) => {
+  assert(user, 'user cannot be blank');
+  assert(roleName, 'roleName cannot be blank');
+  
+  let Role = models.Role;
+  return Role.findOrCreate({where: {name: roleName}}).then(role => {
+    return user.addRole(role[0]);
+  }).then(() => Promise.resolve(user));
+};
+
+const createUserWithRole = (attrs, roleName) => {
+  let createdUser;
+  
+  return createUser(attrs).then(user => {
+    createdUser = user;
+    
+    return assignRoleToUser(user, roleName);
+  }).then(() => {
+    return Promise.resolve(createdUser);
   });
 };
 
@@ -92,7 +113,9 @@ var createAccessTokenForUserId = (userId) => {
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
 exports.dbUtils = dbUtils;
 exports.factory = {
-  createUser: createUser
+  createUser: createUser,
+  assignRoleToUser: assignRoleToUser,
+  createUserWithRole: createUserWithRole
 };
 
 // Setup some global helper
