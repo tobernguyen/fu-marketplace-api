@@ -15,8 +15,8 @@ describe('PUT /api/v1/users/me', () => {
     });
   });
   
-  describe('with valid access token', () => {
-    it('should return 200 OK when user update it own information', done => {
+  describe('with valid access token and input attribute with correct validation', () => {
+    it('should return 200 OK and return new user profile', done => {
       request(app)
         .put('/api/v1/users/me')
         .set('X-Access-Token', accessToken)
@@ -39,12 +39,12 @@ describe('PUT /api/v1/users/me', () => {
           expect(res.body.gender).to.equal('male');
           expect(res.body.identityNumber).to.equal('123456789');
         })
-        .expect(200, done);
+        .expect(200, done)  
     });
   });
   
-  describe('with valid access token', () => {
-    it('should return 422 when user update attribute with wrong validation', done => {
+  describe('with valid access token and input attribute with wrong validation', () => {
+    it('should return 422 and return errors in correct format', done => {
       request(app)
         .put('/api/v1/users/me')
         .set('X-Access-Token', accessToken)

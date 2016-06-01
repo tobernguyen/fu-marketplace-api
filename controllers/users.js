@@ -1,11 +1,9 @@
 'use strict';
 
-const User = require('../models').User;
-
 const USER_UPDATE_VALID_KEY = ['fullName', 'room', 'phone', 'gender', 'identityNumber'];
 
+var User = require('../models').User;
 var _ = require('lodash');
-
 var ValidationError = require('sequelize').ValidationError;
 
 exports.getCurrentUser = (req, res) => {
