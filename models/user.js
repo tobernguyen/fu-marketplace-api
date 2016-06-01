@@ -36,12 +36,15 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [8,],
+        len: [8, 255]
       }
     },
     fullName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [1, 50]
+      }
     },
     seller: {
       type: DataTypes.BOOLEAN
