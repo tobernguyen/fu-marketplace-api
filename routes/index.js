@@ -18,6 +18,7 @@ router.get('/auth/google/callback', auth.loginWithGoogle);
  * Routes that can be accessed only by autheticated users
  */
 router.get('/api/v1/users/me', users.getCurrentUser);
+router.put('/api/v1/users/me', users.putCurrentUser);
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 
 /*

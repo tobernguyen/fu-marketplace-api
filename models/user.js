@@ -29,11 +29,17 @@ module.exports = function(sequelize, DataTypes) {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [8, 255]
+      }
     },
     fullName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [1, 50]
+      }
     },
     acceptTokenAfter: {
       type: DataTypes.DATE
@@ -42,7 +48,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     },
     phone: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      validate: {
+        isNumeric: true
+      }
     },
     room: {
       type: DataTypes.STRING
@@ -53,9 +62,16 @@ module.exports = function(sequelize, DataTypes) {
     gender: {
       type: DataTypes.STRING
     },
-    ban: {
+    banned: {
       type: DataTypes.BOOLEAN
-    }
+    },
+    identityNumber: {
+      type: DataTypes.STRING,
+      validate: {
+        isNumeric: true,
+        len: [9,12]
+      }
+    },
   }, {
     hooks: {
       beforeCreate: function(user, options) {
