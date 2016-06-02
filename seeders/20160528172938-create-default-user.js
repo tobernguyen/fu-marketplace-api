@@ -1,6 +1,5 @@
 'use strict';
 
-const bcrypt = require('bcrypt');
 const models = require('../models');
 
 module.exports = {
@@ -9,7 +8,7 @@ module.exports = {
     
     return models.User.create({
       email: 'longnh1994@gmail.com',
-      password: bcrypt.hashSync('12345678', parseInt(process.env.PASSWORD_SALT_ROUND)),
+      password: '12345678',
       fullName: 'Long Nguyen'
     }).then(function(u) {
       user = u;
