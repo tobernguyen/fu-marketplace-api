@@ -21,9 +21,12 @@ router.get('/api/v1/users/me', users.getCurrentUser);
 router.put('/api/v1/users/me', users.putCurrentUser);
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 
+
 /*
  * Routes that can be accessed only by authenticated & authorized users
  */
 router.get('/api/v1/admin/users', mustBe.authorized('admin'), users.adminGetAll);
+router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), users.adminGetUser);
+router.put('/api/v1/admin/users/:id', mustBe.authorized('admin'), users.adminUpdateUserProfile);
 
 module.exports = router;
