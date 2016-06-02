@@ -10,7 +10,7 @@ describe('PUT /api/v1/admin/users/:id', () => {
   before(done => {
     helper.factory.createUserWithRole({},'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createUser();
+      return helper.factory.createUserWithRole({},'seller');
     }).then(u => {
       userToBeUpdated = u;
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
@@ -44,7 +44,8 @@ describe('PUT /api/v1/admin/users/:id', () => {
             expect(res.body.gender).to.equal('male');
             expect(res.body.identityNumber).to.equal('123456789');
             expect(res.body.banned).to.equal(true);
-            expect(!res.body.password);
+            expect(res.body.password).to.be.undefined;
+            expect(res.body.roles).to.include('seller');
           })
           .expect(200, done);  
       });
@@ -101,9 +102,9 @@ describe('GET /api/v1/admin/users/:id', () => {
   let userToBeUpdated, normalUserAccessToken, adminToken;
   
   before(done => {
-    helper.factory.createUserWithRole({},'admin').then(u => {
+    helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createUser();
+      return helper.factory.createUserWithRole({}, 'seller');
     }).then(u => {
       userToBeUpdated = u;
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
@@ -125,7 +126,8 @@ describe('GET /api/v1/admin/users/:id', () => {
           expect(res.body.gender).to.equal(userToBeUpdated.gender);
           expect(res.body.identityNumber).to.equal(userToBeUpdated.identityNumber);
           expect(res.body.banned).to.equal(userToBeUpdated.banned);
-          expect(!res.body.password);
+          expect(res.body.password).to.be.undefined;
+          expect(res.body.roles).to.include('seller');
         })
         .expect(200, done);  
     });
@@ -135,6 +137,45 @@ describe('GET /api/v1/admin/users/:id', () => {
     it('should return 403 Forbidden', done => {
       request(app)
         .get(`/api/v1/admin/users/${userToBeUpdated.id}`)
+        .set('X-Access-Token', normalUserAccessToken)
+        .expect(res => {
+          expect(res.body.status).to.equal(403);
+          expect(res.body.message_code).to.equal('error.authentication.not_authorized');
+        })
+        .expect(403, done);  
+    });
+  });
+});
+
+describe('GET /api/v1/admin/users/', () => {
+  let normalUserAccessToken, adminToken;
+  
+  before(done => {
+    helper.factory.createUserWithRole({}, 'admin').then(u => {
+      adminToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createUser();
+    }).then(u => {
+      normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
+      done();
+    });
+  });
+  
+  describe('with admin access token', () => {
+    it('should return 200 OK and return new user profile', done => {
+      request(app)
+        .get('/api/v1/admin/users/')
+        .set('X-Access-Token', adminToken)
+        .expect(res => {
+          expect(res.body.users).to.be.ok;
+        })
+        .expect(200, done);  
+    });
+  });
+  
+  describe('with normal user access token', () => {
+    it('should return 403 Forbidden', done => {
+      request(app)
+        .get('/api/v1/admin/users/')
         .set('X-Access-Token', normalUserAccessToken)
         .expect(res => {
           expect(res.body.status).to.equal(403);

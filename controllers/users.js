@@ -1,9 +1,12 @@
 'use strict';
 
 const USER_UPDATE_VALID_KEY = ['fullName', 'room', 'phone', 'gender', 'identityNumber'];
-const ADMIN_UPDATE_VALID_KEY = USER_UPDATE_VALID_KEY.concat(['role', 'banned']);
+const ADMIN_UPDATE_VALID_KEY = USER_UPDATE_VALID_KEY.concat(['banned']);
 
-var User = require('../models').User;
+var models = require('../models');
+var User = models.User;
+var Role = models.Role;
+
 var _ = require('lodash');
 var errorHandlers = require('./helpers/errorHandlers');
 
@@ -25,16 +28,25 @@ exports.postSignOutAll = (req, res) => {
 };
 
 exports.adminGetAll = (req, res) => {
-  User.findAll().then(users => {
+  User.findAll({
+    include: Role
+  }).then(users => {
+    let result = _.map(users, u => {
+      let user = u.toJSON();
+      let roleNames = _.map(user.Roles, r => r.name);
+      delete user.Roles;
+      if (roleNames.length > 0) user['roles'] = roleNames;
+      return user;
+    });
     res.json({
-      users: users
+      users: result
     });
   });
 };
 
 exports.adminUpdateUserProfile = (req, res) => {
   var userId = req.params.id;
-  
+    
   User.findById(userId).then(user => {
     if (!user){
       res.status(404);
@@ -45,7 +57,12 @@ exports.adminUpdateUserProfile = (req, res) => {
     } else{
       sanitizeUpdateRequest(req, true);
       user.update(getUpdateParams(req, true)).then(user => {
-        res.json(user);
+        let result = user.toJSON();
+        user.getRoles().then(roles => {
+          let roleNames = _.map(roles, r => r.name);
+          if (roleNames.length > 0) result['roles'] = roleNames;
+          res.json(result);
+        });
       }).catch(err => {
         errorHandlers.modelErrorHandler(err, res);
       });
@@ -64,7 +81,12 @@ exports.adminGetUser = (req, res) => {
         error: 'User is not exits'
       });
     } else{
-      res.json(user);
+      let result = user.toJSON();
+      user.getRoles().then(roles => {
+        let roleNames = _.map(roles, r => r.name);
+        if (roleNames.length > 0) result['roles'] = roleNames;
+        res.json(result);
+      });
     }
   });
 };
@@ -72,7 +94,12 @@ exports.adminGetUser = (req, res) => {
 exports.putCurrentUser = (req, res) =>{
   sanitizeUpdateRequest(req, false);
   req.user.update(getUpdateParams(req, false)).then(user => {
-    res.json(user);
+    let result = user.toJSON();
+    user.getRoles().then(roles => {
+      let roleNames = _.map(roles, r => r.name);
+      if (roleNames.length > 0) result['roles'] = roleNames; 
+      res.json(result);
+    });
   }).catch(err => {
     errorHandlers.modelErrorHandler(err, res);
   });
