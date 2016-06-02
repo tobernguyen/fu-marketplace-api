@@ -185,3 +185,94 @@ describe('GET /api/v1/admin/users/', () => {
     });
   });
 });
+
+describe('POST /api/v1/admin/users/:id/setRoles', () => {
+  let userToBeUpdated, adminToken;
+  
+  before(done => {
+    helper.factory.createUserWithRole({}, 'admin').then(u => {
+      adminToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createUserWithRole({}, 'seller');
+    }).then(u => {
+      userToBeUpdated = u;
+      done();
+    });
+  });
+  
+  describe('clear all roles', () => {
+    it('should return 200 OK and return new user profile', done => {
+      request(app)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/changeRoles`)
+        .set('X-Access-Token', adminToken)
+        .send({
+          roles: []
+        })
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.email).to.equal(userToBeUpdated.email);
+          expect(res.body.fullName).to.equal(userToBeUpdated.fullName);
+          expect(res.body.id).to.equal(userToBeUpdated.id);
+          expect(res.body.room).to.equal(userToBeUpdated.room);
+          expect(res.body.phone).to.equal(userToBeUpdated.phone);
+          expect(res.body.gender).to.equal(userToBeUpdated.gender);
+          expect(res.body.identityNumber).to.equal(userToBeUpdated.identityNumber);
+          expect(res.body.banned).to.equal(userToBeUpdated.banned);
+          expect(res.body.password).to.be.undefined;
+          expect(res.body.roles).to.be.undefined;
+        })
+        .expect(200, done);  
+    });
+  });
+  
+  describe('change role', () => {
+    it('should return 200 OK and return new user profile', done => {
+      request(app)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/changeRoles`)
+        .set('X-Access-Token', adminToken)
+        .send({
+          roles: ['admin']
+        })
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.email).to.equal(userToBeUpdated.email);
+          expect(res.body.fullName).to.equal(userToBeUpdated.fullName);
+          expect(res.body.id).to.equal(userToBeUpdated.id);
+          expect(res.body.room).to.equal(userToBeUpdated.room);
+          expect(res.body.phone).to.equal(userToBeUpdated.phone);
+          expect(res.body.gender).to.equal(userToBeUpdated.gender);
+          expect(res.body.identityNumber).to.equal(userToBeUpdated.identityNumber);
+          expect(res.body.banned).to.equal(userToBeUpdated.banned);
+          expect(res.body.password).to.be.undefined;
+          expect(res.body.roles).to.be.include('admin');
+          expect(res.body.roles).to.be.not.include('seller');
+        })
+        .expect(200, done);  
+    });
+  });
+  
+  describe('with invalid role', () => {
+    it('should return 200 OK and return new user profile', done => {
+      request(app)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/changeRoles`)
+        .set('X-Access-Token', adminToken)
+        .send({
+          roles: ['invalid role']
+        })
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.email).to.equal(userToBeUpdated.email);
+          expect(res.body.fullName).to.equal(userToBeUpdated.fullName);
+          expect(res.body.id).to.equal(userToBeUpdated.id);
+          expect(res.body.room).to.equal(userToBeUpdated.room);
+          expect(res.body.phone).to.equal(userToBeUpdated.phone);
+          expect(res.body.gender).to.equal(userToBeUpdated.gender);
+          expect(res.body.identityNumber).to.equal(userToBeUpdated.identityNumber);
+          expect(res.body.banned).to.equal(userToBeUpdated.banned);
+          expect(res.body.password).to.be.undefined;
+          expect(res.body.roles).to.be.include('admin');
+          expect(res.body.roles).to.be.not.include('invalid role');
+        })
+        .expect(200, done);  
+    });
+  });
+});
