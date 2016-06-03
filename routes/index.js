@@ -26,9 +26,9 @@ router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 /*
  * Routes that can be accessed only by authenticated & authorized users
  */
-router.get('/api/v1/admin/users', mustBe.authorized('admin'), adminUser.adminGetAll);
-router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.adminGetUser);
-router.put('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.adminUpdateUserProfile);
-router.post('/api/v1/admin/users/:id/changeRoles', mustBe.authorized('admin'), adminUser.adminChangeUserRoles);
+router.get('/api/v1/admin/users', mustBe.authorized('admin'), adminUser.getUsers);
+router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.getUser);
+router.put('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.putUser);
+router.post('/api/v1/admin/users/:id/setRoles', mustBe.authorized('admin'), adminUser.postUserRoles);
 
 module.exports = router;

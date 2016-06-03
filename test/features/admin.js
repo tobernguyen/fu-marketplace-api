@@ -202,7 +202,7 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
   describe('clear all roles', () => {
     it('should return 200 OK and return new user profile', done => {
       request(app)
-        .post(`/api/v1/admin/users/${userToBeUpdated.id}/changeRoles`)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)
         .send({
           roles: []
@@ -227,7 +227,7 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
   describe('change role', () => {
     it('should return 200 OK and return new user profile', done => {
       request(app)
-        .post(`/api/v1/admin/users/${userToBeUpdated.id}/changeRoles`)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)
         .send({
           roles: ['admin']
@@ -253,7 +253,7 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
   describe('with invalid role', () => {
     it('should return 200 OK and return new user profile', done => {
       request(app)
-        .post(`/api/v1/admin/users/${userToBeUpdated.id}/changeRoles`)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)
         .send({
           roles: ['invalid role']
@@ -273,6 +273,20 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
           expect(res.body.roles).to.be.not.include('invalid role');
         })
         .expect(200, done);  
+    });
+  });
+  
+  describe('with empty json', () => {
+    it('should return 200 OK and return new user profile', done => {
+      request(app)
+        .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
+        .set('X-Access-Token', adminToken)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.status).to.equal(422);
+          expect(res.body.error).to.equal('Unprocessable Entity roles is not exits');
+        })
+        .expect(422, done);  
     });
   });
 });

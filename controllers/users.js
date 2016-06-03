@@ -1,9 +1,9 @@
 'use strict';
 
 var _ = require('lodash');
-var UserUpdateNormalizer = require('./helpers/userUpdateNormalizer');
-var sanitizeUpdateRequest = UserUpdateNormalizer.sanitizeUpdateRequest;
-var getUpdateParams = UserUpdateNormalizer.getUpdateParams;
+var userUpdateNormalizer = require('./helpers/userUpdateNormalizer');
+var sanitizeUpdateRequest = userUpdateNormalizer.sanitizeUpdateRequest;
+var getUpdateParams = userUpdateNormalizer.getUpdateParams;
 var errorHandlers = require('./helpers/errorHandlers');
 
 exports.getCurrentUser = (req, res) => {

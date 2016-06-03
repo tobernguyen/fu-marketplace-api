@@ -4,12 +4,12 @@ var _ = require('lodash');
 var models = require('../../models');
 var User = models.User;
 var Role = models.Role;
-var UserUpdateNormalizer = require('../helpers/userUpdateNormalizer');
-var sanitizeUpdateRequest = UserUpdateNormalizer.sanitizeUpdateRequest;
-var getUpdateParams = UserUpdateNormalizer.getUpdateParams;
+var userUpdateNormalizer = require('../helpers/userUpdateNormalizer');
+var sanitizeUpdateRequest = userUpdateNormalizer.sanitizeUpdateRequest;
+var getUpdateParams = userUpdateNormalizer.getUpdateParams;
 var errorHandlers = require('../helpers/errorHandlers');
 
-exports.adminGetAll = (req, res) => {
+exports.getUsers = (req, res) => {
   User.findAll({
     include: Role
   }).then(users => {
@@ -26,7 +26,7 @@ exports.adminGetAll = (req, res) => {
   });
 };
 
-exports.adminUpdateUserProfile = (req, res) => {
+exports.putUser = (req, res) => {
   var userId = req.params.id;
     
   User.findById(userId).then(user => {
@@ -52,43 +52,57 @@ exports.adminUpdateUserProfile = (req, res) => {
   });
 };
 
-exports.adminGetUser = (req, res) => {
+exports.getUser = (req, res) => {
   let userId = req.params.id;
   responseUserById(userId, res);
 };
 
-exports.adminChangeUserRoles = (req, res) => {
+exports.postUserRoles = (req, res) => {
   let userId = req.params.id;
   
   let roles = req.body.roles;
   
-  let user;
-  User.findById(userId).then(u => {
-    if (!u){
-      res.status(404);
-      res.json({
-        status: 404,
-        error: 'User is not exits'
-      });
-    } else{
-      user = u;
-      return Role.findAll({
-        where: {
-          name : {
-            $in: roles
-          }
+  if (!roles) {
+    res.status(422);
+    res.json({
+      status: 422,
+      error: 'Unprocessable Entity roles is not exits'
+    });
+  } else {
+    let user;
+    User.findById(userId).then(u => {
+      if (!u){
+        res.status(404);
+        res.json({
+          status: 404,
+          error: 'User is not exits'
+        });
+      } else{
+        user = u;
+        if (roles.length == 0){
+          return Promise.resolve([]);
+        } else {
+          return Role.findAll({
+            where: {
+              name : {
+                $in: roles
+              }
+            }
+          });
         }
-      });
-    }
-  }).then(r => {
-    if (r[0] || !roles[0]){
-      return user.setRoles(r);
-    }
-  }).then(() => {
-    responseUser(user, res);
-  }).catch(err => {
-    errorHandlers.modelErrorHandler(err, res);
-  });
+      }
+    }).then(r => {
+      if (r.length > 0 || roles.length ==0){
+        return user.setRoles(r);
+      } else {
+        return Promise.resolve();
+      }
+    }).then(() => {
+      responseUser(user, res);
+    }).catch(err => {
+      errorHandlers.modelErrorHandler(err, res);
+    });
+  }
 };
 
 var responseUserById = (id, res) => {
