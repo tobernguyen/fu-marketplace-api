@@ -80,7 +80,6 @@ exports.postSetRoles = (req, res) => {
       } else {
         user = u;
         if (roles.length == 0) {
-          console.log('abc');
           return user.setRoles([]);
         } else {
           return Role.findAll({
