@@ -71,7 +71,7 @@ module.exports = function(sequelize, DataTypes) {
         isNumeric: true,
         len: [9,12]
       }
-    },
+    }
   }, {
     hooks: {
       beforeCreate: function(user, options) {

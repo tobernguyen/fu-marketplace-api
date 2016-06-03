@@ -8,7 +8,7 @@ describe('PUT /api/v1/users/me', () => {
   let user, accessToken;
   
   before(done => {
-    helper.factory.createUser().then(u => {
+    helper.factory.createUserWithRole({}, 'seller').then(u => {
       user = u;
       accessToken = helper.createAccessTokenForUserId(u.id);
       done();
@@ -39,6 +39,7 @@ describe('PUT /api/v1/users/me', () => {
             expect(res.body.phone).to.equal('123123123123');
             expect(res.body.gender).to.equal('male');
             expect(res.body.identityNumber).to.equal('123456789');
+            expect(res.body.roles).to.include('seller');
           })
           .expect(200, done);  
       });
