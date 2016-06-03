@@ -57,7 +57,7 @@ exports.getUser = (req, res) => {
   responseUserById(userId, res);
 };
 
-exports.postUserRoles = (req, res) => {
+exports.postSetRoles = (req, res) => {
   let userId = req.params.id;
   
   let roles = req.body.roles;
@@ -66,7 +66,7 @@ exports.postUserRoles = (req, res) => {
     res.status(422);
     res.json({
       status: 422,
-      error: 'Unprocessable Entity roles is not exits'
+      error: 'Roles must be an array'
     });
   } else {
     let user;
@@ -84,7 +84,7 @@ exports.postUserRoles = (req, res) => {
         } else {
           return Role.findAll({
             where: {
-              name : {
+              name: {
                 $in: roles
               }
             }
@@ -92,7 +92,7 @@ exports.postUserRoles = (req, res) => {
         }
       }
     }).then(r => {
-      if (r.length > 0 || roles.length ==0){
+      if (r.length > 0 || roles.length == 0){
         return user.setRoles(r);
       } else {
         return Promise.resolve();
@@ -114,7 +114,7 @@ var responseUserById = (id, res) => {
         error: 'User is not exits'
       });
     } else {
-      responseUser(user,res);
+      responseUser(user, res);
     }
   });
 };

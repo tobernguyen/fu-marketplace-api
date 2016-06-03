@@ -284,7 +284,7 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
         .set('Content-Type', 'application/json')
         .expect(res => {
           expect(res.body.status).to.equal(422);
-          expect(res.body.error).to.equal('Unprocessable Entity roles is not exits');
+          expect(res.body.error).to.equal('Roles must be an array');
         })
         .expect(422, done);  
     });

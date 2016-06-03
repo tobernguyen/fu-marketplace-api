@@ -29,6 +29,6 @@ router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 router.get('/api/v1/admin/users', mustBe.authorized('admin'), adminUser.getUsers);
 router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.getUser);
 router.put('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.putUser);
-router.post('/api/v1/admin/users/:id/setRoles', mustBe.authorized('admin'), adminUser.postUserRoles);
+router.post('/api/v1/admin/users/:id/setRoles', mustBe.authorized('admin'), adminUser.postSetRoles);
 
 module.exports = router;
