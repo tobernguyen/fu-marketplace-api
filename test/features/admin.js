@@ -199,8 +199,8 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
     });
   });
   
-  describe('clear all roles', () => {
-    it('should return 200 OK and return new user profile', done => {
+  describe('with input roles is empty array', () => {
+    it('should return 200 OK and return user profile with empty roles', done => {
       request(app)
         .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)
@@ -224,8 +224,8 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
     });
   });
   
-  describe('change role', () => {
-    it('should return 200 OK and return new user profile', done => {
+  describe('with an array of role contain valid role', () => {
+    it('should return 200 OK and return user profile with new role', done => {
       request(app)
         .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)
@@ -250,8 +250,8 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
     });
   });
   
-  describe('with invalid role', () => {
-    it('should return 200 OK and return new user profile', done => {
+  describe('with an array of role contain invalid role', () => {
+    it('should return 200 OK and return user profile without changing the role', done => {
       request(app)
         .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)
@@ -276,8 +276,8 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
     });
   });
   
-  describe('with empty json', () => {
-    it('should return 200 OK and return new user profile', done => {
+  describe('with empty body', () => {
+    it('should return 422 and return and error message', done => {
       request(app)
         .post(`/api/v1/admin/users/${userToBeUpdated.id}/setRoles`)
         .set('X-Access-Token', adminToken)

@@ -62,7 +62,7 @@ exports.postSetRoles = (req, res) => {
   
   let roles = req.body.roles;
   
-  if (!roles) {
+  if (!_.isArray(roles)) {
     res.status(422);
     res.json({
       status: 422,
@@ -71,16 +71,17 @@ exports.postSetRoles = (req, res) => {
   } else {
     let user;
     User.findById(userId).then(u => {
-      if (!u){
+      if (!u) {
         res.status(404);
         res.json({
           status: 404,
           error: 'User is not exits'
         });
-      } else{
+      } else {
         user = u;
-        if (roles.length == 0){
-          return Promise.resolve([]);
+        if (roles.length == 0) {
+          console.log('abc');
+          return user.setRoles([]);
         } else {
           return Role.findAll({
             where: {
@@ -88,15 +89,15 @@ exports.postSetRoles = (req, res) => {
                 $in: roles
               }
             }
+          }).then(r => {
+            if (r.length > 0) {
+              return user.setRoles(r);  
+            } else {
+              return Promise.resolve();
+            }
           });
-        }
-      }
-    }).then(r => {
-      if (r.length > 0 || roles.length == 0){
-        return user.setRoles(r);
-      } else {
-        return Promise.resolve();
-      }
+        } 
+      }   
     }).then(() => {
       responseUser(user, res);
     }).catch(err => {
