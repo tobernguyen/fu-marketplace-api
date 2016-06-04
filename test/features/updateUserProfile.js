@@ -3,6 +3,7 @@
 const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
+const User = require('../../models').User;
 
 describe('PUT /api/v1/users/me', () => {
   let user, accessToken;
@@ -65,5 +66,72 @@ describe('PUT /api/v1/users/me', () => {
           .expect(422, done);
       });
     });
+  });
+});
+
+describe('POST /api/v1/users/me/uploadAvatar', () => {
+  let user, accessToken;
+  
+  before(done => {
+    helper.factory.createUser().then(u => {
+      user = u;
+      accessToken = helper.createAccessTokenForUserId(u.id);
+      done();
+    });
+  });
+  
+  describe('with valid access token and ', () => {
+    describe('valid image file', () => {
+      it('should return 200 and return user with valid avatar file', done => {
+        request(app)
+          .post('/api/v1/users/me/uploadAvatar')
+          .set('X-Access-Token', accessToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .expect(res => {
+            expect(res.body.id).to.equal(user.id);
+            expect(res.body.avatar).to.have.string(`users/${user.id}/avatar-small.jpg`);
+          })
+          .expect(200, done);  
+      });
+    });
+    
+    describe('invalid image file', () => {
+      it('should return 422 and inform client file is invalid', done => {
+        request(app)
+          .post('/api/v1/users/me/uploadAvatar')
+          .set('X-Access-Token', accessToken)
+          .attach('file', 'test/fixtures/invalid-image.txt')
+          .expect(res => {
+            expect(res.body.status).to.equal(422);
+            expect(res.body.message).to.equal('Only PNG and JPEG file is allowed');
+          })
+          .expect(422, done);
+      });
+    });
+    
+    describe('image file is too big', () => {
+      let originalMaximumAvatarSize;
+      
+      before(() => {
+        originalMaximumAvatarSize = User.MAXIMUM_AVATAR_SIZE;
+        User.MAXIMUM_AVATAR_SIZE = 1024; // Allow 1KB file only
+      });
+      
+      after(() => {
+        User.MAXIMUM_AVATAR_SIZE = originalMaximumAvatarSize;
+      });
+      
+      it('should return 406 and inform client file is too big', done => {
+        request(app)
+          .post('/api/v1/users/me/uploadAvatar')
+          .set('X-Access-Token', accessToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .expect(res => {
+            expect(res.body.status).to.equal(406);
+            expect(res.body.message).to.equal('File is too big. Maximum file size allow: 1KB');
+          })
+          .expect(406, done);
+      });
+    }); 
   });
 });

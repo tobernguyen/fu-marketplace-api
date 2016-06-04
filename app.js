@@ -48,6 +48,11 @@ app.all('/*', function(req, res, next) {
 app.all('/api/v1/*', [require('./middlewares/validateToken')]);
 app.use('/', require('./routes'));
 
+// For testing and development enrivonment only
+if (process.env.UPLOAD_TO_S3 == 'false') {
+  app.use(express.static('public'));
+}
+
 // If no route is matched by now, it must be a 404
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

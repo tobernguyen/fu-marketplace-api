@@ -12,11 +12,12 @@ var faker = require('faker');
 var Umzug = require('umzug');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
-var jwt = require('jsonwebtoken');
 chai.use(chaiAsPromised);
+var jwt = require('jsonwebtoken');
 var expect = chai.expect;
 require('sinon');
 require('sinon-as-promised');
+var fs = require('fs-extra');
 
 before(done => {
   dbUtils.runMigrations()
@@ -26,6 +27,7 @@ before(done => {
 
 after(() => {
   _sequelize.close();
+  fs.emptyDirSync('public/uploads/__test__');
 });
 
 var dbUtils = {
@@ -75,7 +77,8 @@ var createUser = (attrs) => {
   return createModel('User', {
     fullName: attrs.fullname || faker.name.findName(),
     email: attrs.email || faker.internet.email(),
-    password: password
+    password: password,
+    avatarFile: attrs.avatarFile
   }).then(u => {
     u['__test__'] = {password: password}; // inject testing data into user object
     return Promise.resolve(u);

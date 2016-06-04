@@ -7,14 +7,16 @@ const saltRound = parseInt(process.env.PASSWORD_SALT_ROUND);
 const hashPassword = (password) => {
   return bcrypt.hashAsync(password, saltRound);
 };
+const imageUploader = require('../libs/image-uploader');
+const _ = require('lodash');
 
 var IGNORE_ATTRIBUTES = [
-  'password', 
-  'updatedAt', 
-  'createdAt', 
-  'acceptTokenAfter', 
-  'ban', 
-  'googleId'
+  'password',
+  'updatedAt',
+  'createdAt',
+  'acceptTokenAfter',
+  'googleId',
+  'avatarFile'
 ];
 
 module.exports = function(sequelize, DataTypes) {
@@ -71,6 +73,9 @@ module.exports = function(sequelize, DataTypes) {
         isNumeric: true,
         len: [9,12]
       }
+    },
+    avatarFile: {
+      type: DataTypes.JSON
     }
   }, {
     hooks: {
@@ -84,6 +89,12 @@ module.exports = function(sequelize, DataTypes) {
         return hashPassword(user.password).then(hashedPassword => {
           user.password = hashedPassword;
         });
+      },
+      afterDestroy: function(user, options) {
+        // Delete user's avatar files
+        if (user.avatarFile && _.isArray(user.avatarFile.versions)) {
+          return imageUploader.deleteImages(user.avatarFile.versions);
+        }
       }
     },
     classMethods: {
@@ -109,5 +120,8 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
+  
+  User.MAXIMUM_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+  
   return User;
 };

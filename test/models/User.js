@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const rewire = require('rewire');
 const tk = require('timekeeper');
 const _ = require('lodash');
+const fs = require('fs-extra');
 
 describe('User Model', () => {
   describe('factory', () => {
@@ -59,6 +60,39 @@ describe('User Model', () => {
           return user.update({password: password});
         }).then(user => {
           expect(bcrypt.compareSync(password, user.password)).to.be.true;
+          done();
+        }, done);
+      });
+    });
+    
+    describe('after delete', () => {
+      let user;
+      let avatarFile = 'public/uploads/users/test.png';
+      let checkAvatarFileExist = () => {
+        fs.accessSync(avatarFile);
+      };
+      
+      beforeEach(done => {
+        fs.ensureFileSync(avatarFile);
+        
+        helper.factory.createUser({
+          avatarFile: {
+            versions: [
+              {
+                Location: 'http://localhost:3000/uploads/users/test.png',
+                Key: avatarFile
+              }  
+            ]
+          }
+        }).then(u => {
+          user = u;
+          done();
+        });
+      });
+      
+      it('should delete all user avatar files after user destroyed', done => {
+        user.destroy().then(() => {
+          expect(checkAvatarFileExist).to.throw(Error);
           done();
         }, done);
       });
