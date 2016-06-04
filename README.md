@@ -1,5 +1,9 @@
 # FU Marketplace API
 
+## Prerequirement
+- PostgreSQL 9.1 or higher
+- GraphicMagick 1.3.x or higher
+
 ## Setup
 Install dependencies
 ```bash
