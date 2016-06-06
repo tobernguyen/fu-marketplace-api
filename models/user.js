@@ -100,6 +100,10 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         User.belongsToMany(models.Role, {through: 'UserRoles'});
+        User.hasMany(models.Shop, {
+          foreignKey: 'ownerId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {

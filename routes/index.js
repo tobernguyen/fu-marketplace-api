@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../controllers/auth');
 const users = require('../controllers/users');
 const adminUser = require('../controllers/admin/users');
+const adminShop = require('../controllers/admin/shop');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -31,5 +32,8 @@ router.get('/api/v1/admin/users', mustBe.authorized('admin'), adminUser.getUsers
 router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.getUser);
 router.put('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.putUser);
 router.post('/api/v1/admin/users/:id/setRoles', mustBe.authorized('admin'), adminUser.postSetRoles);
+
+router.get('/api/v1/admin/shops', mustBe.authorized('admin'), adminShop.getShops);
+router.get('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.getShop);
 
 module.exports = router;
