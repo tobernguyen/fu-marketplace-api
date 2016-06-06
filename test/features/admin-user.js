@@ -290,3 +290,132 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
     });
   });
 });
+
+describe('POST /api/v1/admin/changePassword', () => {
+  let user, accessToken;
+  
+  before(done => {
+    helper.factory.createUserWithRole({}, 'admin').then(u => {
+      user = u;
+      accessToken = helper.createAccessTokenForUserId(u.id);
+      done();
+    });
+  });
+  
+  describe('with empty or not provide password and oldpassword', () => {
+    it('should return 422', done => {
+      request(app)
+        .post('/api/v1/admin/changePassword')
+        .set('X-Access-Token', accessToken)
+        .send({
+          password: '',
+          oldPassword: ''
+        })
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.status).to.equal(422);
+          expect(res.body.message_code).to.equal('error.param.must_provide_old_password_and_password');
+        })
+        .expect(422, done);  
+    });
+  });
+  
+  describe('with empty or not provide password', () => {
+    it('should return 422', done => {
+      request(app)
+        .post('/api/v1/admin/changePassword')
+        .set('X-Access-Token', accessToken)
+        .send({
+          password: '',
+          oldPassword: '12345678'
+        })
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.status).to.equal(422);
+          expect(res.body.message_code).to.equal('error.param.must_provide_old_password_and_password');
+        })
+        .expect(422, done);  
+    });
+  });
+  
+  describe('with provided password and oldpassword', () => {
+    describe('with not match oldPassword', () => {
+      it('should return 401', done => {
+        request(app)
+          .post('/api/v1/admin/changePassword')
+          .set('X-Access-Token', accessToken)
+          .send({
+            password: '1234567890',
+            oldPassword: '123132313123'
+          })
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            expect(res.body.status).to.equal(401);
+            expect(res.body.message_code).to.equal('error.authentication.invalid_credentials');
+          })
+          .expect(401, done);  
+      });
+    });
+    
+    describe('with match oldPassword', () => {
+      describe('with not vaid new password', () => {
+        it('should return 422', done => {
+          request(app)
+            .post('/api/v1/admin/changePassword')
+            .set('X-Access-Token', accessToken)
+            .send({
+              password: '123',
+              oldPassword: user.__test__.password
+            })
+            .set('Content-Type', 'application/json')
+            .expect(res => {
+              expect(res.body.status).to.equal(422);
+              expect(res.body.errors.password).to.be.ok;
+              expect(res.body.errors.password.message_code).to.equal('error.model.validation_len_failed');
+            })
+            .expect(422, done);  
+        });
+      });
+      
+      describe('with vaid new password', () => {
+        it('should return 200', done => {
+          var checkToken = () => {
+            request(app)
+              .get('/api/v1/users/me')
+              .set('X-Access-Token', accessToken)
+              .expect(400, done);
+          };
+          
+          request(app)
+            .post('/api/v1/admin/changePassword')
+            .set('X-Access-Token', accessToken)
+            .send({
+              password: '1234567890',
+              oldPassword: user.__test__.password
+            })
+            .set('Content-Type', 'application/json')
+            .expect(200, checkToken);  
+        });
+        
+        describe('with new password', () => {
+          it('should return 200 OK', (done) => {
+            request(app)
+              .post('/login')
+              .send({
+                email: user.email,
+                password: '1234567890'
+              })
+              .set('Content-Type', 'application/json')
+              .expect(res => {
+                expect(res.body.user.fullName).to.equal(user.fullName);
+                expect(res.body.user.email).to.equal(user.email);
+                expect(res.body.user.id).to.equal(user.id);
+                expect(res.body.token).to.be.ok;
+              })
+              .expect(200, done);
+          });
+        });
+      });
+    });
+  });
+});

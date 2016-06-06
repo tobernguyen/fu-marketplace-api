@@ -4,6 +4,7 @@ var _ = require('lodash');
 var models = require('../../models');
 var ShipPlace = models.ShipPlace;
 var Shop = models.Shop;
+var errorHandlers = require('../helpers/errorHandlers');
 
 exports.getShops = (req, res) => {
   Shop.findAll({
@@ -34,14 +35,9 @@ exports.getShop = (req, res) => {
 
 var responseShopById = (id, res) => {
   Shop.findById(id).then(shop => {
-    if (!shop){
-      res.status(404);
+    if (!shop) {
       let error = 'Shop is not exits';
-      res.json({
-        status: 404,
-        error: error,
-        message_code: `error.model.${_.snakeCase(error)}`
-      });
+      errorHandlers.responseError(404, error, 'model', res);
     } else {
       responseShop(shop, res);
     }

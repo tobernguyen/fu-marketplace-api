@@ -33,6 +33,8 @@ router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.getU
 router.put('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.putUser);
 router.post('/api/v1/admin/users/:id/setRoles', mustBe.authorized('admin'), adminUser.postSetRoles);
 
+router.post('/api/v1/admin/changePassword', mustBe.authorized('admin'), adminUser.postChangePassword);
+
 router.get('/api/v1/admin/shops', mustBe.authorized('admin'), adminShop.getShops);
 router.get('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.getShop);
 

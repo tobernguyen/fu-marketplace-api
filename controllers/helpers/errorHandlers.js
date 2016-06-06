@@ -27,5 +27,13 @@ module.exports = {
         error: err.message
       });
     }
+  },
+  responseError: (code, error, kind, res) => {
+    res.status(code);
+    res.json({
+      status: code,
+      error: error,
+      message_code: `error.${kind}.${_.snakeCase(error)}`
+    });
   }
 };
