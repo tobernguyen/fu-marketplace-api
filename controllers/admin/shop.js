@@ -5,6 +5,9 @@ var models = require('../../models');
 var ShipPlace = models.ShipPlace;
 var Shop = models.Shop;
 var errorHandlers = require('../helpers/errorHandlers');
+var shopUpdateNormalizer = require('../helpers/shopUpdateNormalizer');
+var sanitizeUpdateRequest = shopUpdateNormalizer.sanitizeUpdateRequest;
+var getUpdateParams = shopUpdateNormalizer.getUpdateParams;
 
 exports.getShops = (req, res) => {
   Shop.findAll({
@@ -19,7 +22,7 @@ exports.getShops = (req, res) => {
         };
       });
       delete shop.ShipPlaces;
-      if (shipPlaces.length > 0) shop['shipPlaces'] = shipPlaces;
+      shop['shipPlaces'] = shipPlaces;
       return shop;
     });
     res.json({
@@ -31,6 +34,23 @@ exports.getShops = (req, res) => {
 exports.getShop = (req, res) => {
   let shopId = req.params.id;
   responseShopById(shopId, res);
+};
+
+exports.putShop = (req, res) => {
+  var shopId = req.params.id;
+    
+  Shop.findById(shopId).then(Shop => {
+    if (!Shop){
+      errorHandlers.responseError(404, 'Shop is not exits', 'model', res);
+    } else{
+      sanitizeUpdateRequest(req, true);
+      Shop.update(getUpdateParams(req, true)).then(shop => {
+        responseShop(shop, res);
+      }).catch(err => {
+        errorHandlers.modelErrorHandler(err, res);
+      });
+    }
+  });
 };
 
 var responseShopById = (id, res) => {
@@ -53,7 +73,7 @@ var responseShop = (shop, res) => {
         name: sp.name
       };
     });
-    if (shipPlace.length > 0) result['shipPlaces'] = shipPlace;
+    result['shipPlaces'] = shipPlace;
     res.json(result);
   });
 };

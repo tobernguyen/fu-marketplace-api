@@ -18,13 +18,14 @@ module.exports = {
       res.status(422);
       res.json({
         status: 422,
-        errors: errors   
+        errors: errors
       });
     } else {
       res.status(500);
       res.json({
         status: 500,
-        error: err.message
+        error: err.message,
+        message_code: `error.model.${_.snakeCase(err.message)}`
       });
     }
   },
