@@ -102,19 +102,22 @@ module.exports = {
         let uploadPromises = _.map(uploadConfig.versions, version => {
           let streamBuilder = gm(part);
           streamBuilder.autoOrient();
-          
-          if (version.resize) {
+          streamBuilder.noProfile();
+
+          if (version.crop) {
+            let sizes = version.resize.split('x');
+            let cropDim = version.crop.split('x');
+            streamBuilder
+              .resize(sizes[0], sizes[1], '^')
+              .gravity('Center')
+              .crop(cropDim[0], cropDim[1]);
+          } else if (version.resize) {
             let sizes = version.resize.split('x');
             streamBuilder.resize(sizes[0], sizes[1]);
           }
           
           if (_.isNumber(version.quality)) {
             streamBuilder.quality(version.quality);
-          }
-          
-          if (version.crop) {
-            let cropInfo = version.crop;
-            streamBuilder.crop(cropInfo.width, cropInfo.height, cropInfo.x || 0, cropInfo.y || 0);
           }
           
           let imageFormat = version.format || 'jpg';
