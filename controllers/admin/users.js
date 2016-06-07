@@ -17,7 +17,7 @@ exports.getUsers = (req, res) => {
       let user = u.toJSON();
       let roleNames = _.map(user.Roles, r => r.name);
       delete user.Roles;
-      if (roleNames.length > 0) user['roles'] = roleNames;
+      user['roles'] = roleNames;
       return user;
     });
     res.json({
@@ -38,7 +38,7 @@ exports.putUser = (req, res) => {
         let result = user.toJSON();
         user.getRoles().then(roles => {
           let roleNames = _.map(roles, r => r.name);
-          if (roleNames.length > 0) result['roles'] = roleNames;
+          result['roles'] = roleNames;
           res.json(result);
         });
       }).catch(err => {
@@ -148,7 +148,7 @@ var responseUser = (user, res) => {
   let result = user.toJSON();
   user.getRoles().then(roles => {
     let roleNames = _.map(roles, r => r.name);
-    if (roleNames.length > 0) result['roles'] = roleNames;
+    result['roles'] = roleNames;
     res.json(result);
   });
 };
