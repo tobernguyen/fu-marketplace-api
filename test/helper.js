@@ -124,8 +124,6 @@ var createShop = (attrs, id) => {
     cover: attrs.avatar || faker.image.imageUrl(),
     coverFile: attrs.avatarFile,
     ownerId: id
-  }).then(u => {
-    return Promise.resolve(u);
   });
 };
 
@@ -157,7 +155,8 @@ exports.factory = {
   createUser: createUser,
   assignRoleToUser: assignRoleToUser,
   createUserWithRole: createUserWithRole,
-  createShopWithShipPlace : createShopWithShipPlace
+  createShopWithShipPlace: createShopWithShipPlace,
+  createShop: createShop
 };
 
 // Setup some global helper

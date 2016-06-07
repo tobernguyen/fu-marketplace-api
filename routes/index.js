@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../controllers/auth');
 const users = require('../controllers/users');
 const adminUser = require('../controllers/admin/users');
-const adminShop = require('../controllers/admin/shop');
+const adminShop = require('../controllers/admin/shops');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));

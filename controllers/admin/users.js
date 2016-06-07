@@ -31,7 +31,7 @@ exports.putUser = (req, res) => {
     
   User.findById(userId).then(user => {
     if (!user){
-      errorHandlers.responseError(404, 'User is not exits', 'model', res);
+      errorHandlers.responseError(404, 'User does not exits', 'model', res);
     } else{
       sanitizeUpdateRequest(req, true);
       user.update(getUpdateParams(req, true)).then(user => {
@@ -42,7 +42,7 @@ exports.putUser = (req, res) => {
           res.json(result);
         });
       }).catch(err => {
-        errorHandlers.modelErrorHandler(err, res);
+        errorHandlers.handleModelError(err, res);
       });
     }
   });
@@ -64,7 +64,7 @@ exports.postSetRoles = (req, res) => {
     let user;
     User.findById(userId).then(u => {
       if (!u) {
-        errorHandlers.responseError(404, 'User is not exits', 'model', res);
+        errorHandlers.responseError(404, 'User does not exits', 'model', res);
       } else {
         user = u;
         if (roles.length == 0) {
@@ -88,7 +88,7 @@ exports.postSetRoles = (req, res) => {
     }).then(() => {
       responseUser(user, res);
     }).catch(err => {
-      errorHandlers.modelErrorHandler(err, res);
+      errorHandlers.handleModelError(err, res);
     });
   }
 };
@@ -97,8 +97,6 @@ exports.postSetRoles = (req, res) => {
  * @summary change password of current admin user
  *
  * @since 1.1
- *
- * @class controllers.admin.user
  *
  * @param $req http request.
  * @param $req http response
@@ -126,7 +124,7 @@ exports.postChangePassword = (req, res) => {
           });
         });
       }).catch(err => {
-        errorHandlers.modelErrorHandler(err, res);
+        errorHandlers.handleModelError(err, res);
       });
     }, () => {
       errorHandlers.responseError(401, 'Invalid credentials', 'authentication', res);
@@ -137,7 +135,7 @@ exports.postChangePassword = (req, res) => {
 var responseUserById = (id, res) => {
   User.findById(id).then(user => {
     if (!user){
-      errorHandlers.responseError(404, 'User is not exits', 'model', res);
+      errorHandlers.responseError(404, 'User does not exits', 'model', res);
     } else {
       responseUser(user, res);
     }

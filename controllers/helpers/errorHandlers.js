@@ -4,7 +4,7 @@ var _ = require('lodash');
 var ValidationError = require('sequelize').ValidationError;
 
 module.exports = {
-  modelErrorHandler: function(err, res) {
+  handleModelError: function(err, res) {
     if (err instanceof ValidationError){
       let errors = {};
       

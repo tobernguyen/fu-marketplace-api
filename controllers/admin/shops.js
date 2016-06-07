@@ -41,7 +41,7 @@ exports.putShop = (req, res) => {
     
   Shop.findById(shopId).then(Shop => {
     if (!Shop){
-      errorHandlers.responseError(404, 'Shop is not exits', 'model', res);
+      errorHandlers.responseError(404, 'Shop does not exits', 'model', res);
     } else{
       sanitizeUpdateRequest(req, true);
       Shop.update(getUpdateParams(req, true)).then(shop => {
@@ -56,7 +56,7 @@ exports.putShop = (req, res) => {
 var responseShopById = (id, res) => {
   Shop.findById(id).then(shop => {
     if (!shop) {
-      let error = 'Shop is not exits';
+      let error = 'Shop does not exits';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       responseShop(shop, res);

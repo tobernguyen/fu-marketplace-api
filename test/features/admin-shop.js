@@ -47,8 +47,8 @@ describe('GET /api/v1/admin/shops/:id', () => {
         .set('X-Access-Token', adminToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.error).to.equal('Shop is not exits');
-          expect(res.body.message_code).to.equal('error.model.shop_is_not_exits');
+          expect(res.body.error).to.equal('Shop does not exits');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
         })
         .expect(404, done);  
     });
@@ -56,7 +56,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
 });
 
 describe('GET /api/v1/admin/shops/', () => {
-  let adminToken, normalUserAccessToken;
+  let adminToken, normalUserAccessToken, createdShop;
   
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
@@ -66,17 +66,32 @@ describe('GET /api/v1/admin/shops/', () => {
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
     }).then(s => {
+      createdShop = s;
       done();
     });
   });
   
   describe('with admin access token', () => {
-    it('should return 200 OK and return an array contain shop info', done => {
+    it('should return 200 OK and return an array which contain created shop info', done => {
       request(app)
         .get('/api/v1/admin/shops/')
         .set('X-Access-Token', adminToken)
         .expect(res => {
           expect(res.body.shops).to.be.ok;
+          let shops = res.body.shops.filter(function(e) {
+            return e.id == createdShop.id;
+          });
+          expect(shops.length).to.equal(1);
+          let shop = shops[0];
+          expect(shop.name).to.equal(createdShop.name);
+          expect(shop.id).to.equal(createdShop.id);
+          expect(shop.ownerId).to.equal(createdShop.ownerId);
+          expect(shop.description).to.equal(createdShop.description);
+          expect(shop.avatar).to.equal(createdShop.avatar);
+          expect(shop.cover).to.equal(createdShop.cover);
+          expect(shop.shipPlaces.filter(function(e) {
+            return e.name == 'dom A';
+          }).length).to.equal(1);   
         })
         .expect(200, done);  
     });
