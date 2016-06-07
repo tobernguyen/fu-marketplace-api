@@ -45,15 +45,17 @@ exports.postUploadCurrentUserAvatar = (req, res) => {
     versions: [
       {
         resize: '100x100',
+        crop: '100x100',
         quality: 90,
         suffix: 'small',
         fileName: `users/${req.user.id}/avatar`
       },
       {
         resize: '250x250',
+        crop: '250x250',
         quality: 90,
         suffix: 'medium',
-        fileName: `users/${req.user.id}/avatar`
+        fileName: `users/${req.user.id}/avatar`,
       }
     ]
   })(req, res, data => {
