@@ -35,7 +35,7 @@ exports.putCurrentUser = (req, res) => {
       res.json(result);
     });
   }).catch(err => {
-    errorHandlers.modelErrorHandler(err, res);
+    errorHandlers.handleModelError(err, res);
   });
 };
 

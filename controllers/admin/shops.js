@@ -47,7 +47,7 @@ exports.putShop = (req, res) => {
       Shop.update(getUpdateParams(req, true)).then(shop => {
         responseShop(shop, res);
       }).catch(err => {
-        errorHandlers.modelErrorHandler(err, res);
+        errorHandlers.handleModelError(err, res);
       });
     }
   });
