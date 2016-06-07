@@ -113,12 +113,50 @@ var createAccessTokenForUserId = (userId) => {
   });
 };
 
+var createShop = (attrs, id) => {
+  if (attrs == undefined) attrs = {};
+
+  return createModel('Shop', {
+    name: attrs.name || faker.name.findName(),
+    description: attrs.description || faker.lorem.sentence(),
+    avatar: attrs.avatar || faker.image.imageUrl(),
+    avatarFile: attrs.avatarFile,
+    cover: attrs.avatar || faker.image.imageUrl(),
+    coverFile: attrs.avatarFile,
+    ownerId: id
+  });
+};
+
+const addShipPlaceToShop = (shop, shipPlace) => {
+  assert(shop, 'shop cannot be blank');
+  assert(shipPlace, 'shipPlace cannot be blank');
+  
+  let ShipPlace = models.ShipPlace;
+  return ShipPlace.findOrCreate({where: {name: shipPlace}}).then(shipPlace => {
+    return shop.addShipPlace(shipPlace[0]);
+  }).then(() => Promise.resolve(shop));
+};
+
+var createShopWithShipPlace = (attrs, id, shipPlace) => {
+  let createdShop;
+  
+  return createShop(attrs, id).then(s => {
+    createdShop = s;
+    
+    return addShipPlaceToShop(s, shipPlace);
+  }).then(() => {
+    return Promise.resolve(createdShop);
+  });
+};
+
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
 exports.dbUtils = dbUtils;
 exports.factory = {
   createUser: createUser,
   assignRoleToUser: assignRoleToUser,
-  createUserWithRole: createUserWithRole
+  createUserWithRole: createUserWithRole,
+  createShopWithShipPlace: createShopWithShipPlace,
+  createShop: createShop
 };
 
 // Setup some global helper
