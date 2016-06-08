@@ -3,8 +3,9 @@
 const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
+const _ = require('lodash');
 
-describe.only('POST /api/v1/requestOpenShopFirstTime', () => {
+describe('POST /api/v1/requestOpenShopFirstTime', () => {
   let user, sellerAccessToken, userAccessToken;
   
   before(done => {
@@ -18,17 +19,28 @@ describe.only('POST /api/v1/requestOpenShopFirstTime', () => {
     });
   });
 
-  describe.only('with invalid request body', () => {
+  describe('with invalid request body', () => {
     it('should return 400 with details of invalid params', done => {
       request(app)
         .post('/api/v1/requestOpenShopFirstTime')
         .set('X-Access-Token', userAccessToken)
         .set('Content-Type', 'application/json')
         .send({
-          name: 'Banh my'
+          sellerInfo: {
+          },
+          shopInfo: {
+            address: 'C203'
+          },
+          note: 'Em muon thanh ti phu'
         })
         .expect(res => {
           expect(res.body.status).to.equal(400);
+          let errors = res.body.errors;
+          expect(_.get(errors, 'sellerInfo.phone').message_code).to.equal('error.form_validation.must_be_a_number');
+          expect(_.get(errors, 'sellerInfo.identityNumber').message_code).to.equal('error.form_validation.must_be_9_or_12_characters');
+          expect(_.get(errors, 'shopInfo.name').message_code).to.equal('error.form_validation.must_not_be_empty');
+          expect(_.get(errors, 'shopInfo.description').message_code).to.equal('error.form_validation.must_not_be_empty');
+          expect(_.get(errors, 'shopInfo.address')).to.be.undefined;
         })
         .expect(400, done);  
     });
@@ -36,41 +48,32 @@ describe.only('POST /api/v1/requestOpenShopFirstTime', () => {
 
   describe('with valid request body', () => {
     describe('with seller access token', () => {
-      it('should return 403 Forbidden', done => {
+      it('should return 400 Already seller', done => {
         request(app)
           .post('/api/v1/requestOpenShopFirstTime')
           .set('X-Access-Token', sellerAccessToken)
-          .send({
-            name: 'Banh my'
-          })
           .set('Content-Type', 'application/json')
-          .expect(res => {
-            expect(res.body.status).to.equal(403);
-            expect(res.body.message_code).to.equal('error.authentication.not_authorized');
+          .send({
+            sellerInfo: {
+              phone: '23123123123',
+              identityNumber: '163299755'
+            },
+            shopInfo: {
+              name: 'Banh My',
+              description: 'banh my XXX',
+              address: 'C203'
+            },
+            note: 'Em muon thanh ti phu'
           })
-          .expect(403, done);  
+          .expect(res => {
+            expect(res.body.status).to.equal(400);
+            expect(res.body.message_code).to.equal('error.open_shop_request.already_seller');
+          })
+          .expect(400, done);  
       });
     });
 
     describe('with user access token', () => {
-      describe('without seller info', () => {
-        it('should return 400 need provide user identity', done => {
-          request(app)
-            .post('/api/v1/requestOpenShopFirstTime')
-            .set('X-Access-Token', userAccessToken)
-            .send({
-              shopInfo: {
-                
-              } 
-            })
-            .set('Content-Type', 'application/json')
-            .expect(res => {
-              expect(res.body.status).to.equal(400);
-            })
-            .expect(400, done);  
-        });
-      });
-
       describe('without shop information', () => {
         it('should return 400 need provide shop information', done => {
           request(app)
@@ -84,21 +87,25 @@ describe.only('POST /api/v1/requestOpenShopFirstTime', () => {
             .set('Content-Type', 'application/json')
             .expect(res => {
               expect(res.body.status).to.equal(400);
+              let errors = res.body.errors;
+              expect(_.get(errors, 'sellerInfo.phone').message_code).to.equal('error.form_validation.must_be_a_number');
+              expect(_.get(errors, 'sellerInfo.identityNumber').message_code).to.equal('error.form_validation.must_be_9_or_12_characters');
+              expect(_.get(errors, 'shopInfo.name').message_code).to.equal('error.form_validation.must_not_be_empty');
+              expect(_.get(errors, 'shopInfo.description').message_code).to.equal('error.form_validation.must_not_be_empty');
+              expect(_.get(errors, 'shopInfo.address').message_code).to.equal('error.form_validation.must_not_be_empty');
             })
             .expect(400, done);  
         });
       });
 
       describe('with valid user and valid shop information', () => {
-
         it('should return 200 OK and return opening request detail', done => {
           request(app)
             .post('/api/v1/requestOpenShopFirstTime')
             .set('X-Access-Token', userAccessToken)
-            .set('Content-Type', 'application/json')
             .send({
               sellerInfo: {
-                phone: '0123123123123',
+                phone: '123123123123',
                 identityNumber: '163299755'
               },
               shopInfo: {
@@ -108,7 +115,7 @@ describe.only('POST /api/v1/requestOpenShopFirstTime', () => {
               },
               note: 'Em muon thanh ti phu'
             })
-            .attach('file', 'test/fixtures/user-avatar.jpg')
+            .set('Content-Type', 'application/json')
             .expect(res => {
               let sellerInfo = res.body.sellerInfo;
               let shopInfo = res.body.shopInfo;

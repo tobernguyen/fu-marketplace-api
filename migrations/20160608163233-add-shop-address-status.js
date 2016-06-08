@@ -8,8 +8,7 @@ module.exports = {
       'Shops',
       'address',
       {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.STRING
       }
     ).then(() => {
       return queryInterface.addColumn(

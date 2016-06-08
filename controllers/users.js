@@ -83,46 +83,32 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
 
   req.checkBody(REQUEST_OPEN_SHOP_BODY_SCHEMA);
 
-  var errors = req.validationErrors();
-  if (errors) {
-    res.json(errors, 400);
+  //handle validate by schema
+  var errs = req.validationErrors();
+  if (errs) {
+    let errors = {};
+    errs.forEach(err => {
+      errors[err.param] = {
+        message: err.msg,
+        message_code: `error.form_validation.${_.snakeCase(err.msg)}`
+      };
+    });
+    res.status(400);
+    res.json({
+      status: 400,
+      errors: errors
+    });
     return;
   }
 
   let sellerInfo = req.body.sellerInfo;
   let shopInfo = req.body.shopInfo;
   let note = req.body.note || '';
-  let identityFileHash = crypto.createHash('sha1').update(user.id.toString()).digest('hex');
-  let uploadData;
 
   validateRequestOpeningShopFirstTime(user).then(() => {
-    return Promise.fromCallback(cb => {
-      imageUploader.useMiddlewareWithConfig({
-        maxFileSize: User.MAXIMUM_IDENTITY_PHOTO_SIZE,
-        versions: [
-          {
-            quality: 80,
-            fileName: `users/${req.user.id}/identity-${identityFileHash}`
-          }
-        ]
-      })(req, res, data => {
-        cb(null, data);
-      });
-    });
-  }).then(_uploadData => {
-    uploadData = _uploadData;
-
     return user.update({
       phone: sellerInfo.phone,
-      identityNumber: sellerInfo.identityNumber,
-      identityPhotoFile: {
-        versions: _.map(_uploadData, image => {
-          return {
-            Url: image.Location,
-            Key: image.Key
-          };
-        })
-      }
+      identityNumber: sellerInfo.identityNumber
     });
   }).then(() => {
     return ShopOpeningRequest.create({
@@ -133,9 +119,8 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
       note: note
     });
   }).then((shopOpeningRequest) => {
-    // Return the entered info include identity photo url
     res.json({
-      sellerInfo: _.assign(sellerInfo, {identityPhoto: uploadData[0].Location}),
+      sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),  // DOAN NAY KO CHAC LOGIC LAM
       shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note'])
     });
   }).catch(error => {
@@ -147,10 +132,14 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
   });
 };
 
+exports.uploadIdentityPhoto = (req, res) => {
+  //TBD
+};
+
 var validateRequestOpeningShopFirstTime = (user) => {
   return user.getRoles().then(roles => {
     let roleNames = _.map(roles, r => r.name);
-    if (_.includes(roleNames, 'seller')) {
+    if (!_.includes(roleNames, 'seller')) {
       return Promise.resolve();
     } else {
       return Promise.reject('already_seller');
@@ -158,7 +147,10 @@ var validateRequestOpeningShopFirstTime = (user) => {
   }).then(() => {
     return ShopOpeningRequest.find({
       where: {
-        ownerId: user.id
+        ownerId: user.id,
+        status: {
+          $in: [ShopOpeningRequest.STATUS.PENDING, ShopOpeningRequest.STATUS.ACCEPTED]
+        }
       }
     });
   }).then(shopOpeningRequests => {

@@ -28,22 +28,7 @@ app.set('port', process.env.PORT || 3000);
 app.use(compression());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(expressValidator({
-  errorFormatter: function(param, msg, value) {
-    var namespace = param.split('.')
-      , root    = namespace.shift()
-      , formParam = root;
-
-    while(namespace.length) {
-      formParam += '[' + namespace.shift() + ']';
-    }
-    return {
-      param: formParam,
-      message: msg,
-      message_code: `error.form_validation.${_.snakeCase(msg)}`
-    };
-  }
-}));
+app.use(expressValidator());
 app.all('/*', function(req, res, next) {
   // CORS headers
   res.header('Access-Control-Allow-Origin', '*'); // restrict it to the required domain

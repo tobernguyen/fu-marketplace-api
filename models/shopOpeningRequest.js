@@ -27,6 +27,11 @@ module.exports = function(sequelize, DataTypes) {
     ownerId: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
     }
   }, {
     classMethods: {
@@ -50,5 +55,11 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
   
+  ShopOpeningRequest.STATUS = {
+    PENDING: 0,
+    REJECTED: 1,
+    ACCEPTED: 2
+  };
+
   return ShopOpeningRequest;
 };
