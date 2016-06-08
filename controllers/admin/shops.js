@@ -8,6 +8,7 @@ var errorHandlers = require('../helpers/errorHandlers');
 var shopUpdateNormalizer = require('../helpers/shopUpdateNormalizer');
 var sanitizeUpdateRequest = shopUpdateNormalizer.sanitizeUpdateRequest;
 var getUpdateParams = shopUpdateNormalizer.getUpdateParams;
+var imageUploader = require('../../libs/image-uploader');
 
 exports.getShops = (req, res) => {
   Shop.findAll({
@@ -48,6 +49,80 @@ exports.putShop = (req, res) => {
         responseShop(shop, res);
       }).catch(err => {
         errorHandlers.handleModelError(err, res);
+      });
+    }
+  });
+};
+
+exports.postShopUploadAvatar = (req, res) => {
+  let shopId = req.params.id;
+
+  Shop.findById(shopId).then(shop => {
+    if (!shop) {
+      let error = 'Shop does not exits';
+      errorHandlers.responseError(404, error, 'model', res);
+    } else {
+      imageUploader.useMiddlewareWithConfig({
+        maxFileSize: Shop.MAXIMUM_AVATAR_SIZE,
+        versions: [
+          {
+            resize: '200x200',
+            crop: '200x200',
+            quality: 90,
+            fileName: `shops/${shop.id}/avatar`
+          }
+        ]
+      })(req, res, data => {
+        shop.update({
+          avatar: data[0].Location, // Save the url of first image version to avatar field
+          avatarFile: {
+            versions: _.map(data, image => {
+              return {
+                Url: image.Location,
+                Key: image.Key
+              };
+            })
+          }
+        }).then(user => {
+          responseShop(shop, res);
+        });
+      });
+    }
+  });
+};
+
+exports.postShopUploadCover = (req, res) => {
+  let shopId = req.params.id;
+
+  Shop.findById(shopId).then(shop => {
+    if (!shop) {
+      let error = 'Shop does not exits';
+      errorHandlers.responseError(404, error, 'model', res);
+    } else {
+      imageUploader.useMiddlewareWithConfig({
+        maxFileSize: Shop.MAXIMUM_COVER_SIZE,
+        versions: [
+          {
+            resize: '900x400',
+            crop: '900x400',
+            quality: 90,
+            fileName: `shops/${shop.id}/cover`
+          }
+        ]
+      })(req, res, data => {
+        shop.update({
+          cover: data[0].Location, // Save the url of first image version to avatar field
+          coverFile: {
+            versions: _.map(data, image => {
+              return {
+                Url: image.Location,
+                Key: image.Key
+              };
+            })
+          }
+        }).then(user => {
+          responseShop(shop, res);
+        });
       });
     }
   });

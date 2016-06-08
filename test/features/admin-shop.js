@@ -3,6 +3,7 @@
 const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
+const Shop = require('../../models').Shop;
 
 
 describe('GET /api/v1/admin/shops/:id', () => {
@@ -154,7 +155,7 @@ describe('PUT /api/v1/admin/shops/:id', () => {
       });
     }); 
     
-    describe('valid invalid ownerID attribute', () => {
+    describe('invalid ownerID attribute', () => {
       it('should return 500 invalid foreign key', done => {
         request(app)
           .put(`/api/v1/admin/shops/${shop.id}`)
@@ -208,5 +209,147 @@ describe('PUT /api/v1/admin/shops/:id', () => {
         })
         .expect(403, done);  
     });
+  });
+});
+
+describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
+  let  adminToken, shop;
+  
+  before(done => {
+    helper.factory.createUserWithRole({}, 'admin').then(u => {
+      adminToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createUser();
+    }).then(u => {
+      return helper.factory.createShopWithShipPlace({}, u.id, 'Dom A');
+    }).then(s => {
+      shop = s;
+      done();
+    });
+  });
+  
+  describe('with valid access token and ', () => {
+    describe('valid image file', () => {
+      it('should return 200 and return user with valid avatar file', done => {
+        request(app)
+          .post(`/api/v1/admin/shops/${shop.id}/uploadAvatar`)
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .expect(res => {
+            expect(res.body.id).to.equal(shop.id);
+            expect(res.body.avatar).to.have.string(`shops/${shop.id}/avatar.jpg`);
+          })
+          .expect(200, done);  
+      });
+    });
+    
+    describe('invalid image file', () => {
+      it('should return 422 and inform client file is invalid', done => {
+        request(app)
+          .post(`/api/v1/admin/shops/${shop.id}/uploadAvatar`)
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/invalid-image.txt')
+          .expect(res => {
+            expect(res.body.status).to.equal(422);
+            expect(res.body.message).to.equal('Only PNG and JPEG file is allowed');
+          })
+          .expect(422, done);
+      });
+    });
+    
+    describe('image file is too big', () => {
+      let originalMaximumAvatarSize;
+      
+      before(() => {
+        originalMaximumAvatarSize = Shop.MAXIMUM_AVATAR_SIZE;
+        Shop.MAXIMUM_AVATAR_SIZE = 1024; // Allow 1KB file only
+      });
+      
+      after(() => {
+        Shop.MAXIMUM_AVATAR_SIZE = originalMaximumAvatarSize;
+      });
+      
+      it('should return 406 and inform client file is too big', done => {
+        request(app)
+          .post(`/api/v1/admin/shops/${shop.id}/uploadAvatar`)
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .expect(res => {
+            expect(res.body.status).to.equal(406);
+            expect(res.body.message).to.equal('File is too big. Maximum file size allow: 1KB');
+          })
+          .expect(406, done);
+      });
+    }); 
+  });
+});
+
+describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
+  let  adminToken, shop;
+  
+  before(done => {
+    helper.factory.createUserWithRole({}, 'admin').then(u => {
+      adminToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createUser();
+    }).then(u => {
+      return helper.factory.createShopWithShipPlace({}, u.id, 'Dom A');
+    }).then(s => {
+      shop = s;
+      done();
+    });
+  });
+  
+  describe('with valid access token and ', () => {
+    describe('valid image file', () => {
+      it('should return 200 and return user with valid cover file', done => {
+        request(app)
+          .post(`/api/v1/admin/shops/${shop.id}/uploadCover`)
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .expect(res => {
+            expect(res.body.id).to.equal(shop.id);
+            expect(res.body.cover).to.have.string(`shops/${shop.id}/cover.jpg`);
+          })
+          .expect(200, done);  
+      });
+    });
+    
+    describe('invalid image file', () => {
+      it('should return 422 and inform client file is invalid', done => {
+        request(app)
+          .post(`/api/v1/admin/shops/${shop.id}/uploadCover`)
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/invalid-image.txt')
+          .expect(res => {
+            expect(res.body.status).to.equal(422);
+            expect(res.body.message).to.equal('Only PNG and JPEG file is allowed');
+          })
+          .expect(422, done);
+      });
+    });
+    
+    describe('image file is too big', () => {
+      let originalMaximumCoverSize;
+      
+      before(() => {
+        originalMaximumCoverSize = Shop.MAXIMUM_COVER_SIZE;
+        Shop.MAXIMUM_COVER_SIZE = 1024; // Allow 1KB file only
+      });
+      
+      after(() => {
+        Shop.MAXIMUM_COVER_SIZE = originalMaximumCoverSize;
+      });
+      
+      it('should return 406 and inform client file is too big', done => {
+        request(app)
+          .post(`/api/v1/admin/shops/${shop.id}/uploadCover`)
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .expect(res => {
+            expect(res.body.status).to.equal(406);
+            expect(res.body.message).to.equal('File is too big. Maximum file size allow: 1KB');
+          })
+          .expect(406, done);
+      });
+    }); 
   });
 });

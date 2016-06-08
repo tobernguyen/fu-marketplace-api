@@ -125,7 +125,7 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
   
-  User.MAXIMUM_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+  User.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
   
   return User;
 };

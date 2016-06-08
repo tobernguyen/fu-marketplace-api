@@ -55,7 +55,7 @@ exports.postUploadCurrentUserAvatar = (req, res) => {
         crop: '250x250',
         quality: 90,
         suffix: 'medium',
-        fileName: `users/${req.user.id}/avatar`,
+        fileName: `users/${req.user.id}/avatar`
       }
     ]
   })(req, res, data => {

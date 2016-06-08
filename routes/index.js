@@ -38,5 +38,7 @@ router.post('/api/v1/admin/changePassword', mustBe.authorized('admin'), adminUse
 router.get('/api/v1/admin/shops', mustBe.authorized('admin'), adminShop.getShops);
 router.get('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.getShop);
 router.put('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.putShop);
+router.post('/api/v1/admin/shops/:id/uploadAvatar', mustBe.authorized('admin'), adminShop.postShopUploadAvatar);
+router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), adminShop.postShopUploadCover);
 
 module.exports = router;

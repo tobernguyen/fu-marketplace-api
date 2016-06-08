@@ -83,7 +83,8 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
   
-  Shop.MAXIMUM_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+  Shop.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
+  Shop.MAXIMUM_COVER_SIZE = 3 * 1024 * 1024; // 3MB
   
   return Shop;
 };
