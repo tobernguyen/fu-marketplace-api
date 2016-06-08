@@ -47,6 +47,14 @@ module.exports = function(sequelize, DataTypes) {
     },
     banned: {
       type: DataTypes.BOOLEAN
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
   }, {
     hooks: {
@@ -64,7 +72,7 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         Shop.belongsToMany(models.ShipPlace, {through: 'ShopShipPlaces'});
-        Shop.belongsTo(models.Shop, {
+        Shop.belongsTo(models.User, {
           foreignKey: 'ownerId',
           constraints: false
         });
@@ -85,6 +93,10 @@ module.exports = function(sequelize, DataTypes) {
   
   Shop.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
   Shop.MAXIMUM_COVER_SIZE = 3 * 1024 * 1024; // 3MB
+  Shop.STATUS = {
+    PUBLISHED: 1,
+    UNPUBLISHED: 0
+  };
   
   return Shop;
 };

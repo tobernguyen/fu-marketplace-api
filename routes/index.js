@@ -24,6 +24,7 @@ router.put('/api/v1/users/me', users.putCurrentUser);
 router.post('/api/v1/users/me/uploadAvatar', users.postUploadCurrentUserAvatar);
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 
+router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTime);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users

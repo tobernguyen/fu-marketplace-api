@@ -92,14 +92,13 @@ module.exports = {
         }
       });
     }).then(() => {
-      return queryInterface.addIndex(
-        'ShopShipPlaces',
-        ['ShopId', 'ShipPlaceId'],
-        {
-          indexName: 'ShopShipPlaceCompoundIndex',
-          indicesTypes: 'UNIQUE'
-        }
-      );
+      // Create Unique CompoundIndex for ShopId and ShipPlaceId
+      let sql = `CREATE UNIQUE INDEX "ShopShipPlaceCompoundIndex"
+                  ON public."ShopShipPlaces"
+                  USING btree
+                  ("ShopId", "ShipPlaceId");
+                `;
+      return queryInterface.sequelize.query(sql, {raw: true});
     });
   },
 

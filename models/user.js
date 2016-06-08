@@ -16,7 +16,8 @@ var IGNORE_ATTRIBUTES = [
   'createdAt',
   'acceptTokenAfter',
   'googleId',
-  'avatarFile'
+  'avatarFile',
+  'identityPhotoFile'
 ];
 
 module.exports = function(sequelize, DataTypes) {
@@ -76,6 +77,9 @@ module.exports = function(sequelize, DataTypes) {
     },
     avatarFile: {
       type: DataTypes.JSON
+    },
+    identityPhotoFile: {
+      type: DataTypes.JSON
     }
   }, {
     hooks: {
@@ -126,6 +130,7 @@ module.exports = function(sequelize, DataTypes) {
   });
   
   User.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
+  User.MAXIMUM_IDENTITY_PHOTO_SIZE = 6 * 1024 * 1024; // 6MB
   
   return User;
 };

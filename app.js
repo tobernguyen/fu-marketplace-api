@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const errorHandler = require('errorhandler');
 const logger = require('./libs/logger');
 const dotenv = require('dotenv');
+const _ = require('lodash');
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -27,7 +28,22 @@ app.set('port', process.env.PORT || 3000);
 app.use(compression());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(expressValidator());
+app.use(expressValidator({
+  errorFormatter: function(param, msg, value) {
+    var namespace = param.split('.')
+      , root    = namespace.shift()
+      , formParam = root;
+
+    while(namespace.length) {
+      formParam += '[' + namespace.shift() + ']';
+    }
+    return {
+      param: formParam,
+      message: msg,
+      message_code: `error.form_validation.${_.snakeCase(msg)}`
+    };
+  }
+}));
 app.all('/*', function(req, res, next) {
   // CORS headers
   res.header('Access-Control-Allow-Origin', '*'); // restrict it to the required domain

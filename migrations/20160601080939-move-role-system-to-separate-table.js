@@ -63,14 +63,13 @@ module.exports = {
         }
       });
     }).then(() => {
-      return queryInterface.addIndex(
-        'UserRoles',
-        ['UserId', 'RoleId'],
-        {
-          indexName: 'UserRoleCompoundIndex',
-          indicesTypes: 'UNIQUE'
-        }
-      );
+      // Create Unique CompoundIndex for UserId and RoleId
+      let sql = `CREATE UNIQUE INDEX "UserRoleCompoundIndex"
+                  ON public."UserRoles"
+                  USING btree
+                  ("UserId", "RoleId");
+                `;
+      return queryInterface.sequelize.query(sql, {raw: true});
     }).then(() => {
       return queryInterface.removeColumn('Users', 'seller');
     }).then(() => {
