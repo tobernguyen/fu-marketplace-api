@@ -9,7 +9,6 @@ const morgan = require('morgan');
 const errorHandler = require('errorhandler');
 const logger = require('./libs/logger');
 const dotenv = require('dotenv');
-const _ = require('lodash');
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.

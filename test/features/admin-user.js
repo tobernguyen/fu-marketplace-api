@@ -408,7 +408,7 @@ describe('POST /api/v1/admin/changePassword', () => {
           .set('Content-Type', 'application/json')
           .expect(res => {
             expect(res.body.status).to.equal(401);
-            expect(res.body.message_code).to.equal('error.authentication.invalid_credentials');
+            expect(res.body.message_code).to.equal('error.authentication.old_password_is_not_correct');
           })
           .expect(401, done);  
       });

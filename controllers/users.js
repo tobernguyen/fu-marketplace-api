@@ -8,7 +8,6 @@ var errorHandlers = require('./helpers/errorHandlers');
 var imageUploader = require('../libs/image-uploader');
 var User = require('../models').User;
 var ShopOpeningRequest = require('../models').ShopOpeningRequest;
-var crypto = require('crypto');
 
 exports.getCurrentUser = (req, res) => {
   let result = req.user.toJSON();
@@ -79,12 +78,10 @@ exports.postUploadCurrentUserAvatar = (req, res) => {
 
 
 exports.postRequestOpenShopFirstTime = (req, res) => {
-  let user = req.user;
-
   req.checkBody(REQUEST_OPEN_SHOP_BODY_SCHEMA);
 
-  //handle validate by schema
-  var errs = req.validationErrors();
+  // TODO: Loi return ra xau vkl
+  var errs = req.validationErrors();;
   if (errs) {
     let errors = {};
     errs.forEach(err => {
@@ -101,6 +98,23 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
     return;
   }
 
+  let user = req.user;
+
+  // Return error if user didn't upload identity photo
+  if (!(user.identityPhotoFile && _.isArray(user.identityPhotoFile.versions) && user.identityPhotoFile.versions.length > 0)) {
+    res.status(400);
+    res.json({
+      status: 400,
+      errors: {
+        'sellerInfo.identityPhoto': {
+          message: 'Identity photo must be present',
+          message_code: 'error.form_validation.identity_photo_must_be_present'
+        }
+      }
+    });
+    return;
+  }
+  
   let sellerInfo = req.body.sellerInfo;
   let shopInfo = req.body.shopInfo;
   let note = req.body.note || '';
@@ -120,7 +134,7 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
     });
   }).then((shopOpeningRequest) => {
     res.json({
-      sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),  // DOAN NAY KO CHAC LOGIC LAM
+      sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),
       shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note'])
     });
   }).catch(error => {
@@ -148,9 +162,7 @@ var validateRequestOpeningShopFirstTime = (user) => {
     return ShopOpeningRequest.find({
       where: {
         ownerId: user.id,
-        status: {
-          $in: [ShopOpeningRequest.STATUS.PENDING, ShopOpeningRequest.STATUS.ACCEPTED]
-        }
+        status: ShopOpeningRequest.STATUS.PENDING
       }
     });
   }).then(shopOpeningRequests => {
