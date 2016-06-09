@@ -65,15 +65,20 @@ describe('User Model', () => {
       });
     });
     
-    describe('after delete', () => {
+    describe('after destroy', () => {
       let user;
       let avatarFile = 'public/uploads/users/test.png';
+      let identityPhotoFile = 'public/uploads/users/identityPhoto.png';
       let checkAvatarFileExist = () => {
         fs.accessSync(avatarFile);
+      };
+      let checkIdentityFileExist = () => {
+        fs.accessSync(identityPhotoFile);        
       };
       
       beforeEach(done => {
         fs.ensureFileSync(avatarFile);
+        fs.ensureFileSync(identityPhotoFile);
         
         helper.factory.createUser({
           avatarFile: {
@@ -81,6 +86,14 @@ describe('User Model', () => {
               {
                 Location: 'http://localhost:3000/uploads/users/test.png',
                 Key: avatarFile
+              }  
+            ]
+          },
+          identityPhotoFile: {
+            versions: [
+              {
+                Location: 'http://localhost:3000/uploads/users/identityPhoto.png',
+                Key: identityPhotoFile
               }  
             ]
           }
@@ -93,6 +106,7 @@ describe('User Model', () => {
       it('should delete all user avatar files after user destroyed', done => {
         user.destroy().then(() => {
           expect(checkAvatarFileExist).to.throw(Error);
+          expect(checkIdentityFileExist).to.throw(Error);
           done();
         }, done);
       });
@@ -122,6 +136,28 @@ describe('User Model', () => {
           expect(user.verifyPassword(correctPassword)).to.eventually.equal(true),
           expect(user.verifyPassword(correctPassword + 'wrong')).to.eventually.equal(false)
         ]);
+      });
+    });
+  });
+
+  describe('#verifyRole', () => {
+    let user;
+
+    before(done => {
+      helper.factory.createUserWithRole({}, 'seller').then(u => {
+        user = u;
+        done();
+      });
+    });
+
+    it('should verify if user has specific role', done => {
+      user.verifyRole('seller').then(isSeller => {
+        expect(isSeller).to.be.true;
+
+        return user.verifyRole('admin');
+      }).then(isAdmin => {
+        expect(isAdmin).to.be.false;
+        done();
       });
     });
   });

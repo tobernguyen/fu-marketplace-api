@@ -22,7 +22,7 @@ router.get('/auth/google/callback', auth.loginWithGoogle);
 router.get('/api/v1/users/me', users.getCurrentUser);
 router.put('/api/v1/users/me', users.putCurrentUser);
 router.post('/api/v1/users/me/uploadAvatar', users.postUploadCurrentUserAvatar);
-// router.post('/api/v1/users/me/uploadIdentityPhoto', users.postUserUploadIdentityPhoto);
+router.post('/api/v1/users/me/uploadIdentityPhoto', users.postUserUploadIdentityPhoto);
 
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 

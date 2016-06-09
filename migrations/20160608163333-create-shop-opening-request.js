@@ -15,6 +15,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      address: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       note: {
         type: Sequelize.TEXT
       },

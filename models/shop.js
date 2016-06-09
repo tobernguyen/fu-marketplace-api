@@ -59,13 +59,20 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     hooks: {
       afterDestroy: function(shop, options) {
+        var promises = [];
+        
         // Delete shop's avatar files
         if (shop.avatarFile && _.isArray(shop.avatarFile.versions)) {
-          return imageUploader.deleteImages(shop.avatarFile.versions);
+          promises.push(imageUploader.deleteImages(shop.avatarFile.versions));
         }
         
+        // Delete shop's cover files
         if (shop.coverFile && _.isArray(shop.coverFile.versions)) {
-          return imageUploader.deleteImages(shop.coverFile.versions);
+          promises.push(imageUploader.deleteImages(shop.coverFile.versions));
+        }
+
+        if (promises.length) {
+          return Promise.all(promises);
         }
       }
     },

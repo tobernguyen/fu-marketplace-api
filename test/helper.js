@@ -78,7 +78,8 @@ var createUser = (attrs) => {
     fullName: attrs.fullname || faker.name.findName(),
     email: attrs.email || faker.internet.email(),
     password: password,
-    avatarFile: attrs.avatarFile
+    avatarFile: attrs.avatarFile,
+    identityPhotoFile: attrs.identityPhotoFile
   }).then(u => {
     u['__test__'] = {password: password}; // inject testing data into user object
     return Promise.resolve(u);
@@ -122,7 +123,7 @@ var createShop = (attrs, id) => {
     avatar: attrs.avatar || faker.image.imageUrl(),
     avatarFile: attrs.avatarFile,
     cover: attrs.avatar || faker.image.imageUrl(),
-    coverFile: attrs.avatarFile,
+    coverFile: attrs.coverFile,
     ownerId: id
   });
 };

@@ -8,6 +8,7 @@ var errorHandlers = require('./helpers/errorHandlers');
 var imageUploader = require('../libs/image-uploader');
 var User = require('../models').User;
 var ShopOpeningRequest = require('../models').ShopOpeningRequest;
+var crypto = require('crypto');
 
 exports.getCurrentUser = (req, res) => {
   let result = req.user.toJSON();
@@ -80,8 +81,7 @@ exports.postUploadCurrentUserAvatar = (req, res) => {
 exports.postRequestOpenShopFirstTime = (req, res) => {
   req.checkBody(REQUEST_OPEN_SHOP_BODY_SCHEMA);
 
-  // TODO: Loi return ra xau vkl
-  var errs = req.validationErrors();;
+  var errs = req.validationErrors();
   if (errs) {
     let errors = {};
     errs.forEach(err => {
@@ -135,38 +135,73 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
   }).then((shopOpeningRequest) => {
     res.json({
       sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),
-      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note'])
+      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note']),
+      note: shopOpeningRequest.note || ''
     });
   }).catch(error => {
     if (error === 'already_seller') {
       errorHandlers.responseError(400, 'Already seller', 'open_shop_request', res);
     } else if (error === 'already_requested') {
       errorHandlers.responseError(400, 'A pending request is existed', 'open_shop_request', res);
+    } else {
+      errorHandlers.handleModelError(error, res);
     }
   });
 };
 
-exports.uploadIdentityPhoto = (req, res) => {
-  //TBD
+exports.postUserUploadIdentityPhoto = (req, res) => {
+  let user = req.user;
+  let identityFileHash = crypto.createHash('sha1').update(user.id.toString()).digest('hex');
+
+  user.verifyRole('seller').then(isSeller => {
+    if (isSeller) {
+      res.status(403);
+      res.json({
+        status: 403,
+        message: 'Seller is not allowed to change identity photo',
+        message_code: 'errors.seller.change_identity_photo_not_allowed'
+      });
+    } else {
+      imageUploader.useMiddlewareWithConfig({
+        maxFileSize: User.MAXIMUM_IDENTITY_PHOTO_SIZE,
+        versions: [
+          {
+            quality: 80,
+            fileName: `users/${req.user.id}/identity-${identityFileHash}`
+          }
+        ]
+      })(req, res, data => {
+        req.user.update({
+          identityPhotoFile: {
+            versions: _.map(data, image => {
+              return {
+                Url: image.Location,
+                Key: image.Key
+              };
+            })
+          }
+        }).then(user => {
+          res.json({
+            identityPhoto: data[0].Location
+          });
+        });
+      });
+    }
+  });
 };
 
 var validateRequestOpeningShopFirstTime = (user) => {
-  return user.getRoles().then(roles => {
-    let roleNames = _.map(roles, r => r.name);
-    if (!_.includes(roleNames, 'seller')) {
-      return Promise.resolve();
-    } else {
-      return Promise.reject('already_seller');
-    }
+  return user.verifyRole('seller').then(isSeller => {
+    return isSeller ? Promise.reject('already_seller') : Promise.resolve();
   }).then(() => {
-    return ShopOpeningRequest.find({
+    return ShopOpeningRequest.findOne({
       where: {
         ownerId: user.id,
         status: ShopOpeningRequest.STATUS.PENDING
       }
     });
   }).then(shopOpeningRequests => {
-    if (shopOpeningRequests.length > 0) {
+    if (shopOpeningRequests) {
       return Promise.reject('already_requested');
     } else {
       return Promise.resolve();
