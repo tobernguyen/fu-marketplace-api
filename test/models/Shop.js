@@ -4,6 +4,7 @@ const helper = require('../helper');
 const Shop = require('../../models').Shop;
 const rewire = require('rewire');
 const _ = require('lodash');
+const fs = require('fs-extra');
 
 describe('Shop Model', () => {
   describe('factory', () => {
@@ -23,7 +24,7 @@ describe('Shop Model', () => {
       }, done);
     });
     
-    describe('#createShopwithShipPlac', () => {      
+    describe('#createShopwithShipPlace', () => {      
       it('should create shop with correct ship places', done => {
 
         helper.factory.createUserWithRole({}, 'seller').then(u => {
@@ -50,6 +51,55 @@ describe('Shop Model', () => {
           expect(actualJSON[attribute]).to.be.undefined;
         });
         done();
+      });
+    });
+  });
+
+  describe('hooks', () => {
+    describe('afterDestroy', () => {
+      let shop;
+      let avatarFile = 'public/uploads/shops/avatar.png';
+      let coverFile = 'public/uploads/shops/cover.png';
+      let checkAvatarFileExist = () => {
+        fs.accessSync(avatarFile);
+      };
+      let checkCoverFileExist = () => {
+        fs.accessSync(coverFile);        
+      };
+      
+      beforeEach(done => {
+        fs.ensureFileSync(avatarFile);
+        fs.ensureFileSync(coverFile);
+        
+        helper.factory.createShop({
+          avatarFile: {
+            versions: [
+              {
+                Location: 'http://localhost:3000/uploads/shops/avatar.png',
+                Key: avatarFile
+              }  
+            ]
+          },
+          coverFile: {
+            versions: [
+              {
+                Location: 'http://localhost:3000/uploads/shops/cover.png',
+                Key: coverFile
+              }  
+            ]
+          }
+        }, 1).then(u => {
+          shop = u;
+          done();
+        });
+      });
+      
+      it('should delete all user avatar files after user destroyed', done => {
+        shop.destroy().then(() => {
+          expect(checkAvatarFileExist).to.throw(Error);
+          expect(checkCoverFileExist).to.throw(Error);
+          done();
+        }, done);
       });
     });
   });

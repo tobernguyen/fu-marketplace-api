@@ -127,7 +127,7 @@ exports.postChangePassword = (req, res) => {
         errorHandlers.handleModelError(err, res);
       });
     }, () => {
-      errorHandlers.responseError(401, 'Invalid credentials', 'authentication', res);
+      errorHandlers.responseError(401, 'Old password is not correct', 'authentication', res);
     });
   }
 };

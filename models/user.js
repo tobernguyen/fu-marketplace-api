@@ -16,7 +16,8 @@ var IGNORE_ATTRIBUTES = [
   'createdAt',
   'acceptTokenAfter',
   'googleId',
-  'avatarFile'
+  'avatarFile',
+  'identityPhotoFile'
 ];
 
 module.exports = function(sequelize, DataTypes) {
@@ -76,6 +77,9 @@ module.exports = function(sequelize, DataTypes) {
     },
     avatarFile: {
       type: DataTypes.JSON
+    },
+    identityPhotoFile: {
+      type: DataTypes.JSON
     }
   }, {
     hooks: {
@@ -91,9 +95,20 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
       afterDestroy: function(user, options) {
+        var promises = [];
+
         // Delete user's avatar files
         if (user.avatarFile && _.isArray(user.avatarFile.versions)) {
-          return imageUploader.deleteImages(user.avatarFile.versions);
+          promises.push(imageUploader.deleteImages(user.avatarFile.versions));
+        }
+
+        // Delete user's identity photo files
+        if (user.identityPhotoFile && _.isArray(user.identityPhotoFile.versions)) {
+          promises.push(imageUploader.deleteImages(user.identityPhotoFile.versions));
+        }
+
+        if (promises.length) {
+          return Promise.all(promises);
         }
       }
     },
@@ -121,11 +136,17 @@ module.exports = function(sequelize, DataTypes) {
       },
       signOutAll: function() {
         return this.update({acceptTokenAfter: new Date()});
+      },
+      verifyRole: function(roleName) {
+        return this.getRoles().then(roles => {
+          return Promise.resolve(_.findIndex(roles, r => r.name === roleName) != -1); 
+        });
       }
     }
   });
   
   User.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
+  User.MAXIMUM_IDENTITY_PHOTO_SIZE = 6 * 1024 * 1024; // 6MB
   
   return User;
 };

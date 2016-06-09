@@ -47,24 +47,39 @@ module.exports = function(sequelize, DataTypes) {
     },
     banned: {
       type: DataTypes.BOOLEAN
+    },
+    address: {
+      type: DataTypes.STRING
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0 // UNPUBLISHED
     }
   }, {
     hooks: {
       afterDestroy: function(shop, options) {
+        var promises = [];
+        
         // Delete shop's avatar files
         if (shop.avatarFile && _.isArray(shop.avatarFile.versions)) {
-          return imageUploader.deleteImages(shop.avatarFile.versions);
+          promises.push(imageUploader.deleteImages(shop.avatarFile.versions));
         }
         
+        // Delete shop's cover files
         if (shop.coverFile && _.isArray(shop.coverFile.versions)) {
-          return imageUploader.deleteImages(shop.coverFile.versions);
+          promises.push(imageUploader.deleteImages(shop.coverFile.versions));
+        }
+
+        if (promises.length) {
+          return Promise.all(promises);
         }
       }
     },
     classMethods: {
       associate: function(models) {
         Shop.belongsToMany(models.ShipPlace, {through: 'ShopShipPlaces'});
-        Shop.belongsTo(models.Shop, {
+        Shop.belongsTo(models.User, {
           foreignKey: 'ownerId',
           constraints: false
         });
@@ -85,6 +100,10 @@ module.exports = function(sequelize, DataTypes) {
   
   Shop.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
   Shop.MAXIMUM_COVER_SIZE = 3 * 1024 * 1024; // 3MB
+  Shop.STATUS = {
+    PUBLISHED: 1,
+    UNPUBLISHED: 0
+  };
   
   return Shop;
 };
