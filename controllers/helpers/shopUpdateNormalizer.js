@@ -1,7 +1,7 @@
 'use strict';
 
-const SHOP_OWNER_UPDATE_VALID_KEY = ['name', 'description', 'opening'];
-const ADMIN_UPDATE_VALID_KEY = SHOP_OWNER_UPDATE_VALID_KEY.concat(['banned', 'ownerId']);
+const SHOP_OWNER_UPDATE_VALID_KEY = ['description', 'opening', 'status', 'address'];
+const ADMIN_UPDATE_VALID_KEY = SHOP_OWNER_UPDATE_VALID_KEY.concat(['name', 'banned', 'ownerId']);
 
 var _ = require('lodash');
 

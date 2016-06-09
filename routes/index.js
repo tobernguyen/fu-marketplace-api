@@ -4,6 +4,7 @@ const auth = require('../controllers/auth');
 const users = require('../controllers/users');
 const adminUser = require('../controllers/admin/users');
 const adminShop = require('../controllers/admin/shops');
+const sellerShop = require('../controllers/seller/shops');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -43,5 +44,15 @@ router.get('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.getS
 router.put('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.putShop);
 router.post('/api/v1/admin/shops/:id/uploadAvatar', mustBe.authorized('admin'), adminShop.postShopUploadAvatar);
 router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), adminShop.postShopUploadCover);
+
+/*
+ * Routes that can be accessed only by authenticated & authorized users who has role 'seller'
+ */
+
+router.get('/api/v1/seller/shops', mustBe.authorized('seller'), sellerShop.getShops);
+router.get('/api/v1/seller/shops/:id', mustBe.authorized('seller'), sellerShop.getShop);
+router.put('/api/v1/seller/shops/:id', mustBe.authorized('seller'), sellerShop.putShop);
+router.post('/api/v1/seller/shops/:id/uploadAvatar', mustBe.authorized('seller'), sellerShop.postShopUploadAvatar);
+router.post('/api/v1/seller/shops/:id/uploadCover', mustBe.authorized('seller'), sellerShop.postShopUploadCover);
 
 module.exports = router;

@@ -124,6 +124,7 @@ var createShop = (attrs, id) => {
     avatarFile: attrs.avatarFile,
     cover: attrs.avatar || faker.image.imageUrl(),
     coverFile: attrs.coverFile,
+    banned: attrs.banned,
     ownerId: id
   });
 };
