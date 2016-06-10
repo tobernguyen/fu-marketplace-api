@@ -20,8 +20,8 @@ require('sinon-as-promised');
 var fs = require('fs-extra');
 
 before(done => {
-  dbUtils.runMigrations()
-    .then(dbUtils.clearDatabase)
+  dbUtils.clearDatabase()
+    .then(dbUtils.runMigrations)
     .then(() => done(), done);
 });
 
@@ -45,18 +45,7 @@ var dbUtils = {
     return umzug.up();
   },
   clearDatabase: () => {
-    return Sequelize.Promise.each(
-      Object.keys(models), function (modelName) {
-        if (models[modelName] instanceof _sequelize.Model) {
-          return models[modelName].destroy({
-            where: Sequelize.literal('1=1'),
-            truncate: true,
-            cascade: true,
-            force: true
-          });
-        }
-      }
-    );
+    return _sequelize.query('DROP SCHEMA public CASCADE;create schema public;');
   }
 };
 
@@ -150,6 +139,40 @@ var createShopWithShipPlace = (attrs, id, shipPlace) => {
   });
 };
 
+var createShopOpeningRequest = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  let createUserPromise;
+  
+  if (!attrs.ownerId) {
+    createUserPromise = createUser().then(u => {
+      return u.update({
+        identityPhotoFile: {
+          versions: [
+            {
+              Url: 'http://someurl.com',
+              Key: 'someKey'
+            }
+          ]
+        }
+      });
+    });
+  } else {
+    createUserPromise = Promise.resolve();
+  }
+
+  return createUserPromise.then(user => {
+    return createModel('ShopOpeningRequest', {
+      name: attrs.name || faker.name.findName(),
+      description: attrs.description || faker.lorem.sentence(),
+      note: attrs.note || '',
+      ownerId: attrs.ownerId || user.id,
+      address: attrs.address || faker.address.streetAddress(),
+      status: attrs.status || 0 // Default is PENDING
+    });
+  });
+};
+
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
 exports.dbUtils = dbUtils;
 exports.factory = {
@@ -157,7 +180,8 @@ exports.factory = {
   assignRoleToUser: assignRoleToUser,
   createUserWithRole: createUserWithRole,
   createShopWithShipPlace: createShopWithShipPlace,
-  createShop: createShop
+  createShop: createShop,
+  createShopOpeningRequest: createShopOpeningRequest
 };
 
 // Setup some global helper

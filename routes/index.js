@@ -4,6 +4,7 @@ const auth = require('../controllers/auth');
 const users = require('../controllers/users');
 const adminUser = require('../controllers/admin/users');
 const adminShop = require('../controllers/admin/shops');
+const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -43,5 +44,7 @@ router.get('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.getS
 router.put('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.putShop);
 router.post('/api/v1/admin/shops/:id/uploadAvatar', mustBe.authorized('admin'), adminShop.postShopUploadAvatar);
 router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), adminShop.postShopUploadCover);
+
+router.get('/api/v1/admin/shopOpeningRequests', mustBe.authorized('admin'), adminShopOpeningRequest.getShopOpeningRequests);
 
 module.exports = router;
