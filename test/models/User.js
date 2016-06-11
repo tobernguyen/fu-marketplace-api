@@ -126,6 +126,24 @@ describe('User Model', () => {
       });
     });
   });
+
+  describe('#getBasicSellerInfo', () => {
+    let seller;
+
+    before(done => {
+      helper.factory.createUserWithRole({}, 'seller').then(s => {
+        seller = s;
+        done();
+      });
+    });
+
+    it('should return seller information of current user', done => {
+      let BASIC_SELLER_INFO_FIELD = rewire('../../models/user').__get__('BASIC_SELLER_INFO_FIELD');
+      let actualJSON = seller.getBasicSellerInfo();
+      expect(actualJSON).to.contain.all.keys(BASIC_SELLER_INFO_FIELD.concat('identityPhoto'));
+      done();
+    });
+  });
   
   describe('#verifyPassword', () => {
     it('should verify if the input password is correct for user instance', () => {

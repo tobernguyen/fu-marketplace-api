@@ -6,7 +6,15 @@ var ShopOpeningRequest = models.ShopOpeningRequest;
 var User = models.User;
 
 exports.getShopOpeningRequests = (req, res) => {
-  ShopOpeningRequest.scope('pending').findAll({
+  let shopOpeningRequestQuery;
+
+  if (req.query.showAll) {
+    shopOpeningRequestQuery = ShopOpeningRequest;
+  } else {
+    shopOpeningRequestQuery = ShopOpeningRequest.scope('pending');
+  }
+
+  shopOpeningRequestQuery.findAll({
     include: User
   }).then(shops => {
     let result = _.map(shops, s => {
@@ -18,7 +26,7 @@ exports.getShopOpeningRequests = (req, res) => {
     });
 
     res.json({
-      shops: result
+      shopOpeningRequests: result
     });
   });
 };

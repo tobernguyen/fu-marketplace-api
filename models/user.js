@@ -21,10 +21,12 @@ var IGNORE_ATTRIBUTES = [
 ];
 
 var BASIC_SELLER_INFO_FIELD = [
+  'id',
   'fullName',
   'phone',
   'email',
-  'avatar'
+  'avatar',
+  'identityNumber'
 ];
 
 module.exports = function(sequelize, DataTypes) {

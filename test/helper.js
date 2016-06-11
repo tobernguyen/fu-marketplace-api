@@ -18,8 +18,10 @@ var expect = chai.expect;
 require('sinon');
 require('sinon-as-promised');
 var fs = require('fs-extra');
+var _ = require('lodash');
 
-before(done => {
+before(function(done) {
+  this.timeout(5000);
   dbUtils.clearDatabase()
     .then(dbUtils.runMigrations)
     .then(() => done(), done);
@@ -67,7 +69,10 @@ var createUser = (attrs) => {
     fullName: attrs.fullname || faker.name.findName(),
     email: attrs.email || faker.internet.email(),
     password: password,
+    phone: attrs.phone,
+    avatar: attrs.avatar,
     avatarFile: attrs.avatarFile,
+    identityNumber: attrs.identityNumber,
     identityPhotoFile: attrs.identityPhotoFile
   }).then(u => {
     u['__test__'] = {password: password}; // inject testing data into user object
@@ -87,6 +92,21 @@ const assignRoleToUser = (user, roleName) => {
 
 const createUserWithRole = (attrs, roleName) => {
   let createdUser;
+
+  if (roleName === 'seller') {
+    attrs = _.assign(attrs, {
+      phone: attrs.phone || '0987654321',
+      identityNumber: attrs.identityNumber || 123456789,
+      identityPhotoFile: attrs.identityPhotoFile || {
+        versions: [
+          {
+            Url: faker.image.imageUrl(),
+            Key: 'someRandomKey'
+          }
+        ]
+      }
+    });
+  }
   
   return createUser(attrs).then(user => {
     createdUser = user;
