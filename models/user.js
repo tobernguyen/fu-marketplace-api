@@ -163,7 +163,7 @@ module.exports = function(sequelize, DataTypes) {
       },
       verifyRole: function(roleName) {
         return this.getRoles().then(roles => {
-          return Promise.resolve(_.findIndex(roles, r => r.name === roleName) != -1); 
+          return Promise.resolve(_.findIndex(roles, r => r.name === roleName) !== -1); 
         });
       }
     }

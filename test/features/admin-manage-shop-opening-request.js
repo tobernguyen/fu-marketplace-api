@@ -4,6 +4,8 @@ const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
 const ShopOpeningRequest = require('../../models').ShopOpeningRequest;
+const Shop = require('../../models').Shop;
+const User = require('../../models').User;
 const _ = require('lodash');
 
 describe('GET /api/v1/admin/shopOpeningRequests', () => {
@@ -35,7 +37,7 @@ describe('GET /api/v1/admin/shopOpeningRequests', () => {
           let requests = res.body.shopOpeningRequests;
           expect(res.body.shopOpeningRequests).to.have.lengthOf(1);
 
-          expect(requests[0]).to.have.all.keys(['id', 'name', 'description', 'note', 'ownerId', 'address', 'status', 'seller']);
+          expect(requests[0]).to.have.all.keys(['id', 'name', 'description', 'note', 'adminMessage', 'ownerId', 'address', 'status', 'seller']);
           expect(requests[0].id).to.equal(pendingRequest.id);
           expect(requests[0].name).to.equal(pendingRequest.name);
 
@@ -58,6 +60,157 @@ describe('GET /api/v1/admin/shopOpeningRequests', () => {
             expect(requestNames).to.have.members([pendingRequest.name, acceptedRequest.name, rejectedRequest.name]);
           })
           .expect(200, done);
+      });
+    });
+  });
+});
+
+describe('POST /api/v1/admin/shopOpeningRequests/:id/accept', () => {
+  let pendingRequest, adminToken;
+  
+  before(done => {
+    helper.factory.createUserWithRole({},'admin').then(u => {
+      adminToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createShopOpeningRequest();
+    }).then(o => {
+      pendingRequest = o;
+      done();
+    });
+  });
+
+  describe('with admin access token', () => {
+    describe('with id of pending request and a note from admin', () => {
+      it('should accept the shop opening request and return 200', done => {
+        let checkAcceptShopOpeningRequestLogic = () => {
+          pendingRequest.reload().then(r => {
+            expect(r.status).to.equal(ShopOpeningRequest.STATUS.ACCEPTED);
+            expect(r.adminMessage).to.equal('We hope you have a nice experience with FU Marketplace.');
+
+            return Shop.findOne({
+              order: '"createdAt" DESC'
+            });
+          }).then(latestShop => {
+            // Check the transformation from ShopOpeningRequest to Shop
+            let attributeToCompare = ['name', 'description', 'address', 'ownerId'];
+            attributeToCompare.forEach(attr => {
+              expect(latestShop.get(attr)).to.equal(pendingRequest.get(attr));
+              expect(latestShop.banned).to.not.be.ok;
+              expect(latestShop.status).to.equal(0); // UNPUBLISHED
+            });
+            
+            return User.findById(pendingRequest.ownerId);
+          }).then(u => {
+            // Promote user to seller if he/she is not
+            expect(u.verifyRole('seller')).to.eventually.equal(true);
+            done();
+          });
+        };
+
+        request(app)
+          .post(`/api/v1/admin/shopOpeningRequests/${pendingRequest.id}/accept`)
+          .set('X-Access-Token', adminToken)
+          .send({
+            message: 'We hope you have a nice experience with FU Marketplace.'
+          })
+          .expect(200, checkAcceptShopOpeningRequestLogic);
+      });
+    });
+
+    describe('with invalid id', () => {
+      it('should return 404', done => {
+        request(app)
+          .post('/api/v1/admin/shopOpeningRequests/12345/accept')
+          .set('X-Access-Token', adminToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.models.shop_opening_request_not_found');
+          })
+          .expect(404, done);
+      });
+    });
+
+    describe('with id does not belong to a pending request', () => {
+      let acceptedRequest;
+
+      before(done => {
+        helper.factory.createShopOpeningRequest({status: ShopOpeningRequest.STATUS.ACCEPTED}).then(sor => {
+          acceptedRequest = sor;
+          done();
+        });
+      });
+
+      it('should return 400', done => {
+        request(app)
+          .post(`/api/v1/admin/shopOpeningRequests/${acceptedRequest.id}/accept`)
+          .set('X-Access-Token', adminToken)
+          .expect(400, done);
+      });
+    });
+  });
+});
+
+describe('POST /api/v1/admin/shopOpeningRequests/:id/reject', () => {
+  let pendingRequest, adminToken;
+  
+  before(done => {
+    helper.factory.createUserWithRole({},'admin').then(u => {
+      adminToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createShopOpeningRequest();
+    }).then(o => {
+      pendingRequest = o;
+      done();
+    });
+  });
+
+  describe('with admin access token', () => {
+    describe('with id of pending request and a note from admin', () => {
+      it('should reject the shop opening request and return 200', done => {
+        let checkRejectShopOpeningRequestLogic = () => {
+          pendingRequest.reload().then(r => {
+            expect(r.status).to.equal(ShopOpeningRequest.STATUS.REJECTED);
+            expect(r.adminMessage).to.equal('Please provide Identity Photo');
+            done();
+          });
+        };
+
+        request(app)
+          .post(`/api/v1/admin/shopOpeningRequests/${pendingRequest.id}/reject`)
+          .set('X-Access-Token', adminToken)
+          .send({
+            message: 'Please provide Identity Photo'
+          })
+          .expect(200, checkRejectShopOpeningRequestLogic);
+      });
+    });
+
+    describe('with invalid id', () => {
+      it('should return 404', done => {
+        request(app)
+          .post('/api/v1/admin/shopOpeningRequests/12345/reject')
+          .set('X-Access-Token', adminToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.models.shop_opening_request_not_found');
+          })
+          .expect(404, done);
+      });
+    });
+
+    describe('with id does not belong to a pending request', () => {
+      let acceptedRequest;
+
+      before(done => {
+        helper.factory.createShopOpeningRequest({status: ShopOpeningRequest.STATUS.ACCEPTED}).then(sor => {
+          acceptedRequest = sor;
+          done();
+        });
+      });
+
+      it('should return 400', done => {
+        request(app)
+          .post(`/api/v1/admin/shopOpeningRequests/${acceptedRequest.id}/reject`)
+          .set('X-Access-Token', adminToken)
+          .expect(400, done);
       });
     });
   });

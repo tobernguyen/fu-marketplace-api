@@ -3,6 +3,11 @@
 const imageUploader = require('../libs/image-uploader');
 const _ = require('lodash');
 
+var SHOP_STATUS = {
+  PUBLISHED: 1,
+  UNPUBLISHED: 0
+};
+
 var IGNORE_ATTRIBUTES = [
   'updatedAt',
   'createdAt',
@@ -33,7 +38,8 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     },
     opening: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
     avatarFile: {
       type: DataTypes.JSON
@@ -46,7 +52,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     banned: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
     address: {
       type: DataTypes.STRING
@@ -100,10 +107,7 @@ module.exports = function(sequelize, DataTypes) {
   
   Shop.MAXIMUM_AVATAR_SIZE = 3 * 1024 * 1024; // 3MB
   Shop.MAXIMUM_COVER_SIZE = 3 * 1024 * 1024; // 3MB
-  Shop.STATUS = {
-    PUBLISHED: 1,
-    UNPUBLISHED: 0
-  };
+  Shop.STATUS = SHOP_STATUS;
   
   return Shop;
 };

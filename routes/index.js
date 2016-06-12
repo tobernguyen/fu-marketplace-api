@@ -46,5 +46,7 @@ router.post('/api/v1/admin/shops/:id/uploadAvatar', mustBe.authorized('admin'), 
 router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), adminShop.postShopUploadCover);
 
 router.get('/api/v1/admin/shopOpeningRequests', mustBe.authorized('admin'), adminShopOpeningRequest.getShopOpeningRequests);
+router.post('/api/v1/admin/shopOpeningRequests/:id/accept', mustBe.authorized('admin'), adminShopOpeningRequest.postAcceptShopOpeningRequest);
+router.post('/api/v1/admin/shopOpeningRequests/:id/reject', mustBe.authorized('admin'), adminShopOpeningRequest.postRejectShopOpeningRequest);
 
 module.exports = router;

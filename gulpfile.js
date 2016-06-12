@@ -16,7 +16,7 @@ gulp.task('set-test-node-env', function() {
 });
 
 gulp.task('default', ['set-test-node-env'], function() {
-  gulp.watch(['test/**/*.js'], ['mocha']);
+  gulp.watch(['**/*.js', '!node_modules/**'], ['mocha']);
 });
 
 gulp.task('mocha', ['set-test-node-env'],function() {
