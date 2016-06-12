@@ -251,6 +251,35 @@ describe('PUT /api/v1/seller/shops/:id', () => {
         });
       }); 
       
+      describe('with not defined status attribute', () => {
+        it('should return 200 OK and return new shop infomation', done => {
+          request(app)
+            .put(`/api/v1/seller/shops/${shop.id}`)
+            .set('X-Access-Token', ownerToken)
+            .send({
+              fullName: 'Nguyen Van A',
+              banned: 'true',
+              invalidattribute: 'invalid',
+              opening: 'true',
+              status: 99999999
+            })
+            .set('Content-Type', 'application/json')
+            .expect(res => {
+              expect(res.body.name).to.equal(shop.name);
+              expect(res.body.description).to.equal(shop.description);
+              expect(res.body.id).to.equal(shop.id);
+              expect(res.body.avatar).to.equal(shop.avatar);
+              expect(res.body.cover).to.equal(shop.cover);
+              expect(res.body.ownerId).to.equal(owner.id);
+              expect(res.body.banned).to.equal(null);
+              expect(res.body.opening).to.equal(true);
+              expect(res.body.status).to.equal(0);
+              expect(res.body.invalidattribute).to.be.undefined;
+            })
+            .expect(200, done);  
+        });
+      }); 
+      
       describe('invalid input attribute', () => {
         it('should return 422 and return errors in correct format', done => {
           request(app)
