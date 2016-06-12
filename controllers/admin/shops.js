@@ -128,6 +128,61 @@ exports.postShopUploadCover = (req, res) => {
   });
 };
 
+exports.postChangeShopShipPlaces = (req, res) => {
+  let shopId = req.params.id;
+  let shipPlaces = req.body.shipPlaces;
+  if (!shipPlaces || !_.isArray(shipPlaces)){
+    let error = 'Must provide shipPlaces';
+    errorHandlers.responseError(422, error, 'param', res);
+  } else {
+    Shop.findById(shopId).then(shop => {
+      if (!shop) {
+        let error = 'Shop does not exits';
+        errorHandlers.responseError(404, error, 'model', res);
+      } else {
+        ShipPlace.findAll({
+          where: {
+            id: {
+              $in: shipPlaces
+            }
+          }
+        }).then(sp => {
+          return shop.setShipPlaces(sp);
+        }).then(s => {
+          responseShop(shop, res);
+        }).catch(err => {
+          errorHandlers.handleModelError(err, res);
+        });
+      }
+    });
+  }
+};
+
+exports.getShopShipPlaces = (req, res) => {
+  let shopId = req.params.id;
+  
+  Shop.findById(shopId).then(shop => {
+    if (!shop) {
+      let error = 'Shop does not exits';
+      errorHandlers.responseError(404, error, 'model', res);
+    } else {
+      shop.getShipPlaces().then(shipPlaces => {
+        let shipPlace = _.map(shipPlaces, function(sp) {
+          return {
+            id: sp.id,
+            name: sp.name
+          };
+        });
+        res.json({
+          shipPlaces: shipPlace
+        });
+      });
+    }
+  });
+  
+};
+
+
 var responseShopById = (id, res) => {
   Shop.findById(id).then(shop => {
     if (!shop) {

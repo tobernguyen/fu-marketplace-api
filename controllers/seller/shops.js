@@ -169,6 +169,77 @@ exports.postShopUploadCover = (req, res) => {
   });
 };
 
+exports.postChangeShopShipPlaces = (req, res) => {
+  var shopId = req.params.id;
+  let seller = req.user;
+  let shipPlaces = req.body.shipPlaces;
+  if (!shipPlaces || !_.isArray(shipPlaces)){
+    let error = 'Must provide shipPlaces';
+    errorHandlers.responseError(422, error, 'param', res);
+  } else {
+    seller.getShops({
+      where: {
+        id: shopId
+      }
+    }).then(shops => {
+      if (shops.length != 1){
+        let error = 'Shop does not exits';
+        errorHandlers.responseError(404, error, 'model', res);
+      } else {
+        let shop = shops[0];
+        let banned = shop.banned || false;
+        if (banned) {
+          let error = 'Cannot update shipPlace for banned shop';
+          errorHandlers.responseError(404, error, 'banned', res);
+        } else {
+          ShipPlace.findAll({
+            where: {
+              id: {
+                $in: shipPlaces
+              }
+            }
+          }).then(sp => {
+            return shop.setShipPlaces(sp);
+          }).then(s => {
+            responseShop(shop, res);
+          }).catch(err => {
+            errorHandlers.handleModelError(err, res);
+          });
+        }
+      }
+    });
+  }
+};
+
+exports.getShopShipPlaces = (req, res) => {
+  var shopId = req.params.id;
+  let seller = req.user;
+
+  seller.getShops({
+    where: {
+      id: shopId
+    }
+  }).then(shops => {
+    if (shops.length != 1){
+      let error = 'Shop does not exits';
+      errorHandlers.responseError(404, error, 'model', res);
+    } else {
+      let shop = shops[0];
+      shop.getShipPlaces().then(shipPlaces => {
+        let shipPlace = _.map(shipPlaces, function(sp) {
+          return {
+            id: sp.id,
+            name: sp.name
+          };
+        });
+        res.json({
+          shipPlaces: shipPlace
+        });
+      });
+    }
+  });
+};
+
 var responseShopById = (owner, id, res) => {
   owner.getShops({
     where: {
