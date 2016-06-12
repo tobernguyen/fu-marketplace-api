@@ -4,6 +4,7 @@ const SHOP_OWNER_UPDATE_VALID_KEY = ['description', 'opening', 'status', 'addres
 const ADMIN_UPDATE_VALID_KEY = SHOP_OWNER_UPDATE_VALID_KEY.concat(['name', 'banned', 'ownerId']);
 
 var _ = require('lodash');
+var Shop = require('../../models/shop');
 
 exports.sanitizeUpdateRequest = (req, isAdmin) => {
   let updateValidKey = (isAdmin) ? ADMIN_UPDATE_VALID_KEY : SHOP_OWNER_UPDATE_VALID_KEY;
@@ -11,6 +12,10 @@ exports.sanitizeUpdateRequest = (req, isAdmin) => {
     req.sanitize(k).escape();
     req.sanitize(k).trim();
   });
+  
+  if (!_.includes(Shop.STATUS, req.body.status)){
+    _.unset(req,'body.status');
+  }
 }; 
 
 exports.getUpdateParams = (req, isAdmin) => {
