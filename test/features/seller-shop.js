@@ -240,7 +240,7 @@ describe('PUT /api/v1/seller/shops/:id', () => {
               expect(res.body.avatar).to.equal(shop.avatar);
               expect(res.body.cover).to.equal(shop.cover);
               expect(res.body.ownerId).to.equal(owner.id);
-              expect(res.body.banned).to.equal(null);
+              expect(res.body.banned).to.equal(false);
               expect(res.body.opening).to.equal(true);
               expect(res.body.status).to.equal(Shop.STATUS.UNPUBLISHED);
               expect(res.body.invalidattribute).to.be.undefined;
@@ -269,7 +269,7 @@ describe('PUT /api/v1/seller/shops/:id', () => {
               expect(res.body.avatar).to.equal(shop.avatar);
               expect(res.body.cover).to.equal(shop.cover);
               expect(res.body.ownerId).to.equal(owner.id);
-              expect(res.body.banned).to.equal(null);
+              expect(res.body.banned).to.equal(false);
               expect(res.body.opening).to.equal(true);
               expect(res.body.status).to.equal(0);
               expect(res.body.invalidattribute).to.be.undefined;
@@ -590,7 +590,7 @@ describe('POST /api/v1/seller/shops/:id/shipPlaces', () => {
               expect(res.body.avatar).to.equal(shop.avatar);
               expect(res.body.cover).to.equal(shop.cover);
               expect(res.body.ownerId).to.equal(owner.id);
-              expect(res.body.banned).to.equal(null);
+              expect(res.body.banned).to.equal(false);
               expect(res.body.shipPlaces.length).to.equal(1);   
               expect(res.body.shipPlaces.length).to.equal(1); 
             })
