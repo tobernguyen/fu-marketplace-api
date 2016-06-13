@@ -9,13 +9,14 @@ var _ = require('lodash');
 
 
 describe('GET /api/v1/admin/shops/:id', () => {
-  let  adminToken, shop;
+  let  adminToken, shop, owner;
   
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createUser();
     }).then(u => {
+      owner = u;
       return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
     }).then(s => {
       shop = s;
@@ -24,7 +25,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
   });
   
   describe('with exits shop', () => {
-    it('should return 200 OK and return new user profile', done => {
+    it('should return 200 OK and return new shop info', done => {
       request(app)
         .get(`/api/v1/admin/shops/${shop.id}`)
         .set('X-Access-Token', adminToken)
@@ -36,6 +37,10 @@ describe('GET /api/v1/admin/shops/:id', () => {
           expect(res.body.avatar).to.equal(shop.avatar);
           expect(res.body.cover).to.equal(shop.cover);
           expect(res.body.shipPlaces).to.have.lengthOf(1);
+          let seller = res.body.seller;
+          expect(seller.id).to.equal(owner.id);
+          expect(seller.fullName).to.equal(owner.fullName);
+          expect(seller.email).to.equal(owner.email);
         })
         .expect(200, done);  
     });
@@ -57,13 +62,14 @@ describe('GET /api/v1/admin/shops/:id', () => {
 });
 
 describe('GET /api/v1/admin/shops/', () => {
-  let adminToken, normalUserAccessToken, createdShop;
+  let adminToken, normalUserAccessToken, createdShop, owner;
   
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createUser();
     }).then(u => {
+      owner = u;
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
     }).then(s => {
@@ -87,7 +93,11 @@ describe('GET /api/v1/admin/shops/', () => {
           expect(shop.name).to.equal(createdShop.name);
           expect(shop.id).to.equal(createdShop.id);
           expect(shop.ownerId).to.equal(createdShop.ownerId);
-          expect(shop.shipPlaces.length).to.equal(1);   
+          expect(shop.shipPlaces.length).to.equal(1);
+          let seller = shop.seller;
+          expect(seller.id).to.equal(owner.id);
+          expect(seller.fullName).to.equal(owner.fullName);
+          expect(seller.email).to.equal(owner.email);
         })
         .expect(200, done); 
     });
@@ -147,6 +157,10 @@ describe('PUT /api/v1/admin/shops/:id', () => {
             expect(res.body.address).to.equal('SOME WHERE');
             expect(res.body.banned).to.equal(true);
             expect(res.body.invalidattribute).to.be.undefined;
+            let s = res.body.seller;
+            expect(s.id).to.equal(seller.id);
+            expect(s.fullName).to.equal(seller.fullName);
+            expect(s.email).to.equal(seller.email);
           })
           .expect(200, done);  
       });
