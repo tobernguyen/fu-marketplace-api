@@ -4,6 +4,7 @@ var _ = require('lodash');
 var models = require('../../models');
 var ShipPlace = models.ShipPlace;
 var Shop = models.Shop;
+var User = models.User;
 var errorHandlers = require('../helpers/errorHandlers');
 var shopUpdateNormalizer = require('../helpers/shopUpdateNormalizer');
 var sanitizeUpdateRequest = shopUpdateNormalizer.sanitizeUpdateRequest;
@@ -12,13 +13,19 @@ var imageUploader = require('../../libs/image-uploader');
 
 exports.getShops = (req, res) => {
   Shop.findAll({
-    include: ShipPlace
+    include: [
+      ShipPlace,
+      User
+    ]
   }).then(shops => {
     let result = _.map(shops, s => {
       let shop = s.toJSON();
       let shipPlaces = _.map(shop.ShipPlaces, s => s.id);
       delete shop.ShipPlaces;
       shop['shipPlaces'] = shipPlaces;
+      let sellerInfo = s.User.getBasicSellerInfo();
+      delete shop['User'];
+      shop['seller'] = sellerInfo;
       return shop;
     });
     res.json({
@@ -35,13 +42,13 @@ exports.getShop = (req, res) => {
 exports.putShop = (req, res) => {
   var shopId = req.params.id;
     
-  Shop.findById(shopId).then(Shop => {
-    if (!Shop){
+  Shop.findById(shopId).then(shop => {
+    if (!shop){
       errorHandlers.responseError(404, 'Shop does not exits', 'model', res);
     } else{
       sanitizeUpdateRequest(req, true);
-      Shop.update(getUpdateParams(req, true))
-        .then(shop => responseShop(shop, res))
+      shop.update(getUpdateParams(req, true))
+        .then(shop => responseShopById(shop.id, res))
         .catch(err => errorHandlers.handleModelError(err, res));
     }
   });
@@ -77,7 +84,7 @@ exports.postShopUploadAvatar = (req, res) => {
             })
           }
         }).then(user => {
-          responseShop(shop, res);
+          responseShopById(shop.id, res);
         });
       });
     }
@@ -114,7 +121,7 @@ exports.postShopUploadCover = (req, res) => {
             })
           }
         }).then(user => {
-          responseShop(shop, res);
+          responseShopById(shop.id, res);
         });
       });
     }
@@ -142,7 +149,7 @@ exports.postChangeShopShipPlaces = (req, res) => {
         }).then(sp => {
           return shop.setShipPlaces(sp);
         }).then(s => {
-          responseShop(shop, res);
+          responseShopById(shop.id, res);
         }).catch(err => {
           errorHandlers.handleModelError(err, res);
         });
@@ -156,7 +163,10 @@ var responseShopById = (id, res) => {
     where: {
       id: id
     },
-    include: ShipPlace
+    include: [
+      ShipPlace,
+      User
+    ]
   }).then(shop => {
     if (!shop) {
       let error = 'Shop does not exits';
@@ -164,17 +174,12 @@ var responseShopById = (id, res) => {
     } else {
       let result = shop.toJSON();
       let shipPlace = _.map(shop.ShipPlaces, sp => sp.id);
+      let sellerInfo = shop.User.getBasicSellerInfo();
       result['shipPlaces'] = shipPlace;
+      delete result['ShipPlace'];
+      delete result['User'];
+      result['seller'] = sellerInfo;
       res.json(result);      
     }
-  });
-};
-
-var responseShop = (shop, res) => {
-  let result = shop.toJSON();
-  shop.getShipPlaces().then(shipPlaces => {
-    let shipPlace = _.map(shipPlaces, sp => sp.id);
-    result['shipPlaces'] = shipPlace;
-    res.json(result);
   });
 };
