@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var ValidationError = require('sequelize').ValidationError;
+var logger = require('../../libs/logger');
 
 module.exports = {
   handleModelError: function(err, res) {
@@ -21,11 +22,13 @@ module.exports = {
         errors: errors
       });
     } else {
+      logger.error(err);
       res.status(500);
       res.json({
         status: 500,
-        error: err.message,
-        message_code: `error.model.${_.snakeCase(err.message)}`
+        message: err.message,
+        message_code: `error.model.${_.snakeCase(err.message)}`,
+        error: process.env.NODE_ENV === 'production' ? '' : err
       });
     }
   },
@@ -33,7 +36,7 @@ module.exports = {
     res.status(code);
     res.json({
       status: code,
-      error: error,
+      message: error,
       message_code: `error.${kind}.${_.snakeCase(error)}`
     });
   }

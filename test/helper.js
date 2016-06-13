@@ -124,18 +124,24 @@ var createShop = (attrs, id) => {
     avatarFile: attrs.avatarFile,
     cover: attrs.avatar || faker.image.imageUrl(),
     coverFile: attrs.coverFile,
+    banned: attrs.banned,
     ownerId: id
   });
 };
 
-const addShipPlaceToShop = (shop, shipPlace) => {
+var addShipPlaceToShop = (shop, shipPlace) => {
   assert(shop, 'shop cannot be blank');
   assert(shipPlace, 'shipPlace cannot be blank');
   
-  let ShipPlace = models.ShipPlace;
-  return ShipPlace.findOrCreate({where: {name: shipPlace}}).then(shipPlace => {
+  return createShipPlace(shipPlace).then(shipPlace => {
     return shop.addShipPlace(shipPlace[0]);
   }).then(() => Promise.resolve(shop));
+};
+
+var createShipPlace = (shipPlace) => {
+  assert(shipPlace, 'shipPlace cannot be blank');
+  let ShipPlace = models.ShipPlace;
+  return ShipPlace.findOrCreate({where: {name: shipPlace}});
 };
 
 var createShopWithShipPlace = (attrs, id, shipPlace) => {
@@ -157,7 +163,9 @@ exports.factory = {
   assignRoleToUser: assignRoleToUser,
   createUserWithRole: createUserWithRole,
   createShopWithShipPlace: createShopWithShipPlace,
-  createShop: createShop
+  addShipPlaceToShop: addShipPlaceToShop,
+  createShop: createShop,
+  createShipPlace: createShipPlace
 };
 
 // Setup some global helper
