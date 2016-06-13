@@ -18,10 +18,12 @@ var expect = chai.expect;
 require('sinon');
 require('sinon-as-promised');
 var fs = require('fs-extra');
+var _ = require('lodash');
 
-before(done => {
-  dbUtils.runMigrations()
-    .then(dbUtils.clearDatabase)
+before(function(done) {
+  this.timeout(5000);
+  dbUtils.clearDatabase()
+    .then(dbUtils.runMigrations)
     .then(() => done(), done);
 });
 
@@ -45,18 +47,7 @@ var dbUtils = {
     return umzug.up();
   },
   clearDatabase: () => {
-    return Sequelize.Promise.each(
-      Object.keys(models), function (modelName) {
-        if (models[modelName] instanceof _sequelize.Model) {
-          return models[modelName].destroy({
-            where: Sequelize.literal('1=1'),
-            truncate: true,
-            cascade: true,
-            force: true
-          });
-        }
-      }
-    );
+    return _sequelize.query('DROP SCHEMA public CASCADE;create schema public;');
   }
 };
 
@@ -78,7 +69,10 @@ var createUser = (attrs) => {
     fullName: attrs.fullname || faker.name.findName(),
     email: attrs.email || faker.internet.email(),
     password: password,
+    phone: attrs.phone,
+    avatar: attrs.avatar,
     avatarFile: attrs.avatarFile,
+    identityNumber: attrs.identityNumber,
     identityPhotoFile: attrs.identityPhotoFile
   }).then(u => {
     u['__test__'] = {password: password}; // inject testing data into user object
@@ -98,6 +92,21 @@ const assignRoleToUser = (user, roleName) => {
 
 const createUserWithRole = (attrs, roleName) => {
   let createdUser;
+
+  if (roleName === 'seller') {
+    attrs = _.assign(attrs, {
+      phone: attrs.phone || '0987654321',
+      identityNumber: attrs.identityNumber || 123456789,
+      identityPhotoFile: attrs.identityPhotoFile || {
+        versions: [
+          {
+            Url: faker.image.imageUrl(),
+            Key: 'someRandomKey'
+          }
+        ]
+      }
+    });
+  }
   
   return createUser(attrs).then(user => {
     createdUser = user;
@@ -156,6 +165,40 @@ var createShopWithShipPlace = (attrs, id, shipPlace) => {
   });
 };
 
+var createShopOpeningRequest = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  let createUserPromise;
+  
+  if (!attrs.ownerId) {
+    createUserPromise = createUser().then(u => {
+      return u.update({
+        identityPhotoFile: {
+          versions: [
+            {
+              Url: 'http://someurl.com',
+              Key: 'someKey'
+            }
+          ]
+        }
+      });
+    });
+  } else {
+    createUserPromise = Promise.resolve();
+  }
+
+  return createUserPromise.then(user => {
+    return createModel('ShopOpeningRequest', {
+      name: attrs.name || faker.name.findName(),
+      description: attrs.description || faker.lorem.sentence(),
+      note: attrs.note || '',
+      ownerId: attrs.ownerId || user.id,
+      address: attrs.address || faker.address.streetAddress(),
+      status: attrs.status || 0 // Default is PENDING
+    });
+  });
+};
+
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
 exports.dbUtils = dbUtils;
 exports.factory = {
@@ -165,7 +208,8 @@ exports.factory = {
   createShopWithShipPlace: createShopWithShipPlace,
   addShipPlaceToShop: addShipPlaceToShop,
   createShop: createShop,
-  createShipPlace: createShipPlace
+  createShipPlace: createShipPlace,
+  createShopOpeningRequest: createShopOpeningRequest
 };
 
 // Setup some global helper

@@ -5,6 +5,7 @@ const request = require('supertest');
 const app = require('../../app.js');
 const ShopOpeningRequest = require('../../models').ShopOpeningRequest;
 const User = require('../../models').User;
+const _ = require('lodash');
 
 describe('POST /api/v1/requestOpenShopFirstTime', () => {
   let user, seller, sellerAccessToken, userAccessToken;
@@ -38,11 +39,11 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
         .expect(res => {
           expect(res.body.status).to.equal(400);
           let errors = res.body.errors;
-          expect(errors['sellerInfo.phone'].message_code).to.equal('error.form_validation.must_be_a_number');
-          expect(errors['sellerInfo.identityNumber'].message_code).to.equal('error.form_validation.must_be_9_or_12_characters');
-          expect(errors['shopInfo.name'].message_code).to.equal('error.form_validation.must_not_be_empty');
-          expect(errors['shopInfo.description'].message_code).to.equal('error.form_validation.must_not_be_empty');
-          expect(errors['shopInfo.address']).to.be.undefined;
+          expect(_.get(errors, ['sellerInfo.phone', 'message_code'])).to.equal('error.form_validation.must_be_a_number');
+          expect(_.get(errors, ['sellerInfo.identityNumber', 'message_code'])).to.equal('error.form_validation.must_be_9_or_12_characters');
+          expect(_.get(errors, ['shopInfo.name', 'message_code'])).to.equal('error.form_validation.must_not_be_empty');
+          expect(_.get(errors, ['shopInfo.description', 'message_code'])).to.equal('error.form_validation.must_not_be_empty');
+          expect(_.get(errors, ['shopInfo.address'])).to.be.undefined;
         })
         .expect(400, done);  
     });
@@ -52,7 +53,7 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
     it('should return 400 and response that identity photo is missing', done => {
       request(app)
         .post('/api/v1/requestOpenShopFirstTime')
-        .set('X-Access-Token', sellerAccessToken)
+        .set('X-Access-Token', userAccessToken)
         .set('Content-Type', 'application/json')
         .send({
           sellerInfo: {
@@ -68,8 +69,9 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(400);
-          expect(res.body.errors['sellerInfo.identityPhoto'].message).to.equal('Identity photo must be present');
-          expect(res.body.errors['sellerInfo.identityPhoto'].message_code).to.equal('error.form_validation.identity_photo_must_be_present');
+          let errors = res.body.errors;
+          expect(_.get(errors, ['sellerInfo.identityPhoto', 'message'])).to.equal('Identity photo must be present');
+          expect(_.get(errors, ['sellerInfo.identityPhoto', 'message_code'])).to.equal('error.form_validation.identity_photo_must_be_present');
         })
         .expect(400, done);  
     });

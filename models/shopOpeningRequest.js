@@ -1,9 +1,15 @@
 'use strict';
 
-var IGNORE_ATTRIBUTES = [
+const IGNORE_ATTRIBUTES = [
   'updatedAt',
   'createdAt'
 ];
+
+const SHOP_OPENING_REQUEST_STATUS = {
+  PENDING: 0,
+  REJECTED: 1,
+  ACCEPTED: 2
+};
 
 module.exports = function(sequelize, DataTypes) {
   let ShopOpeningRequest = sequelize.define('ShopOpeningRequest', {
@@ -35,9 +41,16 @@ module.exports = function(sequelize, DataTypes) {
     status: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: SHOP_OPENING_REQUEST_STATUS.PENDING
     }
   }, {
+    scopes: {
+      pending: {
+        where: {
+          status: SHOP_OPENING_REQUEST_STATUS.PENDING
+        }
+      }
+    },
     classMethods: {
       associate: function(models) {
         ShopOpeningRequest.belongsTo(models.User, {
@@ -59,11 +72,7 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
   
-  ShopOpeningRequest.STATUS = {
-    PENDING: 0,
-    REJECTED: 1,
-    ACCEPTED: 2
-  };
+  ShopOpeningRequest.STATUS = SHOP_OPENING_REQUEST_STATUS;
 
   return ShopOpeningRequest;
 };

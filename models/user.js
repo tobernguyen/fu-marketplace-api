@@ -20,6 +20,15 @@ var IGNORE_ATTRIBUTES = [
   'identityPhotoFile'
 ];
 
+var BASIC_SELLER_INFO_FIELD = [
+  'id',
+  'fullName',
+  'phone',
+  'email',
+  'avatar',
+  'identityNumber'
+];
+
 module.exports = function(sequelize, DataTypes) {
   let User = sequelize.define('User', {
     email: {
@@ -130,6 +139,21 @@ module.exports = function(sequelize, DataTypes) {
         });
         
         return values;
+      },
+      getBasicSellerInfo: function() {
+        var result = {};
+
+        _.each(BASIC_SELLER_INFO_FIELD, fieldName => {
+          result[fieldName] = this[fieldName];
+        });
+
+        if (this.identityPhotoFile && _.isArray(this.identityPhotoFile.versions)) {
+          result['identityPhoto'] = this.identityPhotoFile.versions[0].Url;
+        } else {
+          result['identityPhoto'] = '';
+        }
+
+        return result;
       },
       verifyPassword: function(inputPassword) {
         return bcrypt.compareAsync(inputPassword, this.password);
