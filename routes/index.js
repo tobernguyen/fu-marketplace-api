@@ -29,6 +29,7 @@ router.post('/api/v1/users/me/uploadIdentityPhoto', users.postUserUploadIdentity
 
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 
+router.get('/api/v1/users/me/shopOpeningRequests', users.getShopOpeningRequests);
 router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTime);
 router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
 

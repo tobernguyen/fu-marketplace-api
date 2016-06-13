@@ -190,6 +190,25 @@ exports.postUserUploadIdentityPhoto = (req, res) => {
   });
 };
 
+exports.getShopOpeningRequests = (req, res) => {
+  ShopOpeningRequest.findAll({
+    where: {
+      ownerId: req.user.id,
+      status: ShopOpeningRequest.STATUS.PENDING
+    }
+  }).then(requests => {
+    let result = _.map(requests, r => {
+      let result = r.toJSON();
+      delete r['ownerId'];
+      return result;
+    });
+
+    res.json({
+      shopOpeningRequests: result
+    });
+  });
+};
+
 var validateRequestOpeningShopFirstTime = (user) => {
   return user.verifyRole('seller').then(isSeller => {
     return isSeller ? Promise.reject('already_seller') : Promise.resolve();
