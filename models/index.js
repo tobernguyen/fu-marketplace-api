@@ -5,13 +5,14 @@ var path      = require('path');
 var Sequelize = require('sequelize');
 var basename  = path.basename(module.filename);
 var env       = process.env.NODE_ENV || 'development';
+var logger    = require('../libs/logger');
 var config    = require(__dirname + '/../config/config.json')[env];
 var db        = {};
 var sequelize;
 
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], {
-    logging: process.env.LOG_SQL_QUERY || false
+    logging: process.env.LOG_SQL_QUERY === 'true' ? logger.info : false
   });
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
