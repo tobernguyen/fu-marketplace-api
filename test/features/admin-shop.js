@@ -4,6 +4,7 @@ const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
 const Shop = require('../../models').Shop;
+const ShipPlace = require('../../models').ShipPlace;
 var _ = require('lodash');
 
 
@@ -34,9 +35,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
           expect(res.body.description).to.equal(shop.description);
           expect(res.body.avatar).to.equal(shop.avatar);
           expect(res.body.cover).to.equal(shop.cover);
-          expect(res.body.shipPlaces.filter(function(e) {
-            return e.name == 'dom A';
-          }).length).to.equal(1);
+          expect(res.body.shipPlaces).to.have.lengthOf(1);
         })
         .expect(200, done);  
     });
@@ -49,7 +48,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
         .set('X-Access-Token', adminToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.error).to.equal('Shop does not exits');
+          expect(res.body.message).to.equal('Shop does not exits');
           expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
         })
         .expect(404, done);  
@@ -88,14 +87,9 @@ describe('GET /api/v1/admin/shops/', () => {
           expect(shop.name).to.equal(createdShop.name);
           expect(shop.id).to.equal(createdShop.id);
           expect(shop.ownerId).to.equal(createdShop.ownerId);
-          expect(shop.description).to.equal(createdShop.description);
-          expect(shop.avatar).to.equal(createdShop.avatar);
-          expect(shop.cover).to.equal(createdShop.cover);
-          expect(shop.shipPlaces.filter(function(e) {
-            return e.name == 'dom A';
-          }).length).to.equal(1);   
+          expect(shop.shipPlaces.length).to.equal(1);   
         })
-        .expect(200, done);  
+        .expect(200, done); 
     });
   });
   
@@ -357,56 +351,6 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
   });
 });
 
-describe('GET /api/v1/admin/shops/:id/shipPlaces', () => {
-  let  adminToken, shop;
-  
-  before(done => {
-    helper.factory.createUserWithRole({}, 'admin').then(u => {
-      adminToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createUser();
-    }).then(u => {
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
-    }).then(s => {
-      shop = s;
-      return helper.factory.addShipPlaceToShop(s, 'dom B');
-    }).then(s => {
-      done();
-    });
-  });
-  
-  describe('with exits shop', () => {
-    it('should return 200 OK and return new user profile', done => {
-      request(app)
-        .get(`/api/v1/admin/shops/${shop.id}/shipPlaces`)
-        .set('X-Access-Token', adminToken)
-        .expect(res => {
-          expect(res.body.shipPlaces.length).to.equal(2);
-          expect(res.body.shipPlaces.filter(function(e) {
-            return e.name == 'dom B';
-          }).length).to.equal(1);
-          expect(res.body.shipPlaces.filter(function(e) {
-            return e.name == 'dom A';
-          }).length).to.equal(1);
-        })
-        .expect(200, done);  
-    });
-  });
-  
-  describe('with non-exits shop', () => {
-    it('should return 404 error', done => {
-      request(app)
-        .get('/api/v1/admin/shops/0/shipPlaces')
-        .set('X-Access-Token', adminToken)
-        .expect(res => {
-          expect(res.body.status).to.equal(404);
-          expect(res.body.error).to.equal('Shop does not exits');
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
-        })
-        .expect(404, done);  
-    });
-  });
-});
-
 describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
   let adminToken, normalUserAccessToken, seller, shop, shipPlace;
   
@@ -434,6 +378,14 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
   describe('with admin access token', () => {
     describe('valid input attribute', () => {
       it('should return 200 OK and return new shop infomation', done => {
+        let receivedShipPlaceId;
+        let checkShipPlace = () => {
+          ShipPlace.findById(receivedShipPlaceId).then(sp => {
+            expect(sp.name).to.equal('dom A');
+            done();
+          });
+        };
+        
         request(app)
           .post(`/api/v1/admin/shops/${shop.id}/shipPlaces`)
           .set('X-Access-Token', adminToken)
@@ -448,12 +400,10 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
             expect(res.body.avatar).to.equal(shop.avatar);
             expect(res.body.cover).to.equal(shop.cover);
             expect(res.body.ownerId).to.equal(seller.id);
-            expect(res.body.shipPlaces.filter(function(e) {
-              return e.name == 'dom A';
-            }).length).to.equal(1);   
             expect(res.body.shipPlaces.length).to.equal(1); 
+            receivedShipPlaceId = res.body.shipPlaces[0];
           })
-          .expect(200, done);  
+          .expect(200, checkShipPlace);  
       });
     }); 
     

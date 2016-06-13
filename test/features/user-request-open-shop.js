@@ -170,7 +170,7 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
             })
             .expect(res => {
               expect(res.body.status).to.equal(400);
-              expect(res.body.error).to.equal('A pending request is existed');
+              expect(res.body.message).to.equal('A pending request is existed');
               expect(res.body.message_code).to.equal('error.open_shop_request.a_pending_request_is_existed');
             })
             .expect(400, done);  

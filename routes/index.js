@@ -44,7 +44,6 @@ router.post('/api/v1/admin/changePassword', mustBe.authorized('admin'), adminUse
 router.get('/api/v1/admin/shops', mustBe.authorized('admin'), adminShop.getShops);
 router.get('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.getShop);
 router.put('/api/v1/admin/shops/:id', mustBe.authorized('admin'), adminShop.putShop);
-router.get('/api/v1/admin/shops/:id/shipPlaces', mustBe.authorized('admin'), adminShop.getShopShipPlaces);
 router.post('/api/v1/admin/shops/:id/shipPlaces', mustBe.authorized('admin'), adminShop.postChangeShopShipPlaces);
 router.post('/api/v1/admin/shops/:id/uploadAvatar', mustBe.authorized('admin'), adminShop.postShopUploadAvatar);
 router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), adminShop.postShopUploadCover);
@@ -57,7 +56,6 @@ router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), a
 router.get('/api/v1/seller/shops', mustBe.authorized('seller'), sellerShop.getShops);
 router.get('/api/v1/seller/shops/:id', mustBe.authorized('seller'), sellerShop.getShop);
 router.put('/api/v1/seller/shops/:id', mustBe.authorized('seller'), sellerShop.putShop);
-router.get('/api/v1/seller/shops/:id/shipPlaces', mustBe.authorized('seller'), sellerShop.getShopShipPlaces);
 router.post('/api/v1/seller/shops/:id/shipPlaces', mustBe.authorized('seller'), sellerShop.postChangeShopShipPlaces);
 router.post('/api/v1/seller/shops/:id/uploadAvatar', mustBe.authorized('seller'), sellerShop.postShopUploadAvatar);
 router.post('/api/v1/seller/shops/:id/uploadCover', mustBe.authorized('seller'), sellerShop.postShopUploadCover);

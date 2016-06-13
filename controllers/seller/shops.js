@@ -18,12 +18,7 @@ exports.getShops = (req, res) => {
   }).then(shops => {
     let result = _.map(shops, s => {
       let shop = s.toJSON();
-      let shipPlaces = _.map(shop.ShipPlaces, function(s) {
-        return {
-          id: s.id,
-          name: s.name
-        };
-      });
+      let shipPlaces = _.map(shop.ShipPlaces, s => s.id);
       delete shop.ShipPlaces;
       shop['shipPlaces'] = shipPlaces;
       return shop;
@@ -211,47 +206,22 @@ exports.postChangeShopShipPlaces = (req, res) => {
   }
 };
 
-exports.getShopShipPlaces = (req, res) => {
-  var shopId = req.params.id;
-  let seller = req.user;
-
-  seller.getShops({
-    where: {
-      id: shopId
-    }
-  }).then(shops => {
-    if (shops.length != 1){
-      let error = 'Shop does not exits';
-      errorHandlers.responseError(404, error, 'model', res);
-    } else {
-      let shop = shops[0];
-      shop.getShipPlaces().then(shipPlaces => {
-        let shipPlace = _.map(shipPlaces, function(sp) {
-          return {
-            id: sp.id,
-            name: sp.name
-          };
-        });
-        res.json({
-          shipPlaces: shipPlace
-        });
-      });
-    }
-  });
-};
-
 var responseShopById = (owner, id, res) => {
-  owner.getShops({
+  Shop.findOne({
     where: {
-      id: id
-    }
-  }).then((shops) => {
-    if (shops.length != 1){
+      id: id,
+      ownerId: owner.id
+    },
+    include: ShipPlace
+  }).then((shop) => {
+    if (!shop) {
       let error = 'Shop does not exits';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
-      let shop = shops[0];
-      responseShop(shop, res);
+      let result = shop.toJSON();
+      let shipPlace = _.map(shop.ShipPlaces, sp => sp.id);
+      result['shipPlaces'] = shipPlace;
+      res.json(result);      
     }
   });
 };
@@ -259,12 +229,7 @@ var responseShopById = (owner, id, res) => {
 var responseShop = (shop, res) => {
   let result = shop.toJSON();
   shop.getShipPlaces().then(shipPlaces => {
-    let shipPlace = _.map(shipPlaces, function(sp) {
-      return {
-        id: sp.id,
-        name: sp.name
-      };
-    });
+    let shipPlace = _.map(shipPlaces, sp => sp.id);
     result['shipPlaces'] = shipPlace;
     res.json(result);
   });
