@@ -5,7 +5,7 @@ const request = require('supertest');
 const app = require('../../app.js');
 const Category = require('../../models').Category;
 
-describe('GET /api/v1/seller/shops/:shopId/items', () => {
+describe.only('GET /api/v1/seller/shops/:shopId/items', () => {
   let  seller, shop1, shop2, sellerToken, category, item;
   
   before(done => {
