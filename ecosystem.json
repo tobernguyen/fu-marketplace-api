@@ -1,0 +1,25 @@
+{
+  apps : [
+    {
+      name      : "FUM - API",
+      script    : "app.js",
+      env_production : {
+        NODE_ENV: "production"
+      },
+      env_staging: {
+        NODE_ENV: "production"
+      }
+    }
+  ],
+
+  deploy : {
+    staging : {
+      user : "deploy",
+      host : "ec2-52-221-254-67.ap-southeast-1.compute.amazonaws.com",
+      ref  : "origin/staging",
+      repo : "git@gitlab.com:fu-marketplace/fu-marketplace-api.git",
+      path : "/home/deploy/fum-api",
+      "post-deploy" : "npm install && pm2 startOrGracefulReload ecosystem.json --env staging"
+    }
+  }
+}
