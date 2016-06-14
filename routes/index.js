@@ -5,7 +5,9 @@ const users = require('../controllers/users');
 const adminUser = require('../controllers/admin/users');
 const adminShop = require('../controllers/admin/shops');
 const sellerShop = require('../controllers/seller/shops');
+const sellerItem = require('../controllers/seller/items');
 const shipPlace = require('../controllers/shipPlaces');
+const category = require('../controllers/categories');
 const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
 
 const _mustBe = require('mustbe');
@@ -32,6 +34,7 @@ router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 router.get('/api/v1/users/me/shopOpeningRequests', users.getShopOpeningRequests);
 router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTime);
 router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
+router.get('/api/v1/categories', category.getCategories);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users
@@ -64,5 +67,6 @@ router.put('/api/v1/seller/shops/:id', mustBe.authorized('seller'), sellerShop.p
 router.post('/api/v1/seller/shops/:id/shipPlaces', mustBe.authorized('seller'), sellerShop.postChangeShopShipPlaces);
 router.post('/api/v1/seller/shops/:id/uploadAvatar', mustBe.authorized('seller'), sellerShop.postShopUploadAvatar);
 router.post('/api/v1/seller/shops/:id/uploadCover', mustBe.authorized('seller'), sellerShop.postShopUploadCover);
+router.get('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.getItems);
 
 module.exports = router;

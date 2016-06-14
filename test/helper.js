@@ -199,6 +199,24 @@ var createShopOpeningRequest = (attrs) => {
   });
 };
 
+var createItem = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  assert(attrs.shopId, 'must provide shop id');
+  assert(attrs.categoryId, 'must provide categoryId');
+  
+  return createModel('Item', {
+    name: attrs.name || faker.name.findName(),
+    description: attrs.description || faker.lorem.sentence(),
+    image: attrs.image || faker.image.imageUrl(),
+    imageFile: attrs.imageFile,
+    shopId: attrs.shopId,
+    categoryId: attrs.categoryId,
+    price: faker.random.number(),
+    sort: faker.random.number()
+  });
+};
+
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
 exports.dbUtils = dbUtils;
 exports.factory = {
@@ -209,7 +227,8 @@ exports.factory = {
   addShipPlaceToShop: addShipPlaceToShop,
   createShop: createShop,
   createShipPlace: createShipPlace,
-  createShopOpeningRequest: createShopOpeningRequest
+  createShopOpeningRequest: createShopOpeningRequest,
+  createItem: createItem
 };
 
 // Setup some global helper

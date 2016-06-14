@@ -87,7 +87,10 @@ module.exports = function(sequelize, DataTypes) {
       associate: function(models) {
         Shop.belongsToMany(models.ShipPlace, {through: 'ShopShipPlaces'});
         Shop.belongsTo(models.User, {
-          foreignKey: 'ownerId',
+          foreignKey: 'ownerId'
+        });
+        Shop.hasMany(models.Item, {
+          foreignKey: 'shopId',
           constraints: false
         });
       }
