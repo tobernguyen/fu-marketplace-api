@@ -63,7 +63,9 @@ app.use(function(req, res, next) {
 /**
  * Error Handler.
  */
-app.use(errorHandler());
+if (process.env.NODE_ENV === 'development' || process.env.SHOW_ERROR_TO_CLIENT === 'true') {
+  app.use(errorHandler());
+}
 
 /**
  * Start Express server.

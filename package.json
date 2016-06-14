@@ -6,8 +6,8 @@
     "url": ""
   },
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "NODE_ENV=development node app.js",
+    "dev": "NODE_ENV=development nodemon app.js",
     "test": "gulp mocha",
     "test:watch": "gulp",
     "test:file": "NODE_ENV=test mocha",
