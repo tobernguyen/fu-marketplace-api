@@ -19,7 +19,7 @@
       ref  : "origin/staging",
       repo : "git@gitlab.com:fu-marketplace/fu-marketplace-api.git",
       path : "/home/deploy/fum-api",
-      "post-deploy" : "ln -sf ../shared/.env.production .env.production && npm install && npm run db:migrate && pm2 startOrGracefulReload ecosystem.json --env staging"
+      "post-deploy" : "ln -sf ../shared/.env.production .env.production && npm install && NODE_ENV=production npm run db:migrate && pm2 startOrGracefulReload ecosystem.json --env staging"
     }
   }
 }
