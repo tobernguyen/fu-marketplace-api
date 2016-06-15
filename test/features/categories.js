@@ -16,7 +16,6 @@ describe('GET /api/v1/categories', () => {
       return Category.findAll();
     }).then(cs => {
       categories = cs;
-      //console.log(categories);
       done();
     });
   });

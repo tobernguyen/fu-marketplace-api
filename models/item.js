@@ -65,7 +65,7 @@ module.exports = function(sequelize, DataTypes) {
     hooks: {
       afterDestroy: function(item, options) {
         if (item.imageFile && _.isArray(item.imageFile.versions)) {
-          return imageUploader.deleteImages(item.avatarFile.versions);
+          return imageUploader.deleteImages(item.imageFile.versions);
         }
       }
     },

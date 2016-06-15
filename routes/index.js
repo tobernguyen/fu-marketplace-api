@@ -68,5 +68,6 @@ router.post('/api/v1/seller/shops/:id/shipPlaces', mustBe.authorized('seller'), 
 router.post('/api/v1/seller/shops/:id/uploadAvatar', mustBe.authorized('seller'), sellerShop.postShopUploadAvatar);
 router.post('/api/v1/seller/shops/:id/uploadCover', mustBe.authorized('seller'), sellerShop.postShopUploadCover);
 router.get('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.getItems);
-// router.post('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.postItems);
+router.post('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.postItems);
+router.put('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.putItem);
 module.exports = router;
