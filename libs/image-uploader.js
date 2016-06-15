@@ -74,6 +74,7 @@ var deleteImageByKey = key => {
 };
 
 module.exports = {
+  storeImageFromStream: storeImageFromStream,
   deleteImages: deleteImages,
   useMiddlewareWithConfig: (uploadConfig) => (req, res, next) => {
     let form = new multiparty.Form();

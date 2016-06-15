@@ -19,13 +19,34 @@ exports.getItems = (req, res) => {
     include: Item
   }).then((shop) => {
     if (!shop) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
-    } else {
-      let items = _.map(shop.Items, item => item.toJSON());
-      res.json({
-        items: items
-      });      
+      return;
     }
+
+    let items = _.map(shop.Items, item => item.toJSON());
+    res.json({
+      items: items
+    });  
+  });
+};
+
+exports.postItems = (req, res) => {
+  let shopId = req.params.shopId;
+  let seller = req.user;
+
+  Shop.findOne({
+    where: {
+      id: shopId,
+      ownerId: seller.id
+    }
+  }).then(shop => {
+    if (!shop) {
+      let error ='Shop does not exist';
+      errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+
   });
 };

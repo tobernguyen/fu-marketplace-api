@@ -8,6 +8,10 @@ var IGNORE_ATTRIBUTES = [
   'createdAt'
 ];
 
+var ITEM_STATUS = {
+  FOR_SELL: 1,
+  NOT_FOR_SELL: 0
+};
 
 module.exports = function(sequelize, DataTypes) {
   let Item = sequelize.define('Item', {
@@ -34,6 +38,11 @@ module.exports = function(sequelize, DataTypes) {
       validate: {
         min: 1
       }
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: ITEM_STATUS.FOR_SELL
     },
     image: {
       type: DataTypes.STRING
@@ -85,5 +94,7 @@ module.exports = function(sequelize, DataTypes) {
   
   Item.MAXIMUM_IMAGE_SIZE = 3 * 1024 * 1024; // 3MB
   
+  Item.STATUS = ITEM_STATUS;
+
   return Item;
 };

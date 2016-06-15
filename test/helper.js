@@ -213,7 +213,8 @@ var createItem = (attrs) => {
     shopId: attrs.shopId,
     categoryId: attrs.categoryId,
     price: faker.random.number(),
-    sort: faker.random.number()
+    sort: faker.random.number(),
+    status: attrs.status || models.Item.NOT_FOR_SELL
   });
 };
 
