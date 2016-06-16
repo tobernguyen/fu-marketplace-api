@@ -20,15 +20,15 @@ describe('GET /api/v1/categories', () => {
     });
   });
   
-  describe('with exits shop', () => {
+  describe('with valid user token', () => {
     it('should return 200 OK and return an array contain all categories', done => {
       request(app)
         .get('/api/v1/categories')
         .set('X-Access-Token', userToken)
         .expect(res => {
           let cs = res.body.categories;
-          _.forEach(categories, function(category) {
-            expect(cs.filter(function(e) {
+          _.forEach(categories, category => {
+            expect(cs.filter(e => {
               return e.name == category.name && e.id == category.id;
             }).length).to.equal(1);
           });

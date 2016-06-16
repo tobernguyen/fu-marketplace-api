@@ -68,31 +68,26 @@ exports.postItems = (req, res) => {
         }
       ]
     })(req, res, d => {
-      let data = req.form;
-      if (!data.image) {
+      let validatedData = req.form;
+      if (!validatedData.image) {
         let error = 'Item must contain image';
         errorHandlers.responseError(404, error, 'model', res);
         return;
       }
-      Item.create({
-        image: data.image[0].Location, // Save the url of first image version to avatar field
-        imageFile: {
-          versions: _.map(data.image, image => {
-            return {
-              Url: image.Location,
-              Key: image.Key
-            };
-          })
-        },
-        name: data.name,
-        description: data.description,
-        sort: data.sort,
-        price: data.price,
-        status: data.status,
-        quantity: data.quantity,
-        categoryId: data.categoryId,
-        shopId: shop.id
-      }).then(item => {
+
+      let newItemData = _.cloneDeep(validatedData);
+      newItemData.image = validatedData.image[0].Location;
+      newItemData.imageFile = {
+        versions: _.map(validatedData.image, image => {
+          return {
+            Url: image.Location,
+            Key: image.Key
+          };
+        })
+      };
+
+      newItemData.shopId = shop.id;
+      Item.create(newItemData).then(item => {
         res.json(item);
       });
     });
@@ -150,15 +145,14 @@ exports.putItem = (req, res) => {
       ]
     })(req, res, d => {
       let data = req.form;
-      let dataUpdate = {};
+      let promises = [];
+      let updateData = _.cloneDeep(data);
       if (data.image !== undefined) {
         if (item.imageFile && _.isArray(item.imageFile.versions)) {
-          imageUploader.deleteImages(item.imageFile.versions).then(() => {
-            
-          });
+          promises[promises.length] = imageUploader.deleteImages(item.imageFile.versions).catch(() => Promise.resolve());
         }
-        dataUpdate.image = data.image[0].Location;
-        dataUpdate.imageFile = {
+        updateData.image = data.image[0].Location;
+        updateData.imageFile = {
           versions: _.map(data.image, image => {
             return {
               Url: image.Location,
@@ -166,15 +160,16 @@ exports.putItem = (req, res) => {
             };
           })
         };
-        delete data.image;
       } 
 
-      _.forIn(data, function(value, key) {
-        dataUpdate[key] = value;
-      });
+      let returnItem;
 
-      item.update(dataUpdate).then(item => {
-        res.json(item);
+      promises[promises.length] = item.update(updateData).then(item => {
+        returnItem = item;
+        return Promise.resolve();
+      });
+      Promise.all(promises).then(item => {
+        res.json(returnItem);
       }).catch(err => {
         errorHandlers.handleModelError(err, res);
       });

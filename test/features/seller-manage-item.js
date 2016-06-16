@@ -6,6 +6,7 @@ const app = require('../../app.js');
 var _ = require('lodash');
 const Category = require('../../models').Category;
 const Item = require('../../models').Item;
+const fs = require('fs-extra');
 
 describe('GET /api/v1/seller/shops/:shopId/items', () => {
   let  seller, shop1, shop2, sellerToken, category, item;
@@ -267,6 +268,40 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
     });
   });
 
+  describe('with valid image file', () => {
+    let oldImageFile;
+
+    before(done => {
+      request(app)
+        .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
+        .set('X-Access-Token', sellerToken)
+        .attach('imageFile', 'test/fixtures/user-avatar.jpg')
+        .end(() => {
+          item.reload().then(() => {
+            oldImageFile = item.imageFile.versions[0].Key;
+            done();
+          });
+        });
+    });
+
+    it('should return 200 with new item information', done => {
+      let checkFileExist = () => {
+        fs.accessSync(oldImageFile);        
+      };
+ 
+      expect(checkFileExist).to.not.throw(Error);
+
+      request(app)
+        .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
+        .set('X-Access-Token', sellerToken)
+        .attach('imageFile', 'test/fixtures/user-avatar.jpg')
+        .expect(res => {
+          expect(checkFileExist).to.throw(Error);
+        })
+        .expect(200, done);
+    });
+  });
+
   describe('with some invalid fields in multipart form data', () => {
     it('should return 400 with message about invalid fields', done => {
       request(app)
@@ -360,7 +395,7 @@ describe('DELETE /api/v1/seller/shops/:shopId/items/:itemId', () => {
     });
   });
 
-  describe.only('with valid item attribute and without image via multipart form', () => {
+  describe('with valid item attribute and without image via multipart form', () => {
     it('should return 200 with new item information', done => {
       request(app)
         .delete(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
