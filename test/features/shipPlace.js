@@ -21,13 +21,12 @@ describe('GET /api/v1/shipPlaces', () => {
   });
   
   describe('with exits shop', () => {
-    it('should return 200 OK and return new user profile', done => {
+    it('should return 200 OK and return an array contain  all ship places', done => {
       request(app)
         .get('/api/v1/shipPlaces')
         .set('X-Access-Token', userToken)
         .expect(res => {
           let sp = res.body.shipPlaces;
-
           _.forEach(sp, function(place) {
             expect(res.body.shipPlaces.filter(function(e) {
               return e.name == place.name && e.id == place.id;
