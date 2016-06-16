@@ -161,6 +161,36 @@ describe('GET /api/v1/users/me', () => {
         .expect(200, done);
     });
   });
+
+  describe.only('with seller token', () => {
+    let seller, accessToken, shop1, shop2;
+    
+    before(done => {
+      helper.factory.createUserWithRole({}, 'seller').then(u => {
+        seller = u;
+        accessToken = helper.createAccessTokenForUserId(seller.id);
+        return helper.factory.createShop({}, seller.id);
+      }).then(s => {
+        shop1 = s;
+        return helper.factory.createShop({}, seller.id);
+      }).then(s => {
+        shop2 = s;
+        done();
+      });
+    });
+
+    it('should also return an array of shop this user owned', done => {
+      request(app)
+        .get('/api/v1/users/me')
+        .set('X-Access-Token', accessToken)
+        .expect(res => {
+          expect(res.body.shops).to.have.lengthOf(2);
+          expect(res.body.shops).to.include({id: shop1.id, name: shop1.name});
+          expect(res.body.shops).to.include({id: shop2.id, name: shop2.name});
+        })
+        .expect(200, done);
+    });
+  });
 });
 
 describe('POST /api/v1/users/signOutAll', () => {

@@ -8,14 +8,28 @@ var errorHandlers = require('./helpers/errorHandlers');
 var imageUploader = require('../libs/image-uploader');
 var User = require('../models').User;
 var ShopOpeningRequest = require('../models').ShopOpeningRequest;
+var Shop = require('../models').Shop;
 var crypto = require('crypto');
 
 exports.getCurrentUser = (req, res) => {
   let result = req.user.toJSON();
   req.user.getRoles().then(roles => {
-    let roleNames = _.map(roles, r => r.name);
-    if (roleNames.length > 0) result['roles'] = roleNames;
-    res.json(result);
+    result['roles'] = _.map(roles, r => r.name);
+
+    // If user is a seller, include owned shops in the response
+    if (_.includes(result['roles'], 'seller')) {
+      Shop.findAll({
+        attributes: ['id', 'name'],
+        where: {
+          ownerId: req.user.id
+        }
+      }).then(shops => {
+        result['shops'] = _.map(shops, s => {return {id: s.id, name: s.name};});
+        res.json(result);
+      });
+    } else {
+      res.json(result);
+    }
   });
 };
 
