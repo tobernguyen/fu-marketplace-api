@@ -70,4 +70,5 @@ router.post('/api/v1/seller/shops/:id/uploadCover', mustBe.authorized('seller'),
 router.get('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.getItems);
 router.post('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.postItems);
 router.put('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.putItem);
+router.delete('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.deleteItem);
 module.exports = router;

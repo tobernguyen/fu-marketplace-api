@@ -10,7 +10,7 @@ var _ = require('lodash');
 
 describe('GET /api/v1/admin/shops/:id', () => {
   let  adminToken, shop, owner;
-  
+
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -23,7 +23,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
       done();
     });
   });
-  
+
   describe('with exits shop', () => {
     it('should return 200 OK and return new shop info', done => {
       request(app)
@@ -42,10 +42,10 @@ describe('GET /api/v1/admin/shops/:id', () => {
           expect(seller.fullName).to.equal(owner.fullName);
           expect(seller.email).to.equal(owner.email);
         })
-        .expect(200, done);  
+        .expect(200, done);
     });
   });
-  
+
   describe('with non-exits shop', () => {
     it('should return 404 error', done => {
       request(app)
@@ -56,14 +56,14 @@ describe('GET /api/v1/admin/shops/:id', () => {
           expect(res.body.message).to.equal('Shop does not exits');
           expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
         })
-        .expect(404, done);  
+        .expect(404, done);
     });
   });
 });
 
 describe('GET /api/v1/admin/shops/', () => {
   let adminToken, normalUserAccessToken, createdShop, owner;
-  
+
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -77,7 +77,7 @@ describe('GET /api/v1/admin/shops/', () => {
       done();
     });
   });
-  
+
   describe('with admin access token', () => {
     it('should return 200 OK and return an array which contain created shop info', done => {
       request(app)
@@ -99,10 +99,10 @@ describe('GET /api/v1/admin/shops/', () => {
           expect(seller.fullName).to.equal(owner.fullName);
           expect(seller.email).to.equal(owner.email);
         })
-        .expect(200, done); 
+        .expect(200, done);
     });
   });
-  
+
   describe('with normal user access token', () => {
     it('should return 403 Forbidden', done => {
       request(app)
@@ -112,14 +112,14 @@ describe('GET /api/v1/admin/shops/', () => {
           expect(res.body.status).to.equal(403);
           expect(res.body.message_code).to.equal('error.authentication.not_authorized');
         })
-        .expect(403, done);  
+        .expect(403, done);
     });
   });
 });
 
 describe('PUT /api/v1/admin/shops/:id', () => {
   let adminToken, normalUserAccessToken, seller, shop;
-  
+
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -133,7 +133,7 @@ describe('PUT /api/v1/admin/shops/:id', () => {
       done();
     });
   });
-  
+
   describe('with admin access token', () => {
     describe('valid input attribute', () => {
       it('should return 200 OK and return new shop infomation', done => {
@@ -162,12 +162,12 @@ describe('PUT /api/v1/admin/shops/:id', () => {
             expect(s.fullName).to.equal(seller.fullName);
             expect(s.email).to.equal(seller.email);
           })
-          .expect(200, done);  
+          .expect(200, done);
       });
-    }); 
-    
+    });
+
     describe('invalid ownerID attribute', () => {
-      it('should return 500 invalid foreign key', done => {
+      it('should return 422 invalid foreign key', done => {
         request(app)
           .put(`/api/v1/admin/shops/${shop.id}`)
           .set('X-Access-Token', adminToken)
@@ -176,13 +176,13 @@ describe('PUT /api/v1/admin/shops/:id', () => {
           })
           .set('Content-Type', 'application/json')
           .expect(res => {
-            expect(res.body.status).to.equal(500);  
+            expect(res.body.status).to.equal(422);
             expect(res.body.message_code).to.equal('error.model.insert_or_update_on_table_shops_violates_foreign_key_constraint_shops_owner_id_fkey');
           })
-          .expect(500, done);  
+          .expect(422, done);
       });
-    }); 
-    
+    });
+
     describe('invalid input attribute', () => {
       it('should return 422 and return errors in correct format', done => {
         request(app)
@@ -204,7 +204,7 @@ describe('PUT /api/v1/admin/shops/:id', () => {
       });
     });
   });
-  
+
   describe('with normal user access token', () => {
     it('should return 403 Forbidden', done => {
       request(app)
@@ -218,14 +218,14 @@ describe('PUT /api/v1/admin/shops/:id', () => {
           expect(res.body.status).to.equal(403);
           expect(res.body.message_code).to.equal('error.authentication.not_authorized');
         })
-        .expect(403, done);  
+        .expect(403, done);
     });
   });
 });
 
 describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
   let  adminToken, shop;
-  
+
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -237,7 +237,7 @@ describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
       done();
     });
   });
-  
+
   describe('with valid access token and ', () => {
     describe('valid image file', () => {
       it('should return 200 and return user with valid avatar file', done => {
@@ -249,10 +249,10 @@ describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
             expect(res.body.id).to.equal(shop.id);
             expect(res.body.avatar).to.have.string(`shops/${shop.id}/avatar.jpg`);
           })
-          .expect(200, done);  
+          .expect(200, done);
       });
     });
-    
+
     describe('invalid image file', () => {
       it('should return 422 and inform client file is invalid', done => {
         request(app)
@@ -266,19 +266,19 @@ describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
           .expect(422, done);
       });
     });
-    
+
     describe('image file is too big', () => {
       let originalMaximumAvatarSize;
-      
+
       before(() => {
         originalMaximumAvatarSize = Shop.MAXIMUM_AVATAR_SIZE;
         Shop.MAXIMUM_AVATAR_SIZE = 1024; // Allow 1KB file only
       });
-      
+
       after(() => {
         Shop.MAXIMUM_AVATAR_SIZE = originalMaximumAvatarSize;
       });
-      
+
       it('should return 406 and inform client file is too big', done => {
         request(app)
           .post(`/api/v1/admin/shops/${shop.id}/uploadAvatar`)
@@ -290,13 +290,13 @@ describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
           })
           .expect(406, done);
       });
-    }); 
+    });
   });
 });
 
 describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
   let  adminToken, shop;
-  
+
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -308,7 +308,7 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
       done();
     });
   });
-  
+
   describe('with valid access token and ', () => {
     describe('valid image file', () => {
       it('should return 200 and return user with valid cover file', done => {
@@ -320,10 +320,10 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
             expect(res.body.id).to.equal(shop.id);
             expect(res.body.cover).to.have.string(`shops/${shop.id}/cover.jpg`);
           })
-          .expect(200, done);  
+          .expect(200, done);
       });
     });
-    
+
     describe('invalid image file', () => {
       it('should return 422 and inform client file is invalid', done => {
         request(app)
@@ -337,19 +337,19 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
           .expect(422, done);
       });
     });
-    
+
     describe('image file is too big', () => {
       let originalMaximumCoverSize;
-      
+
       before(() => {
         originalMaximumCoverSize = Shop.MAXIMUM_COVER_SIZE;
         Shop.MAXIMUM_COVER_SIZE = 1024; // Allow 1KB file only
       });
-      
+
       after(() => {
         Shop.MAXIMUM_COVER_SIZE = originalMaximumCoverSize;
       });
-      
+
       it('should return 406 and inform client file is too big', done => {
         request(app)
           .post(`/api/v1/admin/shops/${shop.id}/uploadCover`)
@@ -361,13 +361,13 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
           })
           .expect(406, done);
       });
-    }); 
+    });
   });
 });
 
 describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
   let adminToken, normalUserAccessToken, seller, shop, shipPlace;
-  
+
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -388,7 +388,7 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
       done();
     });
   });
-  
+
   describe('with admin access token', () => {
     describe('valid input attribute', () => {
       it('should return 200 OK and return new shop infomation', done => {
@@ -399,7 +399,7 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
             done();
           });
         };
-        
+
         request(app)
           .post(`/api/v1/admin/shops/${shop.id}/shipPlaces`)
           .set('X-Access-Token', adminToken)
@@ -414,13 +414,13 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
             expect(res.body.avatar).to.equal(shop.avatar);
             expect(res.body.cover).to.equal(shop.cover);
             expect(res.body.ownerId).to.equal(seller.id);
-            expect(res.body.shipPlaces.length).to.equal(1); 
+            expect(res.body.shipPlaces.length).to.equal(1);
             receivedShipPlaceId = res.body.shipPlaces[0];
           })
-          .expect(200, checkShipPlace);  
+          .expect(200, checkShipPlace);
       });
-    }); 
-    
+    });
+
     describe('invalid shipPlaces attribute', () => {
       it('should return 422 error', done => {
         request(app)
@@ -431,13 +431,13 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
           })
           .set('Content-Type', 'application/json')
           .expect(res => {
-            expect(res.body.status).to.equal(422);  
+            expect(res.body.status).to.equal(422);
             expect(res.body.message_code).to.equal('error.param.must_provide_ship_places');
           })
-          .expect(422, done);  
+          .expect(422, done);
       });
-    }); 
-    
+    });
+
     describe('invalid input attribute', () => {
       it('should return 422 error', done => {
         request(app)
@@ -448,14 +448,14 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
           })
           .set('Content-Type', 'application/json')
           .expect(res => {
-            expect(res.body.status).to.equal(422);  
+            expect(res.body.status).to.equal(422);
             expect(res.body.message_code).to.equal('error.param.must_provide_ship_places');
           })
-          .expect(422, done);  
+          .expect(422, done);
       });
     });
   });
-  
+
   describe('with normal user access token', () => {
     it('should return 403 Forbidden', done => {
       request(app)
@@ -469,7 +469,7 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
           expect(res.body.status).to.equal(403);
           expect(res.body.message_code).to.equal('error.authentication.not_authorized');
         })
-        .expect(403, done);  
+        .expect(403, done);
     });
   });
 });

@@ -95,8 +95,6 @@ module.exports = (uploadConfig) => (req, res, next) => {
       rejectUploadPromise();
     });
   });
-  // cho nao sai la res luon noi chung phan valid data thi ok roi, con cai valid anh ay
-  // thi ko dc
   
   form.on('field', (name, value) => {
     verifyFields(name, value, errors, req);
@@ -117,8 +115,12 @@ module.exports = (uploadConfig) => (req, res, next) => {
   
   form.on('close', () => {
     if (!partCount) {
-      // if not contain image file just next()
-      next();
+      // if not contain image file and there is no error just next()
+      if (_.isEmpty(errors)) {
+        next();
+      } else {
+        responseError(res,400, errors);
+      }
     } else {
       promise.then((data) => {
         if (_.isEmpty(errors)) {

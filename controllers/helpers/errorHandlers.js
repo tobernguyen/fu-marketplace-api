@@ -2,24 +2,32 @@
 
 var _ = require('lodash');
 var ValidationError = require('sequelize').ValidationError;
+var ForeignKeyConstraintError = require('sequelize').ForeignKeyConstraintError;
 var logger = require('../../libs/logger');
 
 module.exports = {
   handleModelError: function(err, res) {
     if (err instanceof ValidationError){
       let errors = {};
-      
+
       err.errors.forEach(err => {
         errors[err.path] = {
           message: err.message,
           message_code: `error.model.${_.snakeCase(err.message)}`
         };
       });
-      
+
       res.status(422);
       res.json({
         status: 422,
         errors: errors
+      });
+    } else if (err instanceof ForeignKeyConstraintError) {
+      res.status(422);
+      res.json({
+        status: 422,
+        message: err.message,
+        message_code: `error.model.${_.snakeCase(err.message)}`
       });
     } else {
       logger.error(err);

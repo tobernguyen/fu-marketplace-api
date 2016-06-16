@@ -175,7 +175,46 @@ exports.putItem = (req, res) => {
 
       item.update(dataUpdate).then(item => {
         res.json(item);
+      }).catch(err => {
+        errorHandlers.handleModelError(err, res);
       });
+    });
+  });
+};
+
+exports.deleteItem = (req, res) => {
+  let shopId = req.params.shopId;
+  let itemId = req.params.itemId;
+  let seller = req.user;
+
+  Shop.findOne({
+    where: {
+      id: shopId,
+      ownerId: seller.id
+    },
+    include: {
+      model: Item,
+      where: {
+        id: itemId
+      }
+    }
+  }).then(shop => {
+    if (!shop) {
+      let error ='Shop does not exist';
+      errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+    if (shop.Items.length == 0) {
+      let error ='Item does not exist';
+      errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+    let item = shop.Items[0];
+    
+    item.destroy().then(() => {
+      res.sendStatus(200);
     });
   });
 };
