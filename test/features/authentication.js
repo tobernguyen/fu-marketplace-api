@@ -162,7 +162,7 @@ describe('GET /api/v1/users/me', () => {
     });
   });
 
-  describe.only('with seller token', () => {
+  describe('with seller token', () => {
     let seller, accessToken, shop1, shop2;
     
     before(done => {
