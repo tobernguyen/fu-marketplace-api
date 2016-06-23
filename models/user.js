@@ -128,6 +128,10 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'ownerId',
           constraints: false
         });
+        User.hasMany(models.Order, {
+          foreignKey: 'userId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {

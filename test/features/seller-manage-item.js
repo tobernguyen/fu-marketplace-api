@@ -3,10 +3,11 @@
 const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
-var _ = require('lodash');
 const Category = require('../../models').Category;
 const Item = require('../../models').Item;
 const fs = require('fs-extra');
+
+var _ = require('lodash');
 
 describe('GET /api/v1/seller/shops/:shopId/items', () => {
   let  seller, shop1, shop2, sellerToken, category, item;

@@ -155,10 +155,18 @@ var createShipPlace = (shipPlace) => {
 
 var createShopWithShipPlace = (attrs, id, shipPlace) => {
   let createdShop;
-  
-  return createShop(attrs, id).then(s => {
+
+  let createSellerPromise;
+
+  if (!id) {
+    createSellerPromise = createUserWithRole({}, 'seller');
+  } else {
+    createSellerPromise = Promise.resolve();
+  }
+  return createSellerPromise.then(u => {
+    return createShop(attrs, id || u.id);
+  }).then(s => {
     createdShop = s;
-    
     return addShipPlaceToShop(s, shipPlace);
   }).then(() => {
     return Promise.resolve(createdShop);
@@ -202,20 +210,111 @@ var createShopOpeningRequest = (attrs) => {
 var createItem = (attrs) => {
   if (attrs == undefined) attrs = {};
 
-  assert(attrs.shopId, 'must provide shop id');
-  assert(attrs.categoryId, 'must provide categoryId');
-  
-  return createModel('Item', {
-    name: attrs.name || faker.name.findName(),
-    description: attrs.description || faker.lorem.sentence(),
-    image: attrs.image || faker.image.imageUrl(),
-    imageFile: attrs.imageFile,
-    shopId: attrs.shopId,
-    categoryId: attrs.categoryId,
-    price: faker.random.number(),
-    sort: faker.random.number(),
-    status: attrs.status || models.Item.NOT_FOR_SELL
+  let createShopPromise, findCategoryPromise;
+  let Category = models.Category;
+  let shopId;
+
+  if (!attrs.shopId) {
+    createShopPromise = createUser().then(u => {
+      return createShop({}, u.id);
+    });
+  } else {
+    createShopPromise = Promise.resolve();
+  }
+
+  if (!attrs.categoryId) {
+    findCategoryPromise = Category.findAll().then(categories => {
+      return Promise.resolve(categories[0]);
+    });
+  } else {
+    findCategoryPromise = Promise.resolve();
+  }
+
+  return createShopPromise.then(shop => {
+    shopId = attrs.shopId || shop.id;
+    return findCategoryPromise;
+  }).then(category => {
+    return createModel('Item', {
+      name: attrs.name || faker.name.findName(),
+      description: attrs.description || faker.lorem.sentence(),
+      image: attrs.image || faker.image.imageUrl(),
+      imageFile: attrs.imageFile,
+      shopId: shopId,
+      categoryId: attrs.categoryId || category.id,
+      price: faker.random.number(),
+      sort: faker.random.number(),
+      status: attrs.status || models.Item.NOT_FOR_SELL
+    });
   });
+};
+
+var createOrder = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  let createItemPromise, createUserPromise;
+  let items, order;
+
+  let Item = models.Item;
+  let Order = models.Order; 
+  let OrderLine = models.OrderLine;
+
+  if (!attrs.items) {
+    createItemPromise = createItem().then(item => {
+      return Promise.resolve([item]);
+    });
+  } else {
+    let itemIds = _.map(attrs.items, item => item.id);
+    createItemPromise = Item.findAll({
+      where: {
+        id: {
+          $in: itemIds
+        }
+      }
+    });
+  }
+
+  if (!attrs.userId) {
+    createUserPromise = createUser();
+  } else {
+    createUserPromise = Promise.resolve();
+  }
+
+  return createItemPromise.then(i => {
+    items = i;
+    return createUserPromise;
+  }).then(u => {
+    return Order.create({
+      userId: attrs.userId || u.id,
+      shopId: items[0].shopId,
+      note: attrs.note || faker.lorem.sentence(),
+      shipAddress: attrs.shipAddress || faker.address.streetAddress(),
+      status: attrs.status
+    });
+  }).then(o => {
+    order = o;
+    let orderLineData = _.map(items, i => {
+      let orderLine = getQuantityAndNoteOfItems(attrs.items, i.id);
+      orderLine.item = _.pick(i, ['name', 'description', 'price']);
+      orderLine.orderId = order.id;
+      return orderLine;
+    });
+    return OrderLine.bulkCreate(orderLineData);
+  }).then(() => {
+    return Promise.resolve(order);
+  });
+};
+
+var getQuantityAndNoteOfItems = (items, id) => {
+  if (!items) {
+    return {
+      quantity: faker.random.number(),
+      note: faker.lorem.sentence()
+    };
+  } else {
+    let reqItem = _.filter(items, ['id', id])[0];
+    delete reqItem.id;
+    return reqItem;
+  }
 };
 
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
@@ -229,7 +328,8 @@ exports.factory = {
   createShop: createShop,
   createShipPlace: createShipPlace,
   createShopOpeningRequest: createShopOpeningRequest,
-  createItem: createItem
+  createItem: createItem,
+  createOrder: createOrder
 };
 
 // Setup some global helper
