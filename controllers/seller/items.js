@@ -94,6 +94,33 @@ exports.postItems = (req, res) => {
   });
 };
 
+exports.getItem = (req, res) => {
+  let shopId = req.params.shopId;
+  let itemId = req.params.itemId;
+  let seller = req.user;
+
+  Item.findOne({
+    where: {
+      id: itemId,
+      shopId: shopId
+    },
+    include: {
+      model: Shop,
+      where: {
+        ownerId: seller.id
+      }
+    }
+  }).then(item => {
+    if (!item) {
+      let error ='Item does not exist';
+      errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+    res.json(item);
+  });
+};
+
 exports.putItem = (req, res) => {
   let shopId = req.params.shopId;
   let itemId = req.params.itemId;
@@ -104,12 +131,14 @@ exports.putItem = (req, res) => {
       id: shopId,
       ownerId: seller.id
     },
-    include: {
-      model: Item,
-      where: {
-        id: itemId
+    include: [
+      {
+        model: Item,
+        where: {
+          id: itemId
+        }
       }
-    }
+    ]
   }).then(shop => {
     if (!shop) {
       let error ='Shop does not exist';

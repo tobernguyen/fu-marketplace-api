@@ -46,7 +46,7 @@ exports.putShop = (req, res) => {
     }
   }).then(shops => {
     if (shops.length != 1){
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       let shop = shops[0];
@@ -76,7 +76,7 @@ exports.postShopUploadAvatar = (req, res) => {
     }
   }).then(shops => {
     if (shops.length != 1){
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       let shop = shops[0];
@@ -125,7 +125,7 @@ exports.postShopUploadCover = (req, res) => {
     }
   }).then(shops => {
     if (shops.length != 1){
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       let shop = shops[0];
@@ -178,7 +178,7 @@ exports.postChangeShopShipPlaces = (req, res) => {
       }
     }).then(shops => {
       if (shops.length != 1){
-        let error = 'Shop does not exits';
+        let error = 'Shop does not exist';
         errorHandlers.responseError(404, error, 'model', res);
       } else {
         let shop = shops[0];
@@ -215,7 +215,7 @@ var responseShopById = (owner, id, res) => {
     include: ShipPlace
   }).then((shop) => {
     if (!shop) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       let result = shop.toJSON();

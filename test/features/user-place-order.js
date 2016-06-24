@@ -145,7 +145,7 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);
     });
@@ -192,7 +192,7 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
       });
 
       describe('with invalid accesToken', () => {
-        it('should return 404 order is not exits', done => {
+        it('should return 404 order is not exist', done => {
           request(app)
             .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
             .set('X-Access-Token', userToken2)
@@ -203,7 +203,7 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
             })
             .expect(res => {
               expect(res.body.status).to.equal(404);
-              expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
+              expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
             })
             .expect(404, done);
         });
@@ -276,7 +276,7 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
+          expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
         })
         .expect(404, done);
     });

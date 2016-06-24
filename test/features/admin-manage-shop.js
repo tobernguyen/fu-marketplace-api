@@ -24,7 +24,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
     });
   });
 
-  describe('with exits shop', () => {
+  describe('with exist shop', () => {
     it('should return 200 OK and return new shop info', done => {
       request(app)
         .get(`/api/v1/admin/shops/${shop.id}`)
@@ -46,15 +46,15 @@ describe('GET /api/v1/admin/shops/:id', () => {
     });
   });
 
-  describe('with non-exits shop', () => {
+  describe('with non-exist shop', () => {
     it('should return 404 error', done => {
       request(app)
         .get('/api/v1/admin/shops/0')
         .set('X-Access-Token', adminToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message).to.equal('Shop does not exits');
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message).to.equal('Shop does not exist');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);
     });

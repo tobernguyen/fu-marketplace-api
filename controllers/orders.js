@@ -27,7 +27,7 @@ exports.postPlaceOrder = (req, res) => {
     ]
   }).then(s => {
     if (!s) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       return Promise.reject({status: 404, message: error, type: 'model'});
     } else {
       return s.placeOrder({
@@ -60,7 +60,7 @@ exports.putUpdateOrder = (req, res) => {
     }
   }).then(o => {
     if (!o) {
-      let error = 'Order does not exits';
+      let error = 'Order does not exist';
       return Promise.reject({status: 404, message: error, type: 'model'});
     }
 

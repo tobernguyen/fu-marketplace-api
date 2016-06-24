@@ -47,8 +47,8 @@ describe('GET /api/v1/seller/shops/:id', () => {
         .set('X-Access-Token', notOwnerToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message).to.equal('Shop does not exits');
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message).to.equal('Shop does not exist');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);  
     });
@@ -191,8 +191,8 @@ describe('PUT /api/v1/seller/shops/:id', () => {
         .set('X-Access-Token', notOwnerToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message).to.equal('Shop does not exits');
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message).to.equal('Shop does not exist');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);  
     });
@@ -547,8 +547,8 @@ describe('POST /api/v1/seller/shops/:id/shipPlaces', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message).to.equal('Shop does not exits');
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message).to.equal('Shop does not exist');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);  
     });

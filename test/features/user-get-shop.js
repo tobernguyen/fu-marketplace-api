@@ -42,7 +42,7 @@ describe('GET /api/v1/shops/:shopId', () => {
         .set('X-Access-Token', accessToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);  
     });
@@ -64,7 +64,7 @@ describe('GET /api/v1/shops/:shopId', () => {
         .set('X-Access-Token', accessToken)
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.shop_does_not_exits');
+          expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
         })
         .expect(404, done);  
     });
