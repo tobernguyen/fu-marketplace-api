@@ -64,7 +64,11 @@ module.exports = function(sequelize, DataTypes) {
             this.update({ status: ORDER_STATUS.ACCEPTED}).then(resolve, reject);
           } else {
             let error = 'Only new order can be accepted';
-            reject(error);
+            reject({
+              status: 403,
+              message: error,
+              type: 'order'
+            });
           }
         });
       },
@@ -74,7 +78,11 @@ module.exports = function(sequelize, DataTypes) {
             this.update({ status: ORDER_STATUS.REJECTED}).then(resolve, reject);
           } else {
             let error = 'Only new order can be rejected';
-            reject(error);
+            reject({               
+              status: 403,               
+              message: error,               
+              type: 'order'             
+            });
           }
         });
       },
@@ -84,7 +92,11 @@ module.exports = function(sequelize, DataTypes) {
             this.update({ status: ORDER_STATUS.CANCELED}).then(resolve, reject);
           } else {
             let error = 'Only new or accepted order can be cancelled';
-            reject(error);
+            reject({               
+              status: 403,               
+              message: error,               
+              type: 'order'             
+            });
           }
         });
       },
@@ -94,7 +106,11 @@ module.exports = function(sequelize, DataTypes) {
             this.update({ status: ORDER_STATUS.SHIPPING}).then(resolve, reject);
           } else {
             let error = 'Only accepted order has able to be start shipping';
-            reject(error);
+            reject({               
+              status: 403,               
+              message: error,               
+              type: 'order'             
+            });
           }
         });
       },
@@ -104,7 +120,11 @@ module.exports = function(sequelize, DataTypes) {
             this.update({ status: ORDER_STATUS.FINISHED}).then(resolve, reject);
           } else {
             let error = 'Only shiping order has able to be finished';
-            reject(error);
+            reject({               
+              status: 403,               
+              message: error,               
+              type: 'order'            
+            });
           }
         });
       }
