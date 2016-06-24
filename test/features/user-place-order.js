@@ -56,9 +56,9 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
             expect(body.status).to.equal(Order.STATUS.NEW);
             expect(body.orderLines).to.have.lengthOf(2);
             let orderLines = body.orderLines;
-            expect(orderLines[0].quantity).to.equal(2);
-            expect(orderLines[0].note).to.equal('không hành nhiều dứa');
-            let item = orderLines[0].item;
+            expect(orderLines[1].quantity).to.equal(2);
+            expect(orderLines[1].note).to.equal('không hành nhiều dứa');
+            let item = orderLines[1].item;
             expect(item.id).to.equal(item1.id);
             expect(item.name).to.equal(item1.name);
             expect(item.description).to.equal(item1.description);
@@ -257,7 +257,7 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
           })
           .expect(res => {
             expect(res.body.status).to.equal(403);
-            expect(res.body.message_code).to.equal('errors.order.user_is_not_allowed_to_update_order_which_accept_or_rejected');
+            expect(res.body.message_code).to.equal('error.order.cannot_update_accepted_order');
           })
           .expect(403, done);
       });

@@ -2,11 +2,6 @@
 
 const Promise = require('bluebird');
 
-var IGNORE_ATTRIBUTES = [
-  'updatedAt',
-  'createdAt'
-];
-
 var ORDER_STATUS = {
   NEW: 0,
   ACCEPTED: 1,
@@ -61,30 +56,24 @@ module.exports = function(sequelize, DataTypes) {
     },
     instanceMethods: {
       toJSON: function () {
-        var values = this.get();
-        
-        IGNORE_ATTRIBUTES.forEach(attr => {
-          delete values[attr];
-        });
-
-        return values;
+        return this.get();
       },
       accept: function () {
         return new Promise((resolve, reject) => {
           if (this.status === ORDER_STATUS.NEW) {
-            resolve(this.update({ status: ORDER_STATUS.ACCEPTED}));
+            this.update({ status: ORDER_STATUS.ACCEPTED}).then(resolve, reject);
           } else {
-            let error = 'Only new order is been accepted';
+            let error = 'Only new order can be accepted';
             reject(error);
           }
         });
       },
       reject: function () {
         return new Promise((resolve, reject) => {
-          if (this.status === ORDER_STATUS.NEW) {
-            resolve(this.update({ status: ORDER_STATUS.REJECTED}));
+          if (this.status === ORDER_STATUS.NEW || this.status === ORDER_STATUS.ACCEPTED) {
+            this.update({ status: ORDER_STATUS.REJECTED}).then(resolve, reject);
           } else {
-            let error = 'Only new order is been rejected';
+            let error = 'Only new order can be rejected';
             reject(error);
           }
         });
@@ -92,9 +81,9 @@ module.exports = function(sequelize, DataTypes) {
       cancel: function (params) {
         return new Promise((resolve, reject) => {
           if (this.status === ORDER_STATUS.NEW || this.status === ORDER_STATUS.ACCEPTED) {
-            resolve(this.update({ status: ORDER_STATUS.REJECTED}));
+            this.update({ status: ORDER_STATUS.CANCELED}).then(resolve, reject);
           } else {
-            let error = 'Only new or accepted order is been cancelled';
+            let error = 'Only new or accepted order can be cancelled';
             reject(error);
           }
         });
@@ -102,8 +91,7 @@ module.exports = function(sequelize, DataTypes) {
       startShipping: function (params) {
         return new Promise((resolve, reject) =>{
           if (this.status === ORDER_STATUS.ACCEPTED) {
-            Order.addHook('afterUpdate', 'autoFinishedAfterShip', autoFinishedAfterShip);
-            resolve(this.update({ status: ORDER_STATUS.SHIPPING}));
+            this.update({ status: ORDER_STATUS.SHIPPING}).then(resolve, reject);
           } else {
             let error = 'Only accepted order has able to be start shipping';
             reject(error);
@@ -113,8 +101,7 @@ module.exports = function(sequelize, DataTypes) {
       finish: function (params) {
         return new Promise(function(resolve, reject) {
           if (this.status === ORDER_STATUS.SHIPPING) {
-            resolve(this.update({ status: ORDER_STATUS.FINISHED}));
-            Order.removeHook('afterUpdate', 'autoFinishedAfterShip');
+            this.update({ status: ORDER_STATUS.FINISHED}).then(resolve, reject);
           } else {
             let error = 'Only shiping order has able to be finished';
             reject(error);
@@ -125,27 +112,6 @@ module.exports = function(sequelize, DataTypes) {
   });
     
   Order.STATUS = ORDER_STATUS;
-  Order.DELAY_AUTO_FINISHED_AFTER_SHIP = 30 * 60 * 1000; // 30mins
-
-  var autoFinishedAfterShip = function(order, options) {
-    if (!order.changed('status') || order.status !== ORDER_STATUS.SHIPPING) {
-      return Promise.resolve(order);
-    }
-    return Promise.delay(Order.DELAY_AUTO_FINISHED_AFTER_SHIP).then(function() {
-      return new Promise(function(resolve, reject) {
-        Order.findById(order.id).then(order => {
-          if (order.status === ORDER_STATUS.SHIPPING) {
-            order.update({ status: ORDER_STATUS.FINISHED}).then(order => {
-              return resolve(order);
-            }).catch(err => {
-              return reject(err);
-            });
-          }
-          resolve(order);
-        });
-      });
-    });
-  };
 
   return Order;
 };

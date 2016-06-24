@@ -128,7 +128,7 @@ var createShop = (attrs) => {
 
   let createUserPromise;
 
-  if (!attrs.userId) {
+  if (!attrs.ownerId) {
     createUserPromise = createUserWithRole({}, 'seller');
   } else {
     createUserPromise = Promise.resolve();
@@ -143,7 +143,7 @@ var createShop = (attrs) => {
       cover: attrs.avatar || faker.image.imageUrl(),
       coverFile: attrs.coverFile,
       banned: attrs.banned,
-      ownerId: attrs.userId || user.id
+      ownerId: attrs.ownerId || user.id
     });
   });
 };

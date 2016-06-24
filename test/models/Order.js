@@ -2,7 +2,6 @@
 
 const helper = require('../helper');
 const Order = require('../../models').Order;
-const rewire = require('rewire');
 
 describe('Order models', () => {
   describe('factory', () => {
@@ -21,20 +20,6 @@ describe('Order models', () => {
         expect(createdOrder.userId).to.equal(user.id);
         done();
       }, done);
-    });
-  });
-  
-  describe('#toJSON', () => {
-    it('should omit IGNORE_ATTRIBUTES in result', done => {
-      let IGNORE_ATTRIBUTES = rewire('../../models/item').__get__('IGNORE_ATTRIBUTES');
-      
-      Order.findOne().then(item => {
-        let actualJSON = item.toJSON();
-        IGNORE_ATTRIBUTES.forEach(attribute => {
-          expect(actualJSON[attribute]).to.be.undefined;
-        });
-        done();
-      });
     });
   });
 });

@@ -16,7 +16,7 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       seller = u;
       sellerToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({ userId: u.id}, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop1 = s;
       return Category.findOne({
@@ -32,7 +32,7 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
       });
     }).then(i => {
       item = i;
-      return helper.factory.createShopWithShipPlace({ userId: seller.id}, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: seller.id}, 'dom A');
     }).then(s => {
       shop2 = s;
       done();
@@ -79,7 +79,7 @@ describe('POST /api/v1/seller/shops/:shopId/items', () => {
   before(done => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       sellerToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({ userId: u.id}, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return Category.findOne({
@@ -200,7 +200,7 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
   before(done => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       sellerToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({ userId: u.id}, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return Category.findAll(); //we already have default category when doing migration
@@ -381,7 +381,7 @@ describe('DELETE /api/v1/seller/shops/:shopId/items/:itemId', () => {
   before(done => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       sellerToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({ userId: u.id}, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return Category.findAll(); //we already have default category when doing migration

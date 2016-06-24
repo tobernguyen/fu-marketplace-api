@@ -125,8 +125,7 @@ module.exports = function(sequelize, DataTypes) {
               },
               status: sequelize.model('Item').STATUS.FOR_SELL
             },
-            transaction: t,
-            order: 'id'
+            transaction: t
           }).then(its => {
             if (its.length == 0) {
               return Promise.reject({ message: 'Item not found', type: 'order', status: 403});
@@ -142,7 +141,7 @@ module.exports = function(sequelize, DataTypes) {
           }).then(o => {
             order = o;
             let orderLineData = _.map(items, i => {
-              let orderLine = getQuantityAndNoteOfItems(reqBody.items, i.id);
+              let orderLine = getQuantityAndNoteOfItem(reqBody.items, i.id);
               orderLine.item = _.pick(i, ['id', 'name', 'description', 'price']);
               orderLine.orderId = order.id;
               return orderLine;
@@ -162,7 +161,7 @@ module.exports = function(sequelize, DataTypes) {
   Shop.MAXIMUM_COVER_SIZE = 3 * 1024 * 1024; // 3MB
   Shop.STATUS = SHOP_STATUS;
   
-  var getQuantityAndNoteOfItems = (reqBody, id) => {
+  var getQuantityAndNoteOfItem = (reqBody, id) => {
     let reqItem = _.filter(reqBody, ['id', id])[0];
     if (reqItem.quantity == 0){
       reqItem.quantity = sequelize.model('OrderLine').DEFAULT_QUANTITY;

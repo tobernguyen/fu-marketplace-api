@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../controllers/auth');
 const users = require('../controllers/users');
+const orders = require('../controllers/orders');
 const adminUser = require('../controllers/admin/users');
 const adminShop = require('../controllers/admin/shops');
 const sellerShop = require('../controllers/seller/shops');
@@ -36,8 +37,8 @@ router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTi
 router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
 router.get('/api/v1/categories', category.getCategories);
 router.get('/api/v1/shops/:shopId', users.getShop);
-router.post('/api/v1/shops/:shopId/orders', users.postPlaceOrder);
-router.put('/api/v1/shops/:shopId/orders/:orderId', users.putUpdateOrder);
+router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
+router.put('/api/v1/shops/:shopId/orders/:orderId', orders.putUpdateOrder);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users

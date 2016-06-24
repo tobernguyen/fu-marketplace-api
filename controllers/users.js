@@ -11,7 +11,6 @@ var User = models.User;
 var ShopOpeningRequest = models.ShopOpeningRequest;
 var Shop = models.Shop;
 var ShipPlace = models.ShipPlace;
-var Order = models.Order;
 var Item = models.Item;
 var crypto = require('crypto');
 
@@ -227,110 +226,9 @@ exports.getShopOpeningRequests = (req, res) => {
   });
 };
 
-exports.postPlaceOrder = (req, res) => {
-  let user = req.user;
-  let shopId = req.params.shopId;
-  let reqBody = req.body;
-  if (!reqBody.note) reqBody.note = '';
-  
-  Shop.findOne({
-    where: {
-      id: shopId,
-      banned: {
-        $not: true
-      }
-    },
-    include: [
-      ShipPlace,
-            User
-    ]
-  }).then(s => {
-    if (!s) {
-      let error = 'Shop does not exits';
-      return Promise.reject({status: 404, message: error, type: 'model'});
-    } else {
-      return s.placeOrder({
-        user: user,
-        reqBody: reqBody
-      });
-    }
-  }).then((order) => {
-    responseOrder(order, res);
-  }).catch((err) => {
-    if (err.status) {
-      res.status(err.status);
-      res.json({
-        status: err.status,
-        message: err.message,
-        message_code: `error.${err.type}.${_.snakeCase(err.message)}`
-      });
-    } else {
-      errorHandlers.handleModelError(err, res);
-    }
-  });
-};
-
-exports.putUpdateOrder = (req, res) => {
-  let user = req.user;
-  let shopId = req.params.shopId;
-  let orderId = req.params.orderId;
-  let reqBody = req.body;
-
-  Order.findOne({
-    where: {
-      id: orderId,
-      shopId: shopId,
-      userId: user.id
-    }
-  }).then(o => {
-    if (!o) {
-
-      let error = 'Order does not exits';
-      return Promise.reject({status: 404, message: error, type: 'model'});
-    } else {
-      let orderUpdateInfo = _.pick(reqBody, ['note', 'shipAddress']);
-      return o.update(orderUpdateInfo);
-    }
-  }).then(o => {
-    if (o.status !== Order.STATUS.NEW) {
-      let error = 'User is not allowed to update order which accept or rejected';
-      res.status(403);
-      res.json({
-        status: 403,
-        message: error,
-        message_code: `errors.order.${_.snakeCase(error)}`
-      });
-    } else {
-      responseOrder(o, res);
-    }
-  }).catch((err) => {
-    if (err.status) {
-      res.status(err.status);
-      res.json({
-        status: err.status,
-        message: err.message,
-        message_code: `error.${err.type}.${_.snakeCase(err.message)}`
-      });
-    } else {
-      errorHandlers.handleModelError(err, res);
-    }
-  });
-};
-
 exports.getShop = (req, res) => {
   let shopId = req.params.shopId;
   responseShopById(shopId, res);
-};
-
-var responseOrder = (order, res) => {
-  let result = order.toJSON();
-  order.getOrderLines({
-    order: 'id'
-  }).then(ols => {
-    let orderLines = _.map(ols, r => _.pick(r, ['item', 'note', 'quantity']));
-    result['orderLines'] = orderLines;
-    res.json(result);
-  });
 };
 
 var validateRequestOpeningShopFirstTime = (user) => {
