@@ -169,10 +169,10 @@ describe('GET /api/v1/users/me', () => {
       helper.factory.createUserWithRole({}, 'seller').then(u => {
         seller = u;
         accessToken = helper.createAccessTokenForUserId(seller.id);
-        return helper.factory.createShop({}, seller.id);
+        return helper.factory.createShop({ userId: seller.id});
       }).then(s => {
         shop1 = s;
-        return helper.factory.createShop({}, seller.id);
+        return helper.factory.createShop({ userId: seller.id});
       }).then(s => {
         shop2 = s;
         done();

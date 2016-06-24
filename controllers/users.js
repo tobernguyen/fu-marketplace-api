@@ -12,6 +12,7 @@ var ShopOpeningRequest = models.ShopOpeningRequest;
 var Shop = models.Shop;
 var ShipPlace = models.ShipPlace;
 var Order = models.Order;
+var Item = models.Item;
 var crypto = require('crypto');
 
 exports.getCurrentUser = (req, res) => {
@@ -241,7 +242,7 @@ exports.postPlaceOrder = (req, res) => {
     },
     include: [
       ShipPlace,
-      User
+            User
     ]
   }).then(s => {
     if (!s) {
@@ -317,7 +318,7 @@ exports.putUpdateOrder = (req, res) => {
 };
 
 exports.getShop = (req, res) => {
-  let shopId = req.params.id;
+  let shopId = req.params.shopId;
   responseShopById(shopId, res);
 };
 
@@ -351,14 +352,22 @@ var validateRequestOpeningShopFirstTime = (user) => {
   });
 };
 
-var responseShopById = (id, res) => {
+var responseShopById = (shopId, res) => {
   Shop.findOne({
     where: {
-      id: id
+      id: shopId,
+      banned: {
+        $not: true
+      }
     },
     include: [
       ShipPlace,
-      User
+      User,
+      {
+        model: Item,
+        where: { status: Item.STATUS.FOR_SELL },
+        required: false
+      } 
     ]
   }).then(shop => {
     if (!shop) {

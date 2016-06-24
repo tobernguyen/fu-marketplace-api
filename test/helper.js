@@ -110,7 +110,7 @@ const createUserWithRole = (attrs, roleName) => {
   
   return createUser(attrs).then(user => {
     createdUser = user;
-    
+
     return assignRoleToUser(user, roleName);
   }).then(() => {
     return Promise.resolve(createdUser);
@@ -123,18 +123,28 @@ var createAccessTokenForUserId = (userId) => {
   });
 };
 
-var createShop = (attrs, id) => {
+var createShop = (attrs) => {
   if (attrs == undefined) attrs = {};
 
-  return createModel('Shop', {
-    name: attrs.name || faker.name.findName(),
-    description: attrs.description || faker.lorem.sentence(),
-    avatar: attrs.avatar || faker.image.imageUrl(),
-    avatarFile: attrs.avatarFile,
-    cover: attrs.avatar || faker.image.imageUrl(),
-    coverFile: attrs.coverFile,
-    banned: attrs.banned,
-    ownerId: id
+  let createUserPromise;
+
+  if (!attrs.userId) {
+    createUserPromise = createUserWithRole({}, 'seller');
+  } else {
+    createUserPromise = Promise.resolve();
+  }
+
+  return createUserPromise.then(user => {
+    return createModel('Shop', {
+      name: attrs.name || faker.name.findName(),
+      description: attrs.description || faker.lorem.sentence(),
+      avatar: attrs.avatar || faker.image.imageUrl(),
+      avatarFile: attrs.avatarFile,
+      cover: attrs.avatar || faker.image.imageUrl(),
+      coverFile: attrs.coverFile,
+      banned: attrs.banned,
+      ownerId: attrs.userId || user.id
+    });
   });
 };
 
@@ -153,19 +163,10 @@ var createShipPlace = (shipPlace) => {
   return ShipPlace.findOrCreate({where: {name: shipPlace}});
 };
 
-var createShopWithShipPlace = (attrs, id, shipPlace) => {
+var createShopWithShipPlace = (attrs, shipPlace) => {
   let createdShop;
-
-  let createSellerPromise;
-
-  if (!id) {
-    createSellerPromise = createUserWithRole({}, 'seller');
-  } else {
-    createSellerPromise = Promise.resolve();
-  }
-  return createSellerPromise.then(u => {
-    return createShop(attrs, id || u.id);
-  }).then(s => {
+  
+  return createShop(attrs).then(s => {
     createdShop = s;
     return addShipPlaceToShop(s, shipPlace);
   }).then(() => {
@@ -215,8 +216,8 @@ var createItem = (attrs) => {
   let shopId;
 
   if (!attrs.shopId) {
-    createShopPromise = createUser().then(u => {
-      return createShop({}, u.id);
+    createShopPromise = createUserWithRole({}, 'seller').then(u => {
+      return createShop({ userId: u.id});
     });
   } else {
     createShopPromise = Promise.resolve();

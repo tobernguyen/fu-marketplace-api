@@ -17,7 +17,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
       return helper.factory.createUser();
     }).then(u => {
       owner = u;
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace( {userId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       done();
@@ -71,7 +71,7 @@ describe('GET /api/v1/admin/shops/', () => {
     }).then(u => {
       owner = u;
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace( {userId: u.id}, 'dom A');
     }).then(s => {
       createdShop = s;
       done();
@@ -127,7 +127,7 @@ describe('PUT /api/v1/admin/shops/:id', () => {
     }).then(u => {
       seller = u;
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace( {userId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       done();
@@ -231,7 +231,7 @@ describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
       adminToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createUser();
     }).then(u => {
-      return helper.factory.createShopWithShipPlace({}, u.id, 'Dom A');
+      return helper.factory.createShopWithShipPlace( {userId: u.id}, 'Dom A');
     }).then(s => {
       shop = s;
       done();
@@ -302,7 +302,7 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
       adminToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createUser();
     }).then(u => {
-      return helper.factory.createShopWithShipPlace({}, u.id, 'Dom A');
+      return helper.factory.createShopWithShipPlace( {userId: u.id}, 'Dom A');
     }).then(s => {
       shop = s;
       done();
@@ -375,7 +375,7 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
     }).then(u => {
       seller = u;
       normalUserAccessToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace( {userId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return helper.factory.addShipPlaceToShop(s, 'dom B');

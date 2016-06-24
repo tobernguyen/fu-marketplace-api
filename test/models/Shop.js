@@ -12,7 +12,7 @@ describe('Shop Model', () => {
       let createdShop;
       
       helper.factory.createUserWithRole({}, 'seller').then(u => {
-        return helper.factory.createShop({}, u.id);
+        return helper.factory.createShop({ userId: u.id});
       }).then(shop => {
         createdShop = shop;
         expect(shop).to.be.ok;
@@ -28,7 +28,7 @@ describe('Shop Model', () => {
       it('should create shop with correct ship places', done => {
 
         helper.factory.createUserWithRole({}, 'seller').then(u => {
-          return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+          return helper.factory.createShopWithShipPlace({ userId: u.id}, 'dom A');
         }).then(shop => {
           expect(shop).to.be.ok;
           return shop.getShipPlaces();

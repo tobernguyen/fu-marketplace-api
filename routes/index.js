@@ -35,8 +35,9 @@ router.get('/api/v1/users/me/shopOpeningRequests', users.getShopOpeningRequests)
 router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTime);
 router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
 router.get('/api/v1/categories', category.getCategories);
-router.post('/api/v1/shop/:shopId/orders', users.postPlaceOrder);
-router.put('/api/v1/shop/:shopId/orders/:orderId', users.putUpdateOrder);
+router.get('/api/v1/shops/:shopId', users.getShop);
+router.post('/api/v1/shops/:shopId/orders', users.postPlaceOrder);
+router.put('/api/v1/shops/:shopId/orders/:orderId', users.putUpdateOrder);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users

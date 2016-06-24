@@ -7,7 +7,7 @@ const Order = require('../../models').Order;
 
 var _ = require('lodash');
 
-describe('POST /api/v1/shop/:shopId/orders', () => {
+describe('POST /api/v1/shops/:shopId/orders', () => {
   let user, item1, item2, userToken;
 
   before(done => {
@@ -28,7 +28,7 @@ describe('POST /api/v1/shop/:shopId/orders', () => {
     describe('with valid order attribute and valid accesToken', () => {
       it('should return 200 with orderInfo', done => {
         request(app)
-          .post(`/api/v1/shop/${item1.shopId}/orders`)
+          .post(`/api/v1/shops/${item1.shopId}/orders`)
           .set('X-Access-Token', userToken)
           .set('Content-Type', 'application/json')
           .send({
@@ -71,7 +71,7 @@ describe('POST /api/v1/shop/:shopId/orders', () => {
     describe('with invalid order attribute and valid accesToken', () => {
       it('should return 403', done => {
         request(app)
-          .post(`/api/v1/shop/${item1.shopId}/orders`)
+          .post(`/api/v1/shops/${item1.shopId}/orders`)
           .set('X-Access-Token', userToken)
           .set('Content-Type', 'application/json')
           .send({
@@ -96,7 +96,7 @@ describe('POST /api/v1/shop/:shopId/orders', () => {
     describe('with quantity = 0 attribute and valid accesToken', () => {
       it('should return 200 and quantity autochange to 1', done => {
         request(app)
-          .post(`/api/v1/shop/${item1.shopId}/orders`)
+          .post(`/api/v1/shops/${item1.shopId}/orders`)
           .set('X-Access-Token', userToken)
           .set('Content-Type', 'application/json')
           .send({
@@ -124,7 +124,7 @@ describe('POST /api/v1/shop/:shopId/orders', () => {
   describe('with invalid shop route', () => {
     it('should return 200 with orderInfo', done => {
       request(app)
-        .post('/api/v1/shop/0/orders')
+        .post('/api/v1/shops/0/orders')
         .set('X-Access-Token', userToken)
         .set('Content-Type', 'application/json')
         .send({
@@ -152,7 +152,7 @@ describe('POST /api/v1/shop/:shopId/orders', () => {
   });
 });
 
-describe.only('PUT /api/v1/shop/:shopId/orders/:orderId', () => {
+describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
   let order, userToken1, userToken2;
 
   before(done => {
@@ -173,7 +173,7 @@ describe.only('PUT /api/v1/shop/:shopId/orders/:orderId', () => {
       describe('with valid order attribute and valid accesToken', () => {
         it('should return 200 with orderInfo', done => {
           request(app)
-            .put(`/api/v1/shop/${order.shopId}/orders/${order.id}`)
+            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
             .set('X-Access-Token', userToken1)
             .set('Content-Type', 'application/json')
             .send({
@@ -194,7 +194,7 @@ describe.only('PUT /api/v1/shop/:shopId/orders/:orderId', () => {
       describe('with invalid accesToken', () => {
         it('should return 404 order is not exits', done => {
           request(app)
-            .put(`/api/v1/shop/${order.shopId}/orders/${order.id}`)
+            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
             .set('X-Access-Token', userToken2)
             .set('Content-Type', 'application/json')
             .send({
@@ -212,7 +212,7 @@ describe.only('PUT /api/v1/shop/:shopId/orders/:orderId', () => {
       describe('with invalid order attribute', () => {
         it('should return 404 invalid attribute', done => {
           request(app)
-            .put(`/api/v1/shop/${order.shopId}/orders/${order.id}`)
+            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
             .set('X-Access-Token', userToken1)
             .set('Content-Type', 'application/json')
             .send({
@@ -248,7 +248,7 @@ describe.only('PUT /api/v1/shop/:shopId/orders/:orderId', () => {
 
       it('should return 200 with orderInfo', done => {
         request(app)
-          .put(`/api/v1/shop/${acceptedOrder.shopId}/orders/${acceptedOrder.id}`)
+          .put(`/api/v1/shops/${acceptedOrder.shopId}/orders/${acceptedOrder.id}`)
           .set('X-Access-Token', userToken1)
           .set('Content-Type', 'application/json')
           .send({
@@ -267,7 +267,7 @@ describe.only('PUT /api/v1/shop/:shopId/orders/:orderId', () => {
   describe('with invalid shop route', () => {
     it('should return 200 with orderInfo', done => {
       request(app)
-        .put(`/api/v1/shop/0/orders/${order.id}`)
+        .put(`/api/v1/shops/0/orders/${order.id}`)
         .set('X-Access-Token', userToken1)
         .set('Content-Type', 'application/json')
         .send({
