@@ -93,6 +93,10 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'shopId',
           constraints: false
         });
+        Shop.hasMany(models.Order, {
+          foreignKey: 'shopId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {
@@ -104,6 +108,51 @@ module.exports = function(sequelize, DataTypes) {
         });
         
         return values;
+      },
+      placeOrder: function(params) {
+        let user = params.user;
+        let reqBody = params.reqBody;
+        if (!reqBody.note) reqBody.note = '';
+
+        let order, items;
+        
+        return sequelize.transaction(t => {
+          let itemIds = _.map(reqBody.items, item => item.id);
+          return this.getItems({
+            where: {
+              id: {
+                $in: itemIds
+              },
+              status: sequelize.model('Item').STATUS.FOR_SELL
+            },
+            transaction: t
+          }).then(its => {
+            if (its.length == 0) {
+              return Promise.reject({ message: 'Item not found', type: 'order', status: 403});
+            } else {
+              items = its;
+              return sequelize.model('Order').create({
+                userId: user.id,
+                shopId: this.id,
+                note: reqBody.note,
+                shipAddress: reqBody.shipAddress
+              }, {transaction: t});
+            }
+          }).then(o => {
+            order = o;
+            let orderLineData = _.map(items, i => {
+              let orderLine = getQuantityAndNoteOfItem(reqBody.items, i.id);
+              orderLine.item = _.pick(i, ['id', 'name', 'description', 'price']);
+              orderLine.orderId = order.id;
+              return orderLine;
+            });
+            return sequelize.model('OrderLine').bulkCreate(orderLineData, {validate: true, transaction: t});
+          });
+        }).then(() => {
+          return Promise.resolve(order);
+        }).catch(err =>  {
+          return Promise.reject(err);
+        });
       }
     }
   });
@@ -112,5 +161,14 @@ module.exports = function(sequelize, DataTypes) {
   Shop.MAXIMUM_COVER_SIZE = 3 * 1024 * 1024; // 3MB
   Shop.STATUS = SHOP_STATUS;
   
+  var getQuantityAndNoteOfItem = (reqBody, id) => {
+    let reqItem = _.filter(reqBody, ['id', id])[0];
+    if (reqItem.quantity == 0){
+      reqItem.quantity = sequelize.model('OrderLine').DEFAULT_QUANTITY;
+    }
+    delete reqItem.id;
+    return reqItem;
+  };
+
   return Shop;
 };

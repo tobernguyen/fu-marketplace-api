@@ -6,9 +6,12 @@ var sanitizeUpdateRequest = userUpdateNormalizer.sanitizeUpdateRequest;
 var getUpdateParams = userUpdateNormalizer.getUpdateParams;
 var errorHandlers = require('./helpers/errorHandlers');
 var imageUploader = require('../libs/image-uploader');
-var User = require('../models').User;
-var ShopOpeningRequest = require('../models').ShopOpeningRequest;
-var Shop = require('../models').Shop;
+var models = require('../models');
+var User = models.User;
+var ShopOpeningRequest = models.ShopOpeningRequest;
+var Shop = models.Shop;
+var ShipPlace = models.ShipPlace;
+var Item = models.Item;
 var crypto = require('crypto');
 
 exports.getCurrentUser = (req, res) => {
@@ -216,11 +219,16 @@ exports.getShopOpeningRequests = (req, res) => {
       delete r['ownerId'];
       return result;
     });
-
+    
     res.json({
       shopOpeningRequests: result
     });
   });
+};
+
+exports.getShop = (req, res) => {
+  let shopId = req.params.shopId;
+  responseShopById(shopId, res);
 };
 
 var validateRequestOpeningShopFirstTime = (user) => {
@@ -238,6 +246,40 @@ var validateRequestOpeningShopFirstTime = (user) => {
       return Promise.reject('already_requested');
     } else {
       return Promise.resolve();
+    }
+  });
+};
+
+var responseShopById = (shopId, res) => {
+  Shop.findOne({
+    where: {
+      id: shopId,
+      banned: {
+        $not: true
+      }
+    },
+    include: [
+      ShipPlace,
+      User,
+      {
+        model: Item,
+        where: { status: Item.STATUS.FOR_SELL },
+        required: false
+      } 
+    ]
+  }).then(shop => {
+    if (!shop) {
+      let error = 'Shop does not exits';
+      errorHandlers.responseError(404, error, 'model', res);
+    } else {
+      let result = shop.toJSON();
+      let shipPlace = _.map(shop.ShipPlaces, sp => sp.id);
+      let sellerInfo = shop.User.getBasicSellerInfo();
+      result['shipPlaces'] = shipPlace;
+      delete result['ShipPlaces'];
+      delete result['User'];
+      result['seller'] = sellerInfo;
+      res.json(result);      
     }
   });
 };

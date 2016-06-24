@@ -16,7 +16,7 @@ describe('GET /api/v1/seller/shops/:id', () => {
       return helper.factory.createUserWithRole({}, 'seller');
     }).then(u => {
       ownerToken = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return helper.factory.createUser();
@@ -84,7 +84,7 @@ describe('GET /api/v1/seller/shops/', () => {
       return helper.factory.createUserWithRole({}, 'seller');
     }).then(u => {
       sellerHasShop = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return helper.factory.createUser();
@@ -154,10 +154,10 @@ describe('PUT /api/v1/seller/shops/:id', () => {
     }).then(u => {
       ownerToken = helper.createAccessTokenForUserId(u.id);
       owner = u;
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
-      return helper.factory.createShopWithShipPlace({banned: true}, owner.id, 'dom A');
+      return helper.factory.createShopWithShipPlace({banned: true, ownerId: owner.id}, 'dom A');
     }).then(s => {
       bannedShop = s;
       return helper.factory.createUser();
@@ -307,10 +307,10 @@ describe('POST /api/v1/seller/shops/:id/uploadAvatar', () => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       ownerId = u.id;
       sellerToken = helper.createAccessTokenForUserId(ownerId);
-      return helper.factory.createShopWithShipPlace({}, ownerId, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
-      return helper.factory.createShopWithShipPlace({banned: true}, ownerId, 'dom A');
+      return helper.factory.createShopWithShipPlace({banned: true, ownerId: ownerId}, 'dom A');
     }).then(s => {
       bannedShop = s;
       done();
@@ -402,10 +402,10 @@ describe('POST /api/v1/seller/shops/:id/uploadCover', () => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       ownerId = u.id;
       sellerToken = helper.createAccessTokenForUserId(ownerId);
-      return helper.factory.createShopWithShipPlace({}, ownerId, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
-      return helper.factory.createShopWithShipPlace({banned: true}, ownerId, 'dom A');
+      return helper.factory.createShopWithShipPlace({banned: true, ownerId: ownerId}, 'dom A');
     }).then(s => {
       bannedShop = s;
       done();
@@ -500,12 +500,12 @@ describe('POST /api/v1/seller/shops/:id/shipPlaces', () => {
     }).then(u => {
       ownerToken = helper.createAccessTokenForUserId(u.id);
       owner = u;
-      return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
     }).then(s => {
       shop = s;
       return helper.factory.addShipPlaceToShop(s, 'dom B');
     }).then(s => {
-      return helper.factory.createShopWithShipPlace({banned: true}, owner.id, 'dom A');
+      return helper.factory.createShopWithShipPlace({banned: true, ownerId: owner.id}, 'dom A');
     }).then(s => {
       bannedShop = s;
       return helper.factory.createUser();

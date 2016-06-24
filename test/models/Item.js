@@ -11,7 +11,7 @@ describe('Item Model', () => {
     it('should be valid', done => {
       let createdItem, shop;
       helper.factory.createUserWithRole({}, 'seller').then(u => {
-        return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+        return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
       }).then(s => {
         shop = s;
         return Category.findOne({
@@ -63,7 +63,7 @@ describe('Item Model', () => {
 
         let shop;
         helper.factory.createUserWithRole({}, 'seller').then(u => {
-          return helper.factory.createShopWithShipPlace({}, u.id, 'dom A');
+          return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
         }).then(s => {
           shop = s;
           return Category.findOne({
