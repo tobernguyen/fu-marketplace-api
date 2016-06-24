@@ -269,7 +269,7 @@ var responseShopById = (shopId, res) => {
     ]
   }).then(shop => {
     if (!shop) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       let result = shop.toJSON();

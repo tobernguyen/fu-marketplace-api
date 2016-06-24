@@ -44,7 +44,7 @@ exports.putShop = (req, res) => {
     
   Shop.findById(shopId).then(shop => {
     if (!shop){
-      errorHandlers.responseError(404, 'Shop does not exits', 'model', res);
+      errorHandlers.responseError(404, 'Shop does not exist', 'model', res);
     } else{
       sanitizeUpdateRequest(req, true);
       shop.update(getUpdateParams(req, true))
@@ -59,7 +59,7 @@ exports.postShopUploadAvatar = (req, res) => {
 
   Shop.findById(shopId).then(shop => {
     if (!shop) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       imageUploader.useMiddlewareWithConfig({
@@ -96,7 +96,7 @@ exports.postShopUploadCover = (req, res) => {
 
   Shop.findById(shopId).then(shop => {
     if (!shop) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       imageUploader.useMiddlewareWithConfig({
@@ -137,7 +137,7 @@ exports.postChangeShopShipPlaces = (req, res) => {
   } else {
     Shop.findById(shopId).then(shop => {
       if (!shop) {
-        let error = 'Shop does not exits';
+        let error = 'Shop does not exist';
         errorHandlers.responseError(404, error, 'model', res);
       } else {
         ShipPlace.findAll({
@@ -169,7 +169,7 @@ var responseShopById = (id, res) => {
     ]
   }).then(shop => {
     if (!shop) {
-      let error = 'Shop does not exits';
+      let error = 'Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
     } else {
       let result = shop.toJSON();

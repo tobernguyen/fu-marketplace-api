@@ -73,6 +73,8 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
   });
 });
 
+
+
 describe('POST /api/v1/seller/shops/:shopId/items', () => {
   let  shop, sellerToken, category;
 
@@ -193,6 +195,73 @@ describe('POST /api/v1/seller/shops/:shopId/items', () => {
   });
 });
 
+describe('GET /api/v1/seller/shops/:shopId/items/:itemId', () => {
+  let  shop, sellerToken, item;
+
+  before(done => {
+    helper.factory.createUserWithRole({}, 'seller').then(u => {
+      sellerToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
+    }).then(s => {
+      shop = s;
+      return Category.findAll(); //we already have default category when doing migration
+    }).then(cs => {
+      return helper.factory.createItem({
+        shopId: shop.id,
+        categoryId: cs[0].id
+      });
+    }).then(i => {
+      item = i;
+      done();
+    });
+  });
+
+  describe('with valid sellerToken and itemId', () => {
+    it('should return 200 with item information', done => {
+
+      request(app)
+        .get(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
+        .set('X-Access-Token', sellerToken)
+        .expect(res => {
+          let body = res.body;
+          expect(body.id).to.equal(item.id);
+          expect(body.name).to.equal(item.name);
+          expect(body.description).to.equal(item.description);
+          expect(body.image).to.equal(item.image);
+          expect(body.quantity).to.equal(item.quantity);
+        })
+        .expect(200, done);
+    });
+  });
+
+  describe('with valid sellerToken and invalid itemId', () => {
+    it('should return 404 item does not exist', done => {
+      request(app)
+        .get(`/api/v1/seller/shops/${shop.id}/items/0`)
+        .set('X-Access-Token', sellerToken)
+        .expect(res => {
+          let body = res.body;
+          expect(body.status).to.equal(404);
+          expect(body.message_code).to.equal('error.model.item_does_not_exist');
+        })
+        .expect(404, done);
+    });
+  });
+
+  describe('with valid sellerToken and invalid shopId', () => {
+    it('should return 404 item does not exist', done => {
+      request(app)
+        .get(`/api/v1/seller/shops/0/items/${item.id}`)
+        .set('X-Access-Token', sellerToken)
+        .expect(res => {
+          let body = res.body;
+          expect(body.status).to.equal(404);
+          expect(body.message_code).to.equal('error.model.item_does_not_exist');
+        })
+        .expect(404, done);
+    });
+  });
+});
 
 describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
   let  shop, sellerToken, categories, item;

@@ -20,7 +20,7 @@ describe('GET /api/v1/shipPlaces', () => {
     });
   });
   
-  describe('with exits shop', () => {
+  describe('with exist shop', () => {
     it('should return 200 OK and return an array contain  all ship places', done => {
       request(app)
         .get('/api/v1/shipPlaces')

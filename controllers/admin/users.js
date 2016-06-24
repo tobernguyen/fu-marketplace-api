@@ -31,7 +31,7 @@ exports.putUser = (req, res) => {
     
   User.findById(userId).then(user => {
     if (!user){
-      errorHandlers.responseError(404, 'User does not exits', 'model', res);
+      errorHandlers.responseError(404, 'User does not exist', 'model', res);
     } else{
       sanitizeUpdateRequest(req, true);
       user.update(getUpdateParams(req, true)).then(user => {
@@ -64,7 +64,7 @@ exports.postSetRoles = (req, res) => {
     let user;
     User.findById(userId).then(u => {
       if (!u) {
-        errorHandlers.responseError(404, 'User does not exits', 'model', res);
+        errorHandlers.responseError(404, 'User does not exist', 'model', res);
       } else {
         user = u;
         if (roles.length == 0) {
@@ -135,7 +135,7 @@ exports.postChangePassword = (req, res) => {
 var responseUserById = (id, res) => {
   User.findById(id).then(user => {
     if (!user){
-      errorHandlers.responseError(404, 'User does not exits', 'model', res);
+      errorHandlers.responseError(404, 'User does not exist', 'model', res);
     } else {
       responseUser(user, res);
     }
