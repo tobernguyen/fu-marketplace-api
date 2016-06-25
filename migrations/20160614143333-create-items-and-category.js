@@ -90,7 +90,8 @@ module.exports = {
             key: 'id',
             deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
           },
-          onUpdate: 'cascade'
+          onUpdate: 'cascade',
+          onDelete: 'cascade'
         },
         createdAt: {
           allowNull: false,

@@ -5,6 +5,8 @@ const Shop = require('../../models').Shop;
 const rewire = require('rewire');
 const _ = require('lodash');
 const fs = require('fs-extra');
+const sinon = require('sinon');
+const elasticsearch = require('../../libs/elasticsearch');
 
 describe('Shop Model', () => {
   describe('factory', () => {
@@ -56,6 +58,50 @@ describe('Shop Model', () => {
   });
 
   describe('hooks', () => {
+    describe('afterCreate', () => {
+      let shop;
+      let elasticsearchSpy;
+      beforeEach(done => {
+        elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+        helper.factory.createShop({}, 1).then(s => {
+          shop = s;
+          done();
+        });
+      });
+
+      afterEach(() => {
+        elasticsearch.indexShopById.restore();
+      });
+
+      it('should call elasticsearch.indexShopById', done => {
+        expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+        done();
+      });
+    });
+
+    describe('afterUpdate', () => {
+      let shop;
+      let elasticsearchSpy;
+      beforeEach(done => {
+        helper.factory.createShop({}, 1).then(s => {
+          elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+          shop = s;
+          done();
+        });
+      });
+
+      afterEach(() => {
+        elasticsearch.indexShopById.restore();
+      });
+
+      it('should call elasticsearch.indexShopById', done => {
+        shop.update({name: 'Updated name'}).then(_ => {
+          expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+          done();
+        });
+      });
+    });
+
     describe('afterDestroy', () => {
       let shop;
       let avatarFile = 'public/uploads/shops/avatar.png';
@@ -66,6 +112,7 @@ describe('Shop Model', () => {
       let checkCoverFileExist = () => {
         fs.accessSync(coverFile);        
       };
+      let elasticsearchSpy;
       
       beforeEach(done => {
         fs.ensureFileSync(avatarFile);
@@ -90,8 +137,13 @@ describe('Shop Model', () => {
           }
         }, 1).then(u => {
           shop = u;
+          elasticsearchSpy = sinon.spy(elasticsearch, 'deleteShopIndexById');
           done();
         });
+      });
+
+      afterEach(() => {
+        elasticsearch.deleteShopIndexById.restore();
       });
       
       it('should delete all user avatar files after user destroyed', done => {
@@ -100,6 +152,13 @@ describe('Shop Model', () => {
           expect(checkCoverFileExist).to.throw(Error);
           done();
         }, done);
+      });
+
+      it('should call elasticsearch.deleteShopIndexById', done => {
+        shop.destroy().then(() => {
+          expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+          done();
+        });
       });
     });
   });

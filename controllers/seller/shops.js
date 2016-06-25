@@ -194,9 +194,10 @@ exports.postChangeShopShipPlaces = (req, res) => {
               }
             }
           }).then(sp => {
-            return shop.setShipPlaces(sp);
+            return shop.setShipPlacesThenUpdateIndex(sp);
           }).then(s => {
             responseShop(shop, res);
+            return null;
           }).catch(err => {
             errorHandlers.handleModelError(err, res);
           });

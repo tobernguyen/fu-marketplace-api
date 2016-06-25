@@ -1,0 +1,100 @@
+{
+  "settings" : {
+    "number_of_shards" : 2,
+    "number_of_replicas" : 1,
+    "index": {
+      "analysis": {
+        "analyzer": {
+          "folding": {
+            "tokenizer": "standard",
+            "filter":  [ "lowercase", "asciifolding" ]
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "shop": {
+      "properties": {
+        "name" : {
+          "type": "string",
+          "analyzer": "standard",
+          "fields": {
+            "folded": {
+              "type": "string",
+              "analyzer": "folding"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "index": "analyzed",
+          "fields": {
+            "folded": {
+              "type": "string",
+              "analyzer": "folding"
+            }
+          }
+        },
+        "avatar": {
+          "type": "string",
+          "index": "no"
+        },
+        "cover": {
+          "type": "string",
+          "index": "no"
+        },
+        "seller" : {
+          "properties" : {
+            "id" : {
+              "type" : "integer",
+              "index": "not_analyzed"
+            },
+            "fullName" : {
+              "type" : "string",
+              "index": "analyzed",
+              "fields": {
+                "folded": {
+                  "type": "string",
+                  "analyzer": "folding"
+                }
+              }
+            }
+          }
+        },
+        "items": {
+          "properties": {
+            "name" : {
+              "type" : "string",
+              "index": "analyzed",
+              "fields": {
+                "folded": {
+                  "type": "string",
+                  "analyzer": "folding"
+                }
+              }
+            },
+            "description" : {
+              "type" : "string",
+              "index": "analyzed",
+              "fields": {
+                "folded": {
+                  "type": "string",
+                  "analyzer": "folding"
+                }
+              }
+            },
+            "image": {
+              "type": "string",
+              "index": "no"
+            }
+          }
+        },
+        "categoryIds": {"type": "integer", "index": "not_analyzed"},
+        "shipPlaceIds": {"type": "integer", "index": "not_analyzed"},
+        "opening": {"type": "boolean", "index": "not_analyzed"},
+        "status": {"type": "integer", "index": "not_analyzed"}
+      }
+    }
+  }
+}

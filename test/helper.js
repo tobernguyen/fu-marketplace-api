@@ -19,11 +19,15 @@ require('sinon');
 require('sinon-as-promised');
 var fs = require('fs-extra');
 var _ = require('lodash');
+var elasticsearchHelper = require('./utils/elasticsearch-helper');
+
 
 before(function(done) {
   this.timeout(5000);
   dbUtils.clearDatabase()
     .then(dbUtils.runMigrations)
+    .then(elasticsearchHelper.deleteAll)
+    .then(elasticsearchHelper.createIndexWithConfig)
     .then(() => done(), done);
 });
 
@@ -125,7 +129,6 @@ var createAccessTokenForUserId = (userId) => {
 
 var createShop = (attrs) => {
   if (attrs == undefined) attrs = {};
-
   let createUserPromise;
 
   if (!attrs.ownerId) {
@@ -143,7 +146,9 @@ var createShop = (attrs) => {
       cover: attrs.avatar || faker.image.imageUrl(),
       coverFile: attrs.coverFile,
       banned: attrs.banned,
-      ownerId: attrs.ownerId || user.id
+      ownerId: attrs.ownerId || user.id,
+      opening: attrs.opening || false,
+      status: attrs.status || models.Shop.STATUS.UNPUBLISHED
     });
   });
 };
@@ -153,7 +158,9 @@ var addShipPlaceToShop = (shop, shipPlace) => {
   assert(shipPlace, 'shipPlace cannot be blank');
   
   return createShipPlace(shipPlace).then(shipPlace => {
-    return shop.addShipPlace(shipPlace[0]);
+    return shop.addShipPlace(shipPlace[0]).then(() => {
+      return shop.reindex();
+    });
   }).then(() => Promise.resolve(shop));
 };
 
@@ -244,7 +251,7 @@ var createItem = (attrs) => {
       categoryId: attrs.categoryId || category.id,
       price: faker.random.number(),
       sort: faker.random.number(),
-      status: attrs.status || models.Item.NOT_FOR_SELL
+      status: attrs.status
     });
   });
 };

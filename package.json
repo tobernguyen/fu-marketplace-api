@@ -27,7 +27,9 @@
     "body-parser": "^1.15.1",
     "compression": "^1.6.2",
     "dotenv": "^2.0.0",
+    "elasticsearch": "^11.0.1",
     "errorhandler": "^1.4.3",
+    "esq": "^1.0.0",
     "express": "^4.13.4",
     "express-validator": "^2.20.4",
     "fs-extra": "^0.30.0",
@@ -43,6 +45,7 @@
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.0.0-0",
     "sequelize-cli": "^2.4.0",
+    "supertest-as-promised": "^3.1.0",
     "umzug": "^1.11.0",
     "winston": "^2.2.0"
   },

@@ -182,4 +182,6 @@ var responseShopById = (id, res) => {
       res.json(result);      
     }
   });
+
+  return null;
 };
