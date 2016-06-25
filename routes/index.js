@@ -38,10 +38,11 @@ router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
 router.get('/api/v1/categories', category.getCategories);
 router.get('/api/v1/shops/:shopId', users.getShop);
 router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
-router.put('/api/v1/shops/:shopId/orders/:orderId', orders.putUpdateOrder);
-router.put('/api/v1/shops/:shopId/orders/:orderId/cancel', orders.cancelOrder);
 
 router.get('/api/v1/orders', orders.getOrders);
+router.put('/api/v1/orders/:orderId', orders.putUpdateOrder);
+router.post('/api/v1/orders/:orderId/cancel', orders.cancelOrder);
+router.post('/api/v1/orders/:orderId/finish', orders.finishOrder);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users

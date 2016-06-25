@@ -152,7 +152,7 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
   });
 });
 
-describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
+describe('PUT /api/v1/orders/:orderId', () => {
   let order, userToken1, userToken2;
 
   before(done => {
@@ -168,87 +168,11 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
     });
   });
 
-  describe('with valid shop route', () => {
-    describe('with new order', () => {
-      describe('with valid order attribute and valid accesToken', () => {
-        it('should return 200 with orderInfo', done => {
-          request(app)
-            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
-            .set('X-Access-Token', userToken1)
-            .set('Content-Type', 'application/json')
-            .send({
-              note: 'ship truoc 12h',
-              shipAddress: 'D201'
-            })
-            .expect(res => {
-              let body = res.body;
-              expect(body.note).to.equal('ship truoc 12h');
-              expect(body.shipAddress).to.equal('D201');
-              expect(body.shopId).to.equal(order.shopId);
-              expect(body.id).to.equal(order.id);
-            })
-            .expect(200, done);
-        });
-      });
-
-      describe('with invalid accesToken', () => {
-        it('should return 404 order is not exist', done => {
-          request(app)
-            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
-            .set('X-Access-Token', userToken2)
-            .set('Content-Type', 'application/json')
-            .send({
-              note: 'ship truoc 12h',
-              shipAddress: 'D201'
-            })
-            .expect(res => {
-              expect(res.body.status).to.equal(404);
-              expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
-            })
-            .expect(404, done);
-        });
-      });
-
-      describe('with invalid order attribute', () => {
-        it('should return 404 invalid attribute', done => {
-          request(app)
-            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}`)
-            .set('X-Access-Token', userToken1)
-            .set('Content-Type', 'application/json')
-            .send({
-              note: 'ship truoc 12h',
-              shipAddress: ''
-            })
-            .expect(res => {
-              expect(res.body.status).to.equal(422);
-              let errors = res.body.errors;
-              expect(_.toPairs(errors)).to.have.lengthOf(1);
-              expect(errors.shipAddress.message).to.equal('Validation len failed');
-              expect(errors.shipAddress.message_code).to.equal('error.model.validation_len_failed');
-            })
-            .expect(422, done);
-        });
-      });
-    });
-    
-    describe('with not new order (status is not new)', () => {
-      let acceptedOrder;
-      beforeEach(done => {
-        helper.factory.createOrder({
-          shopId: order.shopId,
-          userId: order.userId,
-          status: Order.STATUS.ACCEPTED
-        }).then(o => {
-          expect(o.status).to.equal(Order.STATUS.ACCEPTED);
-          acceptedOrder = o;
-          done();
-        });
-        
-      });
-
-      it('should return 403', done => {
+  describe('with new order', () => {
+    describe('with valid order attribute and valid accesToken', () => {
+      it('should return 200 with orderInfo', done => {
         request(app)
-          .put(`/api/v1/shops/${acceptedOrder.shopId}/orders/${acceptedOrder.id}`)
+          .put(`/api/v1/orders/${order.id}`)
           .set('X-Access-Token', userToken1)
           .set('Content-Type', 'application/json')
           .send({
@@ -256,18 +180,74 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
             shipAddress: 'D201'
           })
           .expect(res => {
-            expect(res.body.status).to.equal(403);
-            expect(res.body.message_code).to.equal('error.order.cannot_update_accepted_order');
+            let body = res.body;
+            expect(body.note).to.equal('ship truoc 12h');
+            expect(body.shipAddress).to.equal('D201');
+            expect(body.shopId).to.equal(order.shopId);
+            expect(body.id).to.equal(order.id);
           })
-          .expect(403, done);
+          .expect(200, done);
+      });
+    });
+
+    describe('with invalid accesToken', () => {
+      it('should return 404 order is not exist', done => {
+        request(app)
+          .put(`/api/v1/orders/${order.id}`)
+          .set('X-Access-Token', userToken2)
+          .set('Content-Type', 'application/json')
+          .send({
+            note: 'ship truoc 12h',
+            shipAddress: 'D201'
+          })
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
+          })
+          .expect(404, done);
+      });
+    });
+
+    describe('with invalid order attribute', () => {
+      it('should return 404 invalid attribute', done => {
+        request(app)
+          .put(`/api/v1/orders/${order.id}`)
+          .set('X-Access-Token', userToken1)
+          .set('Content-Type', 'application/json')
+          .send({
+            note: 'ship truoc 12h',
+            shipAddress: ''
+          })
+          .expect(res => {
+            expect(res.body.status).to.equal(422);
+            let errors = res.body.errors;
+            expect(_.toPairs(errors)).to.have.lengthOf(1);
+            expect(errors.shipAddress.message).to.equal('Validation len failed');
+            expect(errors.shipAddress.message_code).to.equal('error.model.validation_len_failed');
+          })
+          .expect(422, done);
       });
     });
   });
- 
-  describe('with invalid shop route', () => {
-    it('should return 200 with orderInfo', done => {
+  
+  describe('with not new order (status is not new)', () => {
+    let acceptedOrder;
+    beforeEach(done => {
+      helper.factory.createOrder({
+        shopId: order.shopId,
+        userId: order.userId,
+        status: Order.STATUS.ACCEPTED
+      }).then(o => {
+        expect(o.status).to.equal(Order.STATUS.ACCEPTED);
+        acceptedOrder = o;
+        done();
+      });
+      
+    });
+
+    it('should return 403', done => {
       request(app)
-        .put(`/api/v1/shops/0/orders/${order.id}`)
+        .put(`/api/v1/orders/${acceptedOrder.id}`)
         .set('X-Access-Token', userToken1)
         .set('Content-Type', 'application/json')
         .send({
@@ -275,15 +255,16 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
           shipAddress: 'D201'
         })
         .expect(res => {
-          expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
+          expect(res.body.status).to.equal(403);
+          expect(res.body.message_code).to.equal('error.order.cannot_update_accepted_order');
         })
-        .expect(404, done);
+        .expect(403, done);
     });
   });
+
 });
 
-describe('PUT /api/v1/shops/:shopId/orders/:orderId/cancel', () => {
+describe('POST /api/v1/orders/:orderId/cancel', () => {
   let order, userToken1, userToken2;
 
   before(done => {
@@ -299,82 +280,137 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId/cancel', () => {
     });
   });
 
-  describe('with valid shop route', () => {
-    describe('with new order', () => {
-      describe('with valid order attribute and valid accesToken', () => {
-        it('should return 200 with new orderInfo', done => {
-          request(app)
-            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}/cancel`)
-            .set('X-Access-Token', userToken1)
-            .set('Content-Type', 'application/json')
-            .expect(res => {
-              let body = res.body;
-              expect(body.status).to.equal(Order.STATUS.CANCELED);
-              expect(body.id).to.equal(order.id);
-            })
-            .expect(200, done);
-        });
-      });
-
-      describe('with invalid accesToken', () => {
-        it('should return 404 order is not exits', done => {
-          request(app)
-            .put(`/api/v1/shops/${order.shopId}/orders/${order.id}/cancel`)
-            .set('X-Access-Token', userToken2)
-            .set('Content-Type', 'application/json')
-            .expect(res => {
-              expect(res.body.status).to.equal(404);
-              expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
-            })
-            .expect(404, done);
-        });
-      });
-    });
-    
-    describe('with shipping order', () => {
-      let shippingOrder;
-      beforeEach(done => {
-        helper.factory.createOrder({
-          shopId: order.shopId,
-          userId: order.userId,
-          status: Order.STATUS.SHIPPING
-        }).then(o => {
-          expect(o.status).to.equal(Order.STATUS.SHIPPING);
-          shippingOrder = o;
-          done();
-        });
-        
-      });
-
-      it('should return 403', done => {
+  describe('with new order', () => {
+    describe('with valid order attribute and valid accesToken', () => {
+      it('should return 200 with canceled orderInfo', done => {
         request(app)
-          .put(`/api/v1/shops/${shippingOrder.shopId}/orders/${shippingOrder.id}/cancel`)
+          .post(`/api/v1/orders/${order.id}/cancel`)
           .set('X-Access-Token', userToken1)
           .set('Content-Type', 'application/json')
           .expect(res => {
-            expect(res.body.status).to.equal(403);
-            expect(res.body.message_code).to.equal('error.order.only_new_or_accepted_order_can_be_cancelled');
+            let body = res.body;
+            expect(body.status).to.equal(Order.STATUS.CANCELED);
+            expect(body.id).to.equal(order.id);
           })
-          .expect(403, done);
+          .expect(200, done);
+      });
+    });
+
+    describe('with invalid accesToken', () => {
+      it('should return 404 order is not exits', done => {
+        request(app)
+          .post(`/api/v1/orders/${order.id}/cancel`)
+          .set('X-Access-Token', userToken2)
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
+          })
+          .expect(404, done);
       });
     });
   });
- 
-  describe('with invalid shop route', () => {
-    it('should return 200 with orderInfo', done => {
+  
+  describe('with shipping order', () => {
+    let shippingOrder;
+    beforeEach(done => {
+      helper.factory.createOrder({
+        shopId: order.shopId,
+        userId: order.userId,
+        status: Order.STATUS.SHIPPING
+      }).then(o => {
+        expect(o.status).to.equal(Order.STATUS.SHIPPING);
+        shippingOrder = o;
+        done();
+      });
+      
+    });
+
+    it('should return 403', done => {
       request(app)
-        .put(`/api/v1/shops/0/orders/${order.id}`)
+        .post(`/api/v1/orders/${shippingOrder.id}/cancel`)
         .set('X-Access-Token', userToken1)
         .set('Content-Type', 'application/json')
-        .send({
-          note: 'ship truoc 12h',
-          shipAddress: 'D201'
-        })
         .expect(res => {
-          expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
+          expect(res.body.status).to.equal(403);
+          expect(res.body.message_code).to.equal('error.order.only_new_or_accepted_order_can_be_cancelled');
         })
-        .expect(404, done);
+        .expect(403, done);
+    });
+  });
+});
+
+describe('POST /api/v1/orders/:orderId/finish', () => {
+  let order, userToken1, userToken2;
+
+  before(done => {
+    helper.factory.createUser().then(u => {
+      userToken1 = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createOrder({ userId: u.id, status: Order.STATUS.SHIPPING});
+    }).then(o => {
+      order = o;
+      return helper.factory.createUser();
+    }).then(u => {
+      userToken2 = helper.createAccessTokenForUserId(u.id);
+      done();
+    });
+  });
+
+  describe('with shipping order', () => {
+    describe('with valid order attribute and valid accesToken', () => {
+      it('should return 200 with finished orderInfo', done => {
+        request(app)
+          .post(`/api/v1/orders/${order.id}/finish`)
+          .set('X-Access-Token', userToken1)
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            let body = res.body;
+            expect(body.status).to.equal(Order.STATUS.FINISHED);
+            expect(body.id).to.equal(order.id);
+          })
+          .expect(200, done);
+      });
+    });
+
+    describe('with invalid accesToken', () => {
+      it('should return 404 order is not exits', done => {
+        request(app)
+          .post(`/api/v1/orders/${order.id}/finish`)
+          .set('X-Access-Token', userToken2)
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
+          })
+          .expect(404, done);
+      });
+    });
+  });
+  
+  describe('with not shipping order', () => {
+    let newOrder;
+    beforeEach(done => {
+      helper.factory.createOrder({
+        shopId: order.shopId,
+        userId: order.userId
+      }).then(o => {
+        expect(o.status).to.equal(Order.STATUS.NEW);
+        newOrder = o;
+        done();
+      }).catch(done);
+      
+    });
+
+    it('should return 403', done => {
+      request(app)
+        .post(`/api/v1/orders/${newOrder.id}/finish`)
+        .set('X-Access-Token', userToken1)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          expect(res.body.status).to.equal(403);
+          expect(res.body.message_code).to.equal('error.order.only_shiping_order_has_able_to_be_finished');
+        })
+        .expect(403, done);
     });
   });
 });
@@ -406,6 +442,9 @@ describe('GET /api/v1/orders/', () => {
         .expect(res => {
           let body = res.body;
           expect(body).to.have.lengthOf(2);
+          _.sortBy(body, ['id']);
+          _.sortBy(orders, ['id']);
+          
           _([0, 1]).forEach(function(value) {
             expect(body[value].id).to.equal(orders[value].id);
             expect(body[value].note).to.equal(orders[value].note);

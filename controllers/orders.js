@@ -49,14 +49,12 @@ exports.postPlaceOrder = (req, res) => {
 
 exports.putUpdateOrder = (req, res) => {
   let user = req.user;
-  let shopId = req.params.shopId;
   let orderId = req.params.orderId;
   let reqBody = req.body;
 
   Order.findOne({
     where: {
       id: orderId,
-      shopId: shopId,
       userId: user.id
     }
   }).then(o => {
@@ -85,13 +83,11 @@ exports.putUpdateOrder = (req, res) => {
 
 exports.cancelOrder = (req, res) => {
   let user = req.user;
-  let shopId = req.params.shopId;
   let orderId = req.params.orderId;
 
   Order.findOne({
     where: {
       id: orderId,
-      shopId: shopId,
       userId: user.id
     }
   }).then(o => {
@@ -100,6 +96,32 @@ exports.cancelOrder = (req, res) => {
       return Promise.reject({status: 404, message: error, type: 'model'});
     }
     return o.cancel();
+  }).then(o => {
+    responseOrder(o, res);
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
+  });
+};
+
+exports.finishOrder = (req, res) => {
+  let user = req.user;
+  let orderId = req.params.orderId;
+
+  Order.findOne({
+    where: {
+      id: orderId,
+      userId: user.id
+    }
+  }).then(o => {
+    if (!o) {
+      let error = 'Order does not exits';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    }
+    return o.finish();
   }).then(o => {
     responseOrder(o, res);
   }).catch(err => {

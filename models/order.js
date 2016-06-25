@@ -115,7 +115,7 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
       finish: function (params) {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
           if (this.status === ORDER_STATUS.SHIPPING) {
             this.update({ status: ORDER_STATUS.FINISHED}).then(resolve, reject);
           } else {
