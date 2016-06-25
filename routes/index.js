@@ -41,6 +41,8 @@ router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
 router.put('/api/v1/shops/:shopId/orders/:orderId', orders.putUpdateOrder);
 router.put('/api/v1/shops/:shopId/orders/:orderId/cancel', orders.cancelOrder);
 
+router.get('/api/v1/orders', orders.getOrders);
+
 /*
  * Routes that can be accessed only by authenticated & authorized users
  */

@@ -283,7 +283,7 @@ describe('PUT /api/v1/shops/:shopId/orders/:orderId', () => {
   });
 });
 
-describe.only('PUT /api/v1/shops/:shopId/orders/:orderId/cancel', () => {
+describe('PUT /api/v1/shops/:shopId/orders/:orderId/cancel', () => {
   let order, userToken1, userToken2;
 
   before(done => {
@@ -372,9 +372,92 @@ describe.only('PUT /api/v1/shops/:shopId/orders/:orderId/cancel', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(404);
-          expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
+          expect(res.body.message_code).to.equal('error.model.order_does_not_exist');
         })
         .expect(404, done);
+    });
+  });
+});
+
+describe('GET /api/v1/orders/', () => {
+  let userToken, orders;
+
+  before(done => {
+    helper.factory.createUser().then(u => {
+      userToken = helper.createAccessTokenForUserId(u.id);
+
+      let promises = [];
+
+      promises[promises.length] = helper.factory.createOrder({ userId: u.id});
+      promises[promises.length] = helper.factory.createOrder({ userId: u.id, status: Order.STATUS.CANCELED});
+      return Promise.all(promises);
+    }).then(o => {
+      orders = o;
+      done();
+    });
+  });
+
+  describe('with valid accesToken and get all order', () => {
+    it('should return 200 with all orderInfo', done => {
+      request(app)
+        .get('/api/v1/orders/')
+        .set('X-Access-Token', userToken)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          let body = res.body;
+          expect(body).to.have.lengthOf(2);
+          _([0, 1]).forEach(function(value) {
+            expect(body[value].id).to.equal(orders[value].id);
+            expect(body[value].note).to.equal(orders[value].note);
+            expect(body[value].shipAddress).to.equal(orders[value].shipAddress);
+
+            orders[value].getOrderLines(ols => {
+              expect(body[value].orderLines[0].note).to.equal(ols[0].note);
+              expect(body[value].orderLines[0].quantity).to.equal(ols[0].quantity);
+              expect(body[value].orderLines[0].item).to.equal(ols[0].item);
+            });
+          });
+        })
+        .expect(200, done);
+    });
+  });
+
+  describe('with valid accesToken and get cancel order', () => {
+    it('should return 200 with 1 cancel orderInfo', done => {
+      request(app)
+        .get('/api/v1/orders/?status=CANCELED')
+        .set('X-Access-Token', userToken)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          let body = res.body;
+          let order = _.filter(orders, function(o) { return o.status === Order.STATUS.CANCELED; })[0];
+
+          expect(body).to.have.lengthOf(1);
+          expect(body[0].id).to.equal(order.id);
+          expect(body[0].note).to.equal(order.note);
+          expect(body[0].shipAddress).to.equal(order.shipAddress);
+
+          order.getOrderLines(ols => {
+            expect(body[0].orderLines[0].note).to.equal(ols[0].note);
+            expect(body[0].orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(body[0].orderLines[0].item).to.equal(ols[0].item);
+          });
+        })
+        .expect(200, done);
+    });
+  });
+
+  describe('with valid accesToken and get rejected order', () => {
+    it('should return 200 with empty array', done => {
+      request(app)
+        .get('/api/v1/orders/?status=REJECTED')
+        .set('X-Access-Token', userToken)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          let body = res.body;
+          expect(body).to.have.lengthOf(0);
+        })
+        .expect(200, done);
     });
   });
 });
