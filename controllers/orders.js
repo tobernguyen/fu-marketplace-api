@@ -7,6 +7,7 @@ var User = models.User;
 var Shop = models.Shop;
 var ShipPlace = models.ShipPlace;
 var Order = models.Order;
+var OrderLine = models.OrderLine;
 
 exports.postPlaceOrder = (req, res) => {
   let user = req.user;
@@ -48,14 +49,12 @@ exports.postPlaceOrder = (req, res) => {
 
 exports.putUpdateOrder = (req, res) => {
   let user = req.user;
-  let shopId = req.params.shopId;
   let orderId = req.params.orderId;
   let reqBody = req.body;
 
   Order.findOne({
     where: {
       id: orderId,
-      shopId: shopId,
       userId: user.id
     }
   }).then(o => {
@@ -79,6 +78,87 @@ exports.putUpdateOrder = (req, res) => {
     } else {
       errorHandlers.handleModelError(err, res);
     }
+  });
+};
+
+exports.cancelOrder = (req, res) => {
+  let user = req.user;
+  let orderId = req.params.orderId;
+
+  Order.findOne({
+    where: {
+      id: orderId,
+      userId: user.id
+    }
+  }).then(o => {
+    if (!o) {
+      let error = 'Order does not exits';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    }
+    return o.cancel();
+  }).then(o => {
+    responseOrder(o, res);
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
+  });
+};
+
+exports.finishOrder = (req, res) => {
+  let user = req.user;
+  let orderId = req.params.orderId;
+
+  Order.findOne({
+    where: {
+      id: orderId,
+      userId: user.id
+    }
+  }).then(o => {
+    if (!o) {
+      let error = 'Order does not exits';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    }
+    return o.finish();
+  }).then(o => {
+    responseOrder(o, res);
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
+  });
+};
+
+exports.getOrders = (req, res) => {
+  let user = req.user;
+  let status = req.query.status;
+
+  let orderFindOption = {
+    where: {
+      userId: user.id
+    },
+    include: OrderLine
+  };
+
+  if (status) {
+    orderFindOption.where.status = Order.STATUS[status];
+  }
+  
+  Order.findAll(orderFindOption).then(os => {
+    let result = _.map(os, o => {
+      let order = o.toJSON();
+      let orderLines = _.map(order.OrderLines, r => _.pick(r, ['item', 'note', 'quantity']));
+      order.orderLines = orderLines;
+      delete order.OrderLines;
+      return order;
+    });
+    res.json(result);
+  }).catch(err => {
+    errorHandlers.handleModelError(err, res);
   });
 };
 

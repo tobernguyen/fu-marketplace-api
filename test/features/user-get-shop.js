@@ -13,6 +13,8 @@ describe('GET /api/v1/shops/:shopId', () => {
       return helper.factory.createShopWithShipPlace({}, 'Dom A');
     }).then(s => {
       shop = s;
+      return helper.factory.createItem({ shopId: s.id});
+    }).then(() => {
       done();
     });
   });
@@ -30,6 +32,8 @@ describe('GET /api/v1/shops/:shopId', () => {
           expect(res.body.avatar).to.equal(shop.avatar);
           expect(res.body.cover).to.equal(shop.cover);
           expect(res.body.shipPlaces.length).to.equal(1);
+          expect(res.body.items.length).to.equal(1);
+          expect(res.body.seller.id).to.equal(shop.ownerId);
         })
         .expect(200, done);  
     });

@@ -266,6 +266,10 @@ var responseShopById = (shopId, res) => {
         where: { status: Item.STATUS.FOR_SELL },
         required: false
       } 
+    ],
+    order: [
+      'sort',
+      'id'
     ]
   }).then(shop => {
     if (!shop) {
@@ -274,11 +278,18 @@ var responseShopById = (shopId, res) => {
     } else {
       let result = shop.toJSON();
       let shipPlace = _.map(shop.ShipPlaces, sp => sp.id);
+      let items = _.map(shop.Items, i => {
+        let item = i.get();
+        delete item['imageFile'];
+        return item;
+      });
       let sellerInfo = shop.User.getBasicSellerInfo();
       result['shipPlaces'] = shipPlace;
+      result['seller'] = sellerInfo;
+      result['items'] = items;
       delete result['ShipPlaces'];
       delete result['User'];
-      result['seller'] = sellerInfo;
+      delete result['Items'];
       res.json(result);      
     }
   });

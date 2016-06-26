@@ -249,8 +249,8 @@ var createItem = (attrs) => {
       imageFile: attrs.imageFile,
       shopId: shopId,
       categoryId: attrs.categoryId || category.id,
-      price: faker.random.number(),
-      sort: faker.random.number(),
+      price: attrs.price || faker.random.number(),
+      sort: attrs.sort || faker.random.number(),
       status: attrs.status
     });
   });
