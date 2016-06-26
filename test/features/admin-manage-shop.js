@@ -144,7 +144,8 @@ describe('PUT /api/v1/admin/shops/:id', () => {
             fullName: 'Nguyen Van A',
             banned: 'true',
             address: 'SOME WHERE',
-            invalidattribute: 'invalid'
+            invalidattribute: 'invalid',
+            status: Shop.STATUS.PUBLISHED
           })
           .set('Content-Type', 'application/json')
           .expect(res => {
@@ -156,6 +157,7 @@ describe('PUT /api/v1/admin/shops/:id', () => {
             expect(res.body.ownerId).to.equal(seller.id);
             expect(res.body.address).to.equal('SOME WHERE');
             expect(res.body.banned).to.equal(true);
+            expect(res.body.status).to.equal(Shop.STATUS.PUBLISHED);
             expect(res.body.invalidattribute).to.be.undefined;
             let s = res.body.seller;
             expect(s.id).to.equal(seller.id);
