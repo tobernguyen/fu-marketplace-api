@@ -150,6 +150,15 @@ var getResultForScrollId = (scrollId) => {
   return client.scroll({
     scroll: SCROLL_TIME,
     scrollId: scrollId
+  }).catch(err => {
+    if (err.status >= 500) {
+      return Promise.reject(err);
+    }
+
+    let rootCauses = _.get(err, 'body.error.root_cause', []);
+    let exceptions = _.map(rootCauses, e => e.type);
+
+    return Promise.reject(exceptions[0]);
   });
 };
 exports.getResultForScrollId = getResultForScrollId;
