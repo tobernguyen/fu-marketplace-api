@@ -108,7 +108,6 @@ describe('POST /api/v1/feed/shops', () => {
         .expect(200)
         .then(res => {
           let result = res.body.result;
-          expect(result.scrollId).to.be.a('String');
           expect(result.total).to.equal(4);
           expect(result.shops).to.be.an('Array');
           expect(result.shops).to.have.lengthOf(4); // Because we have one UNPUBLISHED shop and 4 PUBLISHED shops
@@ -149,8 +148,8 @@ describe('POST /api/v1/feed/shops', () => {
     });
   });
 
-  describe('with scrollId', () => {
-    it('should return next batch of result', done => {
+  describe('with page key', () => {
+    it('should return next page of result', done => {
       request(app)
         .post('/api/v1/feed/shops')
         .set('X-Access-Token', userToken)
@@ -162,14 +161,15 @@ describe('POST /api/v1/feed/shops', () => {
         .then(res => {
           let result = res.body.result;
           expect(result.shops).to.have.lengthOf(2);
-
-          let scrollId = result.scrollId;
           
           return request(app)
             .post('/api/v1/feed/shops')
             .set('X-Access-Token', userToken)
             .set('Content-Type', 'application/json')
-            .send({scrollId: scrollId})
+            .send({
+              size: 2,
+              page: 2
+            })
             .expect(200);
         }).then(res => {
           let result = res.body.result;

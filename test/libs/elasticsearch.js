@@ -269,47 +269,48 @@ describe('libs/elasticsearch', () => {
         });
       });
     });
-  });
 
-  describe('#getResultForScrollId', () => {
-    before(function(done) {
-      this.timeout(5000);
+    describe('with the hash contain page keys', () => {
+      before(function(done) {
+        this.timeout(5000);
 
-      let promises = _.map(_.range(1,14), i => {
-        return helper.factory.createShop({
-          opening: true,
-          status: Shop.STATUS.PUBLISHED
+        let promises = _.map(_.range(1,14), i => {
+          return helper.factory.createShop({
+            opening: true,
+            status: Shop.STATUS.PUBLISHED
+          });
         });
+
+        return Promise.all(promises).then(s => {
+          return elasticsearchHelper.refreshIndexNow();
+        }).then(() => done(), done);
       });
 
-      return Promise.all(promises).then(s => {
-        setTimeout(done, 3000);
-      });
-    });
-
-    describe('when passed a valid scrollId', () => {
-      it('should return the next batch of result', done => {
+      it('should return correct record for passed page', done => {
         elasticsearch.searchShop().then((resp) => {
-          let scrollId = resp['_scroll_id'];
           let expectedPerPage = elasticsearch.__get__('DEFAULT_PER_PAGE');
-          expect(resp.hits.total).to.equal(13);
+          expect(resp.hits.total).to.equal(17);
           expect(resp.hits.hits).to.have.lengthOf(expectedPerPage);
 
-          return elasticsearch.getResultForScrollId(scrollId);
+          return elasticsearch.searchShop({page: 2});
         }).then(resp => {
-          let scrollId = resp['_scroll_id'];
           let expectedPerPage = elasticsearch.__get__('DEFAULT_PER_PAGE');
           expect(resp.hits.hits).to.have.lengthOf(expectedPerPage);
 
-          return elasticsearch.getResultForScrollId(scrollId);
+          return elasticsearch.searchShop({page: 3});
         }).then(resp => {
-          let scrollId = resp['_scroll_id'];
           let expectedPerPage = elasticsearch.__get__('DEFAULT_PER_PAGE');
-          expect(resp.hits.hits).to.have.lengthOf(13 - expectedPerPage*2);
+          expect(resp.hits.hits).to.have.lengthOf(expectedPerPage);
 
-          return elasticsearch.getResultForScrollId(scrollId);
+          return elasticsearch.searchShop({page: 4});
+        }).then(resp => {
+          let expectedPerPage = elasticsearch.__get__('DEFAULT_PER_PAGE');
+          expect(resp.hits.hits).to.have.lengthOf(17 - expectedPerPage*3);
+
+          return elasticsearch.searchShop({page: 5});
         }).then(resp => {
           expect(resp.hits.hits).to.have.lengthOf(0);
+
           done();
         }).catch(done);
       });

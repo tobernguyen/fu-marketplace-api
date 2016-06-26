@@ -22,7 +22,6 @@ var logger = require('../../libs/logger');
  * Response format
  * {
  *  result: {
- *    scrollId: String // Scroll ID to retrieve next batch of result
  *    total: Number    // Number of total shop found
  *    shops: [
  *      { 
@@ -43,18 +42,10 @@ var logger = require('../../libs/logger');
  * 
  */
 exports.searchShop = (req, res) => {
-  let searchPromise;
+  let searchParams = _.pick(req.body, ['keyword', 'size', 'categoryIds', 'shipPlaceId', 'page']);
 
-  if (req.body.scrollId) {
-    searchPromise = elasticsearch.getResultForScrollId(req.body.scrollId);
-  } else {
-    let searchParams = _.pick(req.body, ['keyword', 'size', 'categoryIds', 'shipPlaceId']);
-    searchPromise = elasticsearch.searchShop(searchParams);
-  }
-
-  searchPromise.then(result => {
+  elasticsearch.searchShop(searchParams).then(result => {
     let response = {};
-    response['scrollId'] = result['_scroll_id'];
     response['total'] = result.hits.total;
     response['shops'] = _.map(result.hits.hits, hit => {
       let shopData = hit['_source'];
@@ -68,7 +59,10 @@ exports.searchShop = (req, res) => {
       result: response
     });
   }).catch(err => {
-    logger.error(err);
-    errorHandlers.responseError(400, err, 'search', res);
+    if (err.status >= 500) {
+      logger.error(err);
+    }
+    
+    errorHandlers.responseError(400, err.message, 'search', res);
   });
 };

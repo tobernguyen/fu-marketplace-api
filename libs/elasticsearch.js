@@ -9,7 +9,6 @@ var client = new elasticsearch.Client({
 });
 var ESQ = require('esq');
 
-var SCROLL_TIME = '1m';
 var INDEX_NAME = process.env.ELASTIC_SEARCH_INDEX_NAME;
 var SHOP_DOCUMENT_NAME = 'shop';
 var DEFAULT_PER_PAGE = 5;
@@ -133,6 +132,9 @@ var searchShop = (query) => {
     term: { opening: true }
   });
 
+  let perPage = _.isNumber(query.size) ? query.size : DEFAULT_PER_PAGE;
+  let page = (_.isNumber(query.page) && query.page >= 1) ? Math.round(query.page) : 1;
+
   return client.search({
     index: INDEX_NAME,
     type: SHOP_DOCUMENT_NAME,
@@ -140,25 +142,8 @@ var searchShop = (query) => {
       query: esq.getQuery()
     },
     _source: [ 'id', 'name', 'description', 'categoryIds', 'status', 'avatar', 'cover', 'shipPlaceIds', 'seller', 'items.image', 'opening'],
-    scroll: SCROLL_TIME,
-    size: _.isNumber(query.size) ? query.size : DEFAULT_PER_PAGE
+    size: perPage,
+    from: perPage * (page - 1)
   });
 };
 exports.searchShop = searchShop;
-
-var getResultForScrollId = (scrollId) => {
-  return client.scroll({
-    scroll: SCROLL_TIME,
-    scrollId: scrollId
-  }).catch(err => {
-    if (err.status >= 500) {
-      return Promise.reject(err);
-    }
-
-    let rootCauses = _.get(err, 'body.error.root_cause', []);
-    let exceptions = _.map(rootCauses, e => e.type);
-
-    return Promise.reject(exceptions[0]);
-  });
-};
-exports.getResultForScrollId = getResultForScrollId;
