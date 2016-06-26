@@ -10,7 +10,7 @@ const fs = require('fs-extra');
 var _ = require('lodash');
 
 describe('GET /api/v1/seller/shops/:shopId/items', () => {
-  let  seller, shop1, shop2, sellerToken, category, item;
+  let  seller, shop1, shop2, sellerToken, category, items;
 
   before(done => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
@@ -28,10 +28,18 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
       category = c;
       return helper.factory.createItem({
         shopId: shop1.id,
-        categoryId: c.id
+        categoryId: c.id,
+        sort: 2
       });
     }).then(i => {
-      item = i;
+      items = [i];
+      return helper.factory.createItem({
+        shopId: i.shopId,
+        categoryId: i.categoryId,
+        sort: 1
+      });
+    }).then(i => {
+      items[items.length] = i;
       return helper.factory.createShopWithShipPlace({ ownerId: seller.id}, 'dom A');
     }).then(s => {
       shop2 = s;
@@ -45,15 +53,20 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
         .get(`/api/v1/seller/shops/${shop1.id}/items`)
         .set('X-Access-Token', sellerToken)
         .expect(res => {
-          expect(res.body.items).to.have.lengthOf(1);
-          let i = res.body.items[0];
-          expect(i.description).to.equal(item.description);
-          expect(i.id).to.equal(item.id);
-          expect(i.image).to.equal(item.image);
-          expect(i.price).to.equal(item.price);
-          expect(i.name).to.equal(item.name);
-          expect(i.shopId).to.equal(shop1.id);
-          expect(i.categoryId).to.equal(category.id);
+          let sortedItems = _.sortBy(items, 'sort', 'id');
+          expect(res.body.items).to.have.lengthOf(2);
+          _([0,1]).forEach(function(value) {
+            let i = res.body.items[value];
+            let item = sortedItems[value];
+            expect(i.id).to.equal(item.id);
+            expect(i.sort).to.equal(item.sort);
+            expect(i.description).to.equal(item.description);
+            expect(i.image).to.equal(item.image);
+            expect(i.price).to.equal(item.price);
+            expect(i.name).to.equal(item.name);
+            expect(i.shopId).to.equal(shop1.id);
+            expect(i.categoryId).to.equal(category.id);
+          });
         })
         .expect(200, done);
     });
@@ -72,8 +85,6 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
     });
   });
 });
-
-
 
 describe('POST /api/v1/seller/shops/:shopId/items', () => {
   let  shop, sellerToken, category;

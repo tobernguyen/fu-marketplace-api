@@ -18,7 +18,15 @@ exports.getItems = (req, res) => {
       id: shopId,
       ownerId: seller.id
     },
-    include: Item
+    include: [
+      {
+        model: Item,
+        order: [
+          'sort',
+          'id'
+        ]
+      }
+    ]
   }).then((shop) => {
     if (!shop) {
       let error = 'Shop does not exist';
@@ -138,6 +146,10 @@ exports.putItem = (req, res) => {
           id: itemId
         }
       }
+    ],
+    order:[
+      'sort',
+      'id'
     ]
   }).then(shop => {
     if (!shop) {
