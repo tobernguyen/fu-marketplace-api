@@ -15,7 +15,13 @@ describe('POST /api/v1/feed/shops', () => {
   before(function(done) {
     this.timeout(5000);
 
-    helper.factory.createUser({}).then(u => {
+    // This test case is sensitive to number of shops
+    // so we have to clear all shops first
+    helper.dbUtils.truncateTable('Shops').then(() => {
+      return elasticsearchHelper.resetDb();
+    }).then(u => {
+      return helper.factory.createUser({});
+    }).then(u => {
       userToken = helper.createAccessTokenForUserId(u.id);
       
       let promises = [];
@@ -90,11 +96,6 @@ describe('POST /api/v1/feed/shops', () => {
     }).then(() => {
       done();
     }).catch(done);
-  });
-
-  after(done => {
-    let promises = _.map(shops, s => s.destroy({force: true}));
-    Promise.all(promises).then(() => done(), done);
   });
 
   describe('without any params', () => {

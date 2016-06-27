@@ -61,39 +61,52 @@ describe('libs/elasticsearch', () => {
     before(function(done) {
       this.timeout(5000);
 
-      let promises = [];
-      promises[promises.length] = helper.factory.createShop({
-        name: 'Alo mình nghe',
-        description: 'Hôm nay mình có bán xúc xích luộc, trứng luộc, nước chanh, mong các bạn ủng hộ.',
-        opening: true,
-        status: Shop.STATUS.PUBLISHED
-      });
-      promises[promises.length] = helper.factory.createShop({
-        name: 'ORIOLE SHOP',
-        description: 'HOA QUẢ - NƯỚC NGỌT - BIA - ĐỒ ĂN VẶT - MÌ TÔM',
-        opening: false,
-        status: Shop.STATUS.PUBLISHED
-      });
-      promises[promises.length] = helper.factory.createShop({
-        name: 'Bá Long Shop',
-        description: 'BIG SIZE✦BÁNH MỲ PATE TRỨNG ✦ BÁNH MỲ PATE CHẢ RUỐC ✦ 15K✦TRÀ SỮA SOCOLA ✦ [HẾT TRÀ SỮA THÁI XANH',
-        opening: true,
-        status: Shop.STATUS.PUBLISHED
-      });
-      promises[promises.length] = helper.factory.createShop({
-        name: 'Vũ Đức Hiếu',
-        description: 'BÚN NGAN BÁNH BAO LẠC LUỘC NƯỚC CHANH NƯỚC NGỌT THUỐC LÁ',
-        opening: true,
-        status: Shop.STATUS.UNPUBLISHED
-      });
-      promises[promises.length] = helper.factory.createShop({
-        name: 'LK Game Store',
-        description: 'Hiện mình nhận cung cấp bản quyền game giá rẻ trên steam, giá giao động từ 10->18k/$ tùy từng game. Và qua đêm nay là đến summer sales, đây là cơ hội tốt để mọi người có thể mua game bản quyền với những cái giá không thể rẻ hơn.',
-        opening: true,
-        status: Shop.STATUS.PUBLISHED
-      });
+      // This test case is sensitive to number of shops
+      // so we have to clear all shops first
+      helper.dbUtils.truncateTable('Shops').then(() => {
+        return elasticsearchHelper.resetDb();
+      }).then(() => {
+        let promises = [];
+        promises[promises.length] = helper.factory.createShop({
+          name: 'Alo mình nghe',
+          description: 'Hôm nay mình có bán xúc xích luộc, trứng luộc, nước chanh, mong các bạn ủng hộ.',
+          opening: true,
+          status: Shop.STATUS.PUBLISHED
+        });
+        promises[promises.length] = helper.factory.createShop({
+          name: 'ORIOLE SHOP',
+          description: 'HOA QUẢ - NƯỚC NGỌT - BIA - ĐỒ ĂN VẶT - MÌ TÔM',
+          opening: false,
+          status: Shop.STATUS.PUBLISHED
+        });
+        promises[promises.length] = helper.factory.createShop({
+          name: 'Bá Long Shop',
+          description: 'BIG SIZE✦BÁNH MỲ PATE TRỨNG ✦ BÁNH MỲ PATE CHẢ RUỐC ✦ 15K✦TRÀ SỮA SOCOLA ✦ [HẾT TRÀ SỮA THÁI XANH',
+          opening: true,
+          status: Shop.STATUS.PUBLISHED
+        });
+        promises[promises.length] = helper.factory.createShop({
+          name: 'Vũ Đức Hiếu',
+          description: 'BÚN NGAN BÁNH BAO LẠC LUỘC NƯỚC CHANH NƯỚC NGỌT THUỐC LÁ',
+          opening: true,
+          status: Shop.STATUS.UNPUBLISHED
+        });
+        promises[promises.length] = helper.factory.createShop({
+          name: 'LK Game Store',
+          description: 'Hiện mình nhận cung cấp bản quyền game giá rẻ trên steam, giá giao động từ 10->18k/$ tùy từng game. Và qua đêm nay là đến summer sales, đây là cơ hội tốt để mọi người có thể mua game bản quyền với những cái giá không thể rẻ hơn.',
+          opening: true,
+          status: Shop.STATUS.PUBLISHED
+        });
+        promises[promises.length] = helper.factory.createShop({
+          name: 'Banned shop',
+          description: 'Tôi là một shop đã bị banned',
+          opening: true,
+          status: Shop.STATUS.PUBLISHED,
+          banned: true
+        });
 
-      Promise.all(promises).then(result => {
+        return Promise.all(promises);
+      }).then(result => {
         shops = result;
 
         let promises = [];
@@ -139,17 +152,12 @@ describe('libs/elasticsearch', () => {
       }).catch(done);
     });
 
-    after(done => {
-      let promises = _.map(shops, s => s.destroy({force: true}));
-      Promise.all(promises).then(() => done(), done);
-    });
-
     describe('with one empty agruments', done => {
       it('should return search result contains published shops and from opening shops to closing shops', done => {
         elasticsearch.searchShop().then(resp => {
           expect(resp.hits.total).to.equal(4);
           expect(resp.hits.hits).to.be.an('Array');
-          expect(resp.hits.hits).to.have.lengthOf(4); // Because we have one unpublised shops
+          expect(resp.hits.hits).to.have.lengthOf(4); // Because we have one unpublised shop and one banned shop
 
           let firstShop = resp.hits.hits[0];
           let expectedFirstShop = shops[_.findIndex(shops, s => s.id == firstShop['_id'])];
@@ -157,7 +165,6 @@ describe('libs/elasticsearch', () => {
           expect(actualFirstShopData.name).to.equal(expectedFirstShop.name);
           expect(actualFirstShopData.description).to.equal(expectedFirstShop.description);
           expect(actualFirstShopData.opening).to.equal(expectedFirstShop.opening);
-          expect(actualFirstShopData.status).to.equal(expectedFirstShop.status);
 
           let lastShop = resp.hits.hits[3];
           let actualLastShopData = lastShop['_source'];

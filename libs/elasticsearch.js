@@ -5,7 +5,7 @@ var logger = require('./logger');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: process.env.ELASTIC_SEARCH_HOST,
-  log: process.env.ELASTIC_SEARCH_LOG_LEVEL
+  log: process.env.ELASTIC_SEARCH_LOG_LEVEL || 'error'
 });
 var ESQ = require('esq');
 
@@ -17,7 +17,7 @@ var buildShopDocument = (shopId) => {
   let models = require('../models');
 
   return models.Shop.findOne({
-    attributes: ['name', 'description', 'opening', 'status', 'avatar', 'cover'],
+    attributes: ['name', 'description', 'opening', 'status', 'avatar', 'cover', 'banned'],
     where: {
       id: shopId
     },
@@ -37,7 +37,7 @@ var buildShopDocument = (shopId) => {
     }]
   }).then(shop => {
     if (!shop) return Promise.reject('Shop not found, skip indexing.');
-    let shopDocument = _.pick(shop, ['name', 'description', 'opening', 'status', 'avatar', 'cover']);
+    let shopDocument = _.pick(shop, ['name', 'description', 'opening', 'status', 'avatar', 'cover', 'banned']);
     shopDocument['seller'] = _.pick(shop.User, ['id', 'fullName']);
     shopDocument['items'] = _.map(shop.Items, i => {
       return {
@@ -116,6 +116,10 @@ var searchShop = (query) => {
     term: { status: models.Shop.STATUS.PUBLISHED }
   });
 
+  esq.query('bool', ['must'], {
+    term: { banned: false }
+  });
+
   if (_.isArray(query.categoryIds)) {
     esq.query('bool', ['must'], {
       terms: { categoryIds: query.categoryIds }
@@ -141,7 +145,7 @@ var searchShop = (query) => {
     body: {
       query: esq.getQuery()
     },
-    _source: [ 'id', 'name', 'description', 'categoryIds', 'status', 'avatar', 'cover', 'shipPlaceIds', 'seller', 'items.image', 'opening'],
+    _source: [ 'id', 'name', 'description', 'categoryIds', 'avatar', 'cover', 'shipPlaceIds', 'seller', 'items.image', 'opening'],
     size: perPage,
     from: perPage * (page - 1)
   });

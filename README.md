@@ -3,6 +3,7 @@
 ## Prerequirement
 - PostgreSQL 9.1 or higher
 - GraphicMagick 1.3.x or higher
+- Elasticsearch 2.x (2.3 at this time write this README)
 
 ## Setup
 Install dependencies
@@ -10,20 +11,27 @@ Install dependencies
 npm install
 ```
 
-Create config file for development environment by copying `.env.example` to `.env.development` and edit it to match your postgresql setting:
+Create config file for development environment by copying `.env.example` to `.env.development` and edit it to match your postgresql and elasticsearch setting:
 ```
 DB_CONNECTION_STRING=postgres://postgres:postgres@localhost:5432/fu_marketplace
+...
+ELASTIC_SEARCH_HOST=localhost:9200
+ELASTIC_SEARCH_INDEX_NAME=fum
 ```
 
 And also edit `.env.test` to match to postgresql setting:
 ```
 DB_CONNECTION_STRING=postgres://postgres:postgres@localhost:5432/fu_marketplace_test
+...
+ELASTIC_SEARCH_HOST=localhost:9200
+ELASTIC_SEARCH_INDEX_NAME=fum_test
 ```
 
-Run migrations and seeds
+Run migrations, seeds and elasticsearch setup
 ```bash
 npm run db:migrate
 npm run db:seed:all
+npm run setup:elasticsearch
 ```
 
 Start local server

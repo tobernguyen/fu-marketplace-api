@@ -147,7 +147,7 @@ exports.postChangeShopShipPlaces = (req, res) => {
             }
           }
         }).then(sp => {
-          return shop.setShipPlaces(sp);
+          return shop.setShipPlacesThenUpdateIndex(sp);
         }).then(s => {
           responseShopById(shop.id, res);
         }).catch(err => {

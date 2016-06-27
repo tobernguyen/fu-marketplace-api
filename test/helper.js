@@ -52,6 +52,9 @@ var dbUtils = {
   },
   clearDatabase: () => {
     return _sequelize.query('DROP SCHEMA public CASCADE;create schema public;');
+  },
+  truncateTable: (table) => {
+    return _sequelize.query(`truncate table public."${table}" CASCADE;`, {raw: true});
   }
 };
 

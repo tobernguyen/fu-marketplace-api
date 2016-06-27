@@ -18,7 +18,10 @@
     "nsp": "nsp check",
     "sequelize": "sequelize",
     "lint": "gulp lint",
-    "lint-n-fix": "gulp lint-n-fix"
+    "lint-n-fix": "gulp lint-n-fix",
+    "setup:elasticsearch": "node bin/setup-elasticsearch.js",
+    "setup:elasticsearch:force": "FORCE_UPDATE=true node bin/setup-elasticsearch.js",
+    "elasticsearch:index:all": "node bin/index-all-documents.js"
   },
   "dependencies": {
     "aws-sdk": "^2.3.18",

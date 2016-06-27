@@ -90,6 +90,7 @@
             }
           }
         },
+        "banned": {"type": "boolean", "index": "not_analyzed", "null_value": false},
         "categoryIds": {"type": "integer", "index": "not_analyzed"},
         "shipPlaceIds": {"type": "integer", "index": "not_analyzed"},
         "opening": {"type": "boolean", "index": "not_analyzed"},

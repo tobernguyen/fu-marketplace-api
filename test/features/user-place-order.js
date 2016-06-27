@@ -442,18 +442,18 @@ describe('GET /api/v1/orders/', () => {
         .expect(res => {
           let body = res.body;
           expect(body).to.have.lengthOf(2);
-          _.sortBy(body, ['id']);
-          _.sortBy(orders, ['id']);
+          let sortedBody = _.sortBy(body, ['id']);
+          let sortedOrders = _.sortBy(orders, ['id']);
           
           _([0, 1]).forEach(function(value) {
-            expect(body[value].id).to.equal(orders[value].id);
-            expect(body[value].note).to.equal(orders[value].note);
-            expect(body[value].shipAddress).to.equal(orders[value].shipAddress);
+            expect(sortedBody[value].id).to.equal(sortedOrders[value].id);
+            expect(sortedBody[value].note).to.equal(sortedOrders[value].note);
+            expect(sortedBody[value].shipAddress).to.equal(sortedOrders[value].shipAddress);
 
-            orders[value].getOrderLines(ols => {
-              expect(body[value].orderLines[0].note).to.equal(ols[0].note);
-              expect(body[value].orderLines[0].quantity).to.equal(ols[0].quantity);
-              expect(body[value].orderLines[0].item).to.equal(ols[0].item);
+            sortedOrders[value].getOrderLines(ols => {
+              expect(sortedBody[value].orderLines[0].note).to.equal(ols[0].note);
+              expect(sortedBody[value].orderLines[0].quantity).to.equal(ols[0].quantity);
+              expect(sortedBody[value].orderLines[0].item).to.equal(ols[0].item);
             });
           });
         })
