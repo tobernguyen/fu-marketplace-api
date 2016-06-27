@@ -230,7 +230,7 @@ describe('PUT /api/v1/seller/shops/:id', () => {
               banned: 'true',
               invalidattribute: 'invalid',
               opening: 'true',
-              status: 0
+              status: Shop.STATUS.UNPUBLISHED
             })
             .set('Content-Type', 'application/json')
             .expect(res => {
