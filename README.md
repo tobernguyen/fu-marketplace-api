@@ -34,6 +34,12 @@ npm run db:seed:all
 npm run setup:elasticsearch
 ```
 
+## SEED
+Run shop seeder:
+```bash
+npm run utils:seeder:shop
+```
+
 Start local server
 ```bash
 npm start

@@ -7,7 +7,7 @@ const Category = require('../../models').Category;
 const ShipPlace = require('../../models').ShipPlace;
 const _ = require('lodash');
 
-describe.only('GET /api/v1/metadata', () => {
+describe('GET /api/v1/metadata', () => {
   let accessToken, categories, shipPlaces;
   
   before(done => {

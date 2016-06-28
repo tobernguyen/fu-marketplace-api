@@ -21,7 +21,8 @@
     "lint-n-fix": "gulp lint-n-fix",
     "setup:elasticsearch": "node bin/setup-elasticsearch.js",
     "setup:elasticsearch:force": "FORCE_UPDATE=true node bin/setup-elasticsearch.js",
-    "elasticsearch:index:all": "node bin/index-all-documents.js"
+    "elasticsearch:index:all": "node bin/index-all-documents.js",
+    "utils:seeder:shop": "node bin/shop-seeder.js"
   },
   "dependencies": {
     "aws-sdk": "^2.3.18",
@@ -65,6 +66,7 @@
     "mocha": "^2.4.5",
     "node-mocks-http": "^1.5.2",
     "nsp": "^2.4.0",
+    "prompt": "^1.0.0",
     "rewire": "^2.5.1",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",

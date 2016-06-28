@@ -58,6 +58,7 @@ exports.putShop = (req, res) => {
         sanitizeUpdateRequest(req, false);
         shop.update(getUpdateParams(req, false)).then(shop => {
           responseShop(shop, res);
+          return null;
         }).catch(err => {
           errorHandlers.handleModelError(err, res);
         });
