@@ -11,6 +11,7 @@ const shipPlace = require('../controllers/shipPlaces');
 const category = require('../controllers/categories');
 const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
 const shopFeed = require('../controllers/feed/shops');
+const application = require('../controllers/application');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -37,6 +38,7 @@ router.get('/api/v1/users/me/shopOpeningRequests', users.getShopOpeningRequests)
 router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTime);
 router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
 router.get('/api/v1/categories', category.getCategories);
+router.get('/api/v1/metadata', application.getMetadata);
 router.get('/api/v1/shops/:shopId', users.getShop);
 router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
 
