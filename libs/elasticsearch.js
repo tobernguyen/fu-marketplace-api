@@ -139,11 +139,25 @@ var searchShop = (query) => {
   let perPage = _.isNumber(query.size) ? query.size : DEFAULT_PER_PAGE;
   let page = (_.isNumber(query.page) && query.page >= 1) ? Math.round(query.page) : 1;
 
+
+
   return client.search({
     index: INDEX_NAME,
     type: SHOP_DOCUMENT_NAME,
     body: {
-      query: esq.getQuery()
+      query: esq.getQuery(),
+      aggregations: {
+        category: {
+          terms: {
+            field: 'categoryIds'
+          }
+        },
+        shipPlace: {
+          terms: {
+            field: 'shipPlaceIds'
+          }
+        }
+      }
     },
     _source: [ 'id', 'name', 'description', 'categoryIds', 'avatar', 'cover', 'shipPlaceIds', 'seller', 'items.image', 'opening'],
     size: perPage,

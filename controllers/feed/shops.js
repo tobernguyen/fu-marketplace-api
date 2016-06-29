@@ -55,6 +55,12 @@ exports.searchShop = (req, res) => {
       return shop;
     });
 
+    // Build aggregations
+    response['aggregations'] = {
+      category: _.get(result, 'aggregations.category.buckets'),
+      shipPlace: _.get(result, 'aggregations.shipPlace.buckets')
+    };
+
     res.json({
       result: response
     });
