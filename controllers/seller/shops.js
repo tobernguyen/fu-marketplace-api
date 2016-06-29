@@ -139,8 +139,8 @@ exports.postShopUploadCover = (req, res) => {
           maxFileSize: Shop.MAXIMUM_COVER_SIZE,
           versions: [
             {
-              resize: '900x400',
-              crop: '900x400',
+              resize: '850x250',
+              crop: '850x250',
               quality: 90,
               fileName: `shops/${shop.id}/cover`
             }
