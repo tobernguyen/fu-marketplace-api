@@ -11,7 +11,9 @@ module.exports = function(sequelize, DataTypes) {
   let OrderLine = sequelize.define('OrderLine', {
     orderId: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      onUpdate: 'cascade',
+      onDelete: 'cascade'
     },
     item: {
       type: DataTypes.JSON,

@@ -132,6 +132,10 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'userId',
           constraints: false
         });
+        User.hasMany(models.UserNotification, {
+          foreignKey: 'userId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {

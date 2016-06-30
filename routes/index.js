@@ -13,6 +13,7 @@ const category = require('../controllers/categories');
 const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
 const shopFeed = require('../controllers/feed/shops');
 const application = require('../controllers/application');
+const userNotifications = require('../controllers/userNotifications');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -32,6 +33,9 @@ router.get('/api/v1/users/me', users.getCurrentUser);
 router.put('/api/v1/users/me', users.putCurrentUser);
 router.post('/api/v1/users/me/uploadAvatar', users.postUploadCurrentUserAvatar);
 router.post('/api/v1/users/me/uploadIdentityPhoto', users.postUserUploadIdentityPhoto);
+router.get('/api/v1/users/me/notifications', userNotifications.getUserNotifications);
+router.post('/api/v1/users/me/notifications/:id/read', userNotifications.postMarkUserNotificationAsRead);
+router.post('/api/v1/users/me/notifications/read', userNotifications.postMarkAllUserNotificationAsRead);
 
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 
