@@ -90,12 +90,13 @@ module.exports = function(sequelize, DataTypes) {
             return this.update({
               status: SHOP_OPENING_REQUEST_STATUS.ACCEPTED,
               adminMessage: adminMessage
-            });
-          }, {transaction: t}).then(() => {
+            }, {transaction: t});
+          }).then(() => {
             // Assign role seller to user if he/she is not
             return sequelize.model('User').findOne({
               where: {id: this.ownerId},
-              include: sequelize.model('Role')
+              include: sequelize.model('Role'),
+              transaction: t
             }).then(u => {
               let owner = u;
 
@@ -105,11 +106,12 @@ module.exports = function(sequelize, DataTypes) {
                 return sequelize.model('Role').findOne({
                   where: {
                     name: 'seller'
-                  }
-                }).then(r => owner.addRole(r));
+                  },
+                  transaction: t
+                }).then(r => owner.addRole(r, {transaction: t}));
               }
             });
-          }, {transaction: t});
+          });
         });        
       },
       reject: function(adminMessage) {
