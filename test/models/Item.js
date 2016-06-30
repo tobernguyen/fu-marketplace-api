@@ -47,6 +47,8 @@ describe('Item Model', () => {
         IGNORE_ATTRIBUTES.forEach(attribute => {
           expect(actualJSON[attribute]).to.be.undefined;
         });
+
+        expect(actualJSON.quantity).to.equal((item.quantity < 0) ? 0 : item.quantity); 
         done();
       });
     });

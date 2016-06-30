@@ -8,8 +8,15 @@ var Item = models.Item;
 var Shop = models.Shop;
 var imageUploader = require('../../libs/image-uploader');
 
+const DEFAULT_PAGE_SIZE = 10;
+
 exports.getItems = (req, res) => {
   let shopId = req.params.shopId;
+  let size = _.toNumber(req.query.size);
+  let page = _.toNumber(req.query.page);
+
+  let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
+  let offset = page > 0 ? (page - 1) * perPage : 0;
   
   let seller = req.user;
 
@@ -24,7 +31,9 @@ exports.getItems = (req, res) => {
         order: [
           'sort',
           'id'
-        ]
+        ],
+        limit: perPage,
+        offset: offset
       }
     ]
   }).then((shop) => {

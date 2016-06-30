@@ -100,6 +100,10 @@ module.exports = function(sequelize, DataTypes) {
         IGNORE_ATTRIBUTES.forEach(attr => {
           delete values[attr];
         });
+
+        if (values.quantity < 0) {
+          values.quantity = 0;
+        }
         
         return values;
       }

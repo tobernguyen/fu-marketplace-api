@@ -33,3 +33,6 @@ Thumbs.db
 
 # Temporary uploads
 public/uploads/
+
+# Istanbul Coverage Reports
+coverage

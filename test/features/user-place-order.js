@@ -340,81 +340,6 @@ describe('POST /api/v1/orders/:orderId/cancel', () => {
   });
 });
 
-describe('POST /api/v1/orders/:orderId/finish', () => {
-  let order, userToken1, userToken2;
-
-  before(done => {
-    helper.factory.createUser().then(u => {
-      userToken1 = helper.createAccessTokenForUserId(u.id);
-      return helper.factory.createOrder({ userId: u.id, status: Order.STATUS.SHIPPING});
-    }).then(o => {
-      order = o;
-      return helper.factory.createUser();
-    }).then(u => {
-      userToken2 = helper.createAccessTokenForUserId(u.id);
-      done();
-    });
-  });
-
-  describe('with shipping order', () => {
-    describe('with valid order attribute and valid accesToken', () => {
-      it('should return 200 with finished orderInfo', done => {
-        request(app)
-          .post(`/api/v1/orders/${order.id}/finish`)
-          .set('X-Access-Token', userToken1)
-          .set('Content-Type', 'application/json')
-          .expect(res => {
-            let body = res.body;
-            expect(body.status).to.equal(Order.STATUS.FINISHED);
-            expect(body.id).to.equal(order.id);
-          })
-          .expect(200, done);
-      });
-    });
-
-    describe('with invalid accesToken', () => {
-      it('should return 404 order is not exits', done => {
-        request(app)
-          .post(`/api/v1/orders/${order.id}/finish`)
-          .set('X-Access-Token', userToken2)
-          .set('Content-Type', 'application/json')
-          .expect(res => {
-            expect(res.body.status).to.equal(404);
-            expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
-          })
-          .expect(404, done);
-      });
-    });
-  });
-  
-  describe('with not shipping order', () => {
-    let newOrder;
-    beforeEach(done => {
-      helper.factory.createOrder({
-        shopId: order.shopId,
-        userId: order.userId
-      }).then(o => {
-        expect(o.status).to.equal(Order.STATUS.NEW);
-        newOrder = o;
-        done();
-      }).catch(done);
-      
-    });
-
-    it('should return 403', done => {
-      request(app)
-        .post(`/api/v1/orders/${newOrder.id}/finish`)
-        .set('X-Access-Token', userToken1)
-        .set('Content-Type', 'application/json')
-        .expect(res => {
-          expect(res.body.status).to.equal(403);
-          expect(res.body.message_code).to.equal('error.order.only_shiping_order_has_able_to_be_finished');
-        })
-        .expect(403, done);
-    });
-  });
-});
-
 describe('GET /api/v1/orders/', () => {
   let userToken, orders;
 
@@ -440,9 +365,9 @@ describe('GET /api/v1/orders/', () => {
         .set('X-Access-Token', userToken)
         .set('Content-Type', 'application/json')
         .expect(res => {
-          let body = res.body;
-          expect(body).to.have.lengthOf(2);
-          let sortedBody = _.sortBy(body, ['id']);
+          let bodyOrders = res.body.orders;
+          expect(bodyOrders).to.have.lengthOf(2);
+          let sortedBody = _.sortBy(bodyOrders, ['id']);
           let sortedOrders = _.sortBy(orders, ['id']);
           
           _([0, 1]).forEach(function(value) {
@@ -468,18 +393,18 @@ describe('GET /api/v1/orders/', () => {
         .set('X-Access-Token', userToken)
         .set('Content-Type', 'application/json')
         .expect(res => {
-          let body = res.body;
+          let bodyOrders = res.body.orders;
           let order = _.filter(orders, function(o) { return o.status === Order.STATUS.CANCELED; })[0];
 
-          expect(body).to.have.lengthOf(1);
-          expect(body[0].id).to.equal(order.id);
-          expect(body[0].note).to.equal(order.note);
-          expect(body[0].shipAddress).to.equal(order.shipAddress);
+          expect(bodyOrders).to.have.lengthOf(1);
+          expect(bodyOrders[0].id).to.equal(order.id);
+          expect(bodyOrders[0].note).to.equal(order.note);
+          expect(bodyOrders[0].shipAddress).to.equal(order.shipAddress);
 
           order.getOrderLines(ols => {
-            expect(body[0].orderLines[0].note).to.equal(ols[0].note);
-            expect(body[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-            expect(body[0].orderLines[0].item).to.equal(ols[0].item);
+            expect(bodyOrders[0].orderLines[0].note).to.equal(ols[0].note);
+            expect(bodyOrders[0].orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(bodyOrders[0].orderLines[0].item).to.equal(ols[0].item);
           });
         })
         .expect(200, done);
@@ -493,8 +418,8 @@ describe('GET /api/v1/orders/', () => {
         .set('X-Access-Token', userToken)
         .set('Content-Type', 'application/json')
         .expect(res => {
-          let body = res.body;
-          expect(body).to.have.lengthOf(0);
+          let bodyOrders = res.body.orders;
+          expect(bodyOrders).to.have.lengthOf(0);
         })
         .expect(200, done);
     });

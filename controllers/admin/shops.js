@@ -11,12 +11,22 @@ var sanitizeUpdateRequest = shopUpdateNormalizer.sanitizeUpdateRequest;
 var getUpdateParams = shopUpdateNormalizer.getUpdateParams;
 var imageUploader = require('../../libs/image-uploader');
 
+const DEFAULT_PAGE_SIZE = 10;
+
 exports.getShops = (req, res) => {
+  let size = _.toNumber(req.query.size);
+  let page = _.toNumber(req.query.page);
+
+  let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
+  let offset = page > 0 ? (page - 1) * perPage : 0;
+
   Shop.findAll({
     include: [
       ShipPlace,
       User
-    ]
+    ],
+    limit: perPage,
+    offset: offset
   }).then(shops => {
     let result = _.map(shops, s => {
       let shop = s.toJSON();

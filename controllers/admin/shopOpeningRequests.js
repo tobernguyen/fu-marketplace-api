@@ -7,8 +7,14 @@ var User = models.User;
 var errorHandlers = require('../helpers/errorHandlers');
 var logger = require('../../libs/logger');
 
+const DEFAULT_PAGE_SIZE = 10;
+
 exports.getShopOpeningRequests = (req, res) => {
   let shopOpeningRequestQuery;
+  let size = _.toNumber(req.query.size);
+  let page = _.toNumber(req.query.page);
+  let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
+  let offset = page > 0 ? (page - 1) * perPage : 0;
 
   if (req.query.showAll) {
     shopOpeningRequestQuery = ShopOpeningRequest;
@@ -17,7 +23,9 @@ exports.getShopOpeningRequests = (req, res) => {
   }
 
   shopOpeningRequestQuery.findAll({
-    include: User
+    include: User,
+    limit: perPage,
+    offset: offset
   }).then(shops => {
     let result = _.map(shops, s => {
       let shop = s.toJSON();

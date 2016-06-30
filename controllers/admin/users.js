@@ -9,9 +9,19 @@ var sanitizeUpdateRequest = userUpdateNormalizer.sanitizeUpdateRequest;
 var getUpdateParams = userUpdateNormalizer.getUpdateParams;
 var errorHandlers = require('../helpers/errorHandlers');
 
+const DEFAULT_PAGE_SIZE = 10;
+
 exports.getUsers = (req, res) => {
+  let size = _.toNumber(req.query.size);
+  let page = _.toNumber(req.query.page);
+
+  let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
+  let offset = page > 0 ? (page - 1) * perPage : 0;
+
   User.findAll({
-    include: Role
+    include: Role,
+    limit: perPage,
+    offset: offset
   }).then(users => {
     let result = _.map(users, u => {
       let user = u.toJSON();

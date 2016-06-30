@@ -7,6 +7,7 @@ const adminUser = require('../controllers/admin/users');
 const adminShop = require('../controllers/admin/shops');
 const sellerShop = require('../controllers/seller/shops');
 const sellerItem = require('../controllers/seller/items');
+const sellerOrder = require('../controllers/seller/orders');
 const shipPlace = require('../controllers/shipPlaces');
 const category = require('../controllers/categories');
 const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
@@ -45,7 +46,6 @@ router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
 router.get('/api/v1/orders', orders.getOrders);
 router.put('/api/v1/orders/:orderId', orders.putUpdateOrder);
 router.post('/api/v1/orders/:orderId/cancel', orders.cancelOrder);
-router.post('/api/v1/orders/:orderId/finish', orders.finishOrder);
 
 router.post('/api/v1/feed/shops', shopFeed.searchShop);
 
@@ -85,4 +85,11 @@ router.get('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('sell
 router.post('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), sellerItem.postItems);
 router.put('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.putItem);
 router.delete('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.deleteItem);
+router.get('/api/v1/seller/shops/:shopId/orders', mustBe.authorized('seller'), sellerOrder.getOrderByShop);
+router.post('/api/v1/seller/orders/:orderId/accept', mustBe.authorized('seller'), sellerOrder.acceptOrder);
+router.post('/api/v1/seller/orders/:orderId/reject', mustBe.authorized('seller'), sellerOrder.rejectOrder);
+router.post('/api/v1/seller/orders/:orderId/ship', mustBe.authorized('seller'), sellerOrder.shipOrder);
+router.post('/api/v1/seller/orders/:orderId/complete', mustBe.authorized('seller'), sellerOrder.completeOrder);
+router.post('/api/v1/seller/orders/:orderId/abort', mustBe.authorized('seller'), sellerOrder.abortOrder);
+
 module.exports = router;

@@ -9,6 +9,8 @@ var ShipPlace = models.ShipPlace;
 var Order = models.Order;
 var OrderLine = models.OrderLine;
 
+const DEFAULT_PAGE_SIZE = 10;
+
 exports.postPlaceOrder = (req, res) => {
   let user = req.user;
   let shopId = req.params.shopId;
@@ -82,66 +84,26 @@ exports.putUpdateOrder = (req, res) => {
 };
 
 exports.cancelOrder = (req, res) => {
-  let user = req.user;
-  let orderId = req.params.orderId;
-
-  Order.findOne({
-    where: {
-      id: orderId,
-      userId: user.id
-    }
-  }).then(o => {
-    if (!o) {
-      let error = 'Order does not exits';
-      return Promise.reject({status: 404, message: error, type: 'model'});
-    }
-    return o.cancel();
-  }).then(o => {
-    responseOrder(o, res);
-  }).catch(err => {
-    if (err.status) {
-      errorHandlers.responseError(err.status, err.message, err.type, res);
-    } else {
-      errorHandlers.handleModelError(err, res);
-    }
-  });
-};
-
-exports.finishOrder = (req, res) => {
-  let user = req.user;
-  let orderId = req.params.orderId;
-
-  Order.findOne({
-    where: {
-      id: orderId,
-      userId: user.id
-    }
-  }).then(o => {
-    if (!o) {
-      let error = 'Order does not exits';
-      return Promise.reject({status: 404, message: error, type: 'model'});
-    }
-    return o.finish();
-  }).then(o => {
-    responseOrder(o, res);
-  }).catch(err => {
-    if (err.status) {
-      errorHandlers.responseError(err.status, err.message, err.type, res);
-    } else {
-      errorHandlers.handleModelError(err, res);
-    }
-  });
+  tryChangeOrderStatus(req, res, 'cancel');
 };
 
 exports.getOrders = (req, res) => {
   let user = req.user;
   let status = req.query.status;
 
+  let size = _.toNumber(req.query.size);
+  let page = _.toNumber(req.query.page);
+
+  let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
+  let offset = page > 0 ? (page - 1) * perPage : 0;
+
   let orderFindOption = {
     where: {
       userId: user.id
     },
-    include: OrderLine
+    include: OrderLine,
+    limit: perPage,
+    offset: offset
   };
 
   if (status) {
@@ -156,9 +118,37 @@ exports.getOrders = (req, res) => {
       delete order.OrderLines;
       return order;
     });
-    res.json(result);
+    res.json({
+      orders: result
+    });
   }).catch(err => {
     errorHandlers.handleModelError(err, res);
+  });
+};
+
+var tryChangeOrderStatus = (req, res, action) => {
+  let user = req.user;
+  let orderId = req.params.orderId;
+
+  Order.findOne({
+    where: {
+      id: orderId,
+      userId: user.id
+    }
+  }).then(o => {
+    if (!o) {
+      let error = 'Order does not exits';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    }
+    return o[action]();
+  }).then(o => {
+    responseOrder(o, res);
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
   });
 };
 

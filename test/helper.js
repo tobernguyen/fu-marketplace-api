@@ -254,7 +254,8 @@ var createItem = (attrs) => {
       categoryId: attrs.categoryId || category.id,
       price: attrs.price || faker.random.number(),
       sort: attrs.sort || faker.random.number(),
-      status: attrs.status
+      status: attrs.status,
+      quantity: attrs.quantity
     });
   });
 };
@@ -270,7 +271,7 @@ var createOrder = (attrs) => {
   let OrderLine = models.OrderLine;
 
   if (!attrs.items) {
-    createItemPromise = createItem().then(item => {
+    createItemPromise = createItem({ shopId: attrs.shopId}).then(item => {
       return Promise.resolve([item]);
     });
   } else {
@@ -305,7 +306,7 @@ var createOrder = (attrs) => {
     order = o;
     let orderLineData = _.map(items, i => {
       let orderLine = getQuantityAndNoteOfItems(attrs.items, i.id);
-      orderLine.item = _.pick(i, ['name', 'description', 'price']);
+      orderLine.item = _.pick(i, ['id', 'name', 'description', 'price']);
       orderLine.orderId = order.id;
       return orderLine;
     });
