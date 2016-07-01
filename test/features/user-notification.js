@@ -22,7 +22,7 @@ describe('GET /api/v1/users/me/notifications', () => {
       _.times(20, i => {
         promises[promises.length] = models.UserNotification.create({
           userId: u.id,
-          type: models.UserNotification.NOTIFICATION_TYPE.ORDER_CHANGE,
+          type: models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
           data: {shopId: i, shopName: faker.name.findName(), orderId: i + 1, oldStatus: Order.STATUS.NEW, newStatus: Order.STATUS.ACCEPTED}
         });
       });
@@ -33,7 +33,7 @@ describe('GET /api/v1/users/me/notifications', () => {
 
       return models.UserNotification.create({
         userId: user.id,
-        type: models.UserNotification.NOTIFICATION_TYPE.ORDER_CHANGE,
+        type: models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
         data: {shopId: 1, shopName: 'Alo bố nghe', orderId: 2, oldStatus: Order.STATUS.NEW, newStatus: Order.STATUS.ACCEPTED}
       });
     }).then(n => {
@@ -41,7 +41,7 @@ describe('GET /api/v1/users/me/notifications', () => {
 
       return models.UserNotification.create({
         userId: user.id,
-        type: models.UserNotification.NOTIFICATION_TYPE.ORDER_CHANGE,
+        type: models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
         data: {shopId: 2, shopName: 'Alo mình nghe', orderId: 3, oldStatus: Order.STATUS.ACCEPTED, newStatus: Order.STATUS.SHIPPING}
       }); 
     }).then(n => {
@@ -74,7 +74,7 @@ describe('GET /api/v1/users/me/notifications', () => {
           expect(firstNotification.data).to.deep.equal({shopName: 'Bao văn su', oldStatus: ShopOpeningRequest.STATUS.PENDING, newStatus: ShopOpeningRequest.STATUS.ACCEPTED, adminMessage: 'Làm ăn tốt nhé!'});
 
           let secondNotification = actualNotifications[1];
-          expect(secondNotification.type).to.equal(models.UserNotification.NOTIFICATION_TYPE.ORDER_CHANGE);
+          expect(secondNotification.type).to.equal(models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS);
           expect(secondNotification.data).to.deep.equal({shopId: 2, shopName: 'Alo mình nghe', orderId: 3, oldStatus: Order.STATUS.ACCEPTED, newStatus: Order.STATUS.SHIPPING});
 
           done();
@@ -120,7 +120,7 @@ describe('POST /api/v1/users/me/notifications/:id/read', () => {
 
       return models.UserNotification.create({
         userId: user.id,
-        type: models.UserNotification.NOTIFICATION_TYPE.ORDER_CHANGE,
+        type: models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
         data: {shopId: 1, shopName: 'Alo bố nghe', orderId: 2, oldStatus: Order.STATUS.NEW, newStatus: Order.STATUS.ACCEPTED}
       });
     }).then(n => {
@@ -155,7 +155,7 @@ describe('POST /api/v1/users/me/notifications/read', () => {
       _.times(3, i => {
         promises[promises.length] = models.UserNotification.create({
           userId: u.id,
-          type: models.UserNotification.NOTIFICATION_TYPE.ORDER_CHANGE,
+          type: models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
           data: {shopId: i, shopName: faker.name.findName(), orderId: i + 1, oldStatus: Order.STATUS.NEW, newStatus: Order.STATUS.ACCEPTED}
         });
       });

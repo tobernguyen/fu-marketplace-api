@@ -1,8 +1,10 @@
 'use strict';
 
 var NOTIFICATION_TYPE = {
-  ORDER_CHANGE: 1,
-  OPEN_SHOP_REQUEST_CHANGE: 2
+  SELLER_CHANGE_ORDER_STATUS: 1,
+  OPEN_SHOP_REQUEST_CHANGE: 2,
+  USER_PLACE_ORDER: 3,
+  USER_CANCEL_ORDER: 4
 };
 
 module.exports = function(sequelize, DataTypes) {
@@ -36,6 +38,62 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
+
+  UserNotification.createNotificationForUser = (orderId, newStatus) => {
+    return sequelize.model('Order').findOne({
+      where: {
+        id: orderId
+      },
+      attributes: ['id', 'userId', 'sellerMessage'],
+      include: [
+        {
+          model: sequelize.model('Shop'),
+          attributes: ['name', 'id']
+        }
+      ]
+    }).then(order => {
+      return UserNotification.create({
+        userId: order.userId,
+        type: UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
+        data: {
+          shopId: order.Shop.id,
+          shopName: order.Shop.name,
+          orderId: order.id,
+          newStatus: newStatus,
+          sellerMessage: order.sellerMessage
+        }
+      });
+    });
+  };
+
+  UserNotification.createNotificationForSeller = (orderId, notificationType) => {
+    return sequelize.model('Order').findOne({
+      where: {
+        id: orderId
+      },
+      include: [
+        {
+          model: sequelize.model('Shop'),
+          required: false
+        },
+        {
+          model: sequelize.model('User'),
+          required: false
+        }
+      ]
+    }).then(order => {
+      return UserNotification.create({
+        userId: order.Shop.ownerId,
+        type: notificationType,
+        data: {
+          buyerName: order.User.fullName,
+          orderId: order.id,
+          shopId: order.Shop.id,
+          shopName: order.Shop.name
+        }
+      });
+    });
+  };
 
   UserNotification.NOTIFICATION_TYPE = NOTIFICATION_TYPE;
 

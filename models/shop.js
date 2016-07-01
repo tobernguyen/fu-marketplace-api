@@ -161,7 +161,13 @@ module.exports = function(sequelize, DataTypes) {
             return sequelize.model('OrderLine').bulkCreate(orderLineData, {validate: true, transaction: t});
           });
         }).then(() => {
-          return Promise.resolve(order);
+          let UserNotification = sequelize.model('UserNotification');
+          
+          // Create notification to inform seller that there is new order
+          // TODO: Process by background job
+          return UserNotification.createNotificationForSeller(order.id, UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER).then(() => {
+            return Promise.resolve(order);
+          });
         }).catch(err =>  {
           return Promise.reject(err);
         });

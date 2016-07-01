@@ -3,6 +3,8 @@
 const helper = require('../helper');
 const Item = require('../../models').Item;
 const Order = require('../../models').Order;
+const UserNotification = require('../../models').UserNotification;
+const sinon = require('sinon');
 
 describe('Order models', () => {
   describe('factory', () => {
@@ -55,6 +57,16 @@ describe('Order models', () => {
             expect(i.quantity).to.equal(99);
             done();
           }, done);
+        });
+
+        it('should call UserNotification.createNotificationForUser with valid params', done => {
+          let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+
+          order.accept().then(() => {
+            expect(userNotificationSpy.withArgs(order.id, Order.STATUS.ACCEPTED).calledOnce).to.be.true;
+            UserNotification.createNotificationForUser.restore();
+            done();
+          });
         });
       });
 
@@ -160,6 +172,16 @@ describe('Order models', () => {
           expect(orderFromDb.status).to.equal(Order.STATUS.REJECTED);
           done();
         }, done);
+      });
+
+      it('should call UserNotification.createNotificationForUser with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+
+        order.reject(options).then(() => {
+          expect(userNotificationSpy.withArgs(order.id, Order.STATUS.REJECTED).calledOnce).to.be.true;
+          UserNotification.createNotificationForUser.restore();
+          done();
+        });
       });
     });
 
@@ -281,6 +303,16 @@ describe('Order models', () => {
           done();
         }, done);
       });
+
+      it('should call UserNotification.createNotificationForSeller with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForSeller');
+
+        order.cancel().then(() => {
+          expect(userNotificationSpy.withArgs(order.id, UserNotification.NOTIFICATION_TYPE.USER_CANCEL_ORDER).calledOnce).to.be.true;
+          UserNotification.createNotificationForSeller.restore();
+          done();
+        });
+      });
     });
 
     describe('with accepted order', () => {
@@ -401,6 +433,16 @@ describe('Order models', () => {
           done();
         }, done);
       });
+
+      it('should call UserNotification.createNotificationForUser with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+
+        order.startShipping().then(() => {
+          expect(userNotificationSpy.withArgs(order.id, Order.STATUS.SHIPPING).calledOnce).to.be.true;
+          UserNotification.createNotificationForUser.restore();
+          done();
+        });
+      });
     });
 
     describe('with completed order', () => {
@@ -452,6 +494,16 @@ describe('Order models', () => {
           expect(orderFromDb.status).to.equal(Order.STATUS.COMPLETED);
           done();
         }, done);
+      });
+
+      it('should call UserNotification.createNotificationForUser with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+
+        order.complete().then(() => {
+          expect(userNotificationSpy.withArgs(order.id, Order.STATUS.COMPLETED).calledOnce).to.be.true;
+          UserNotification.createNotificationForUser.restore();
+          done();
+        });
       });
     });
 
@@ -539,6 +591,16 @@ describe('Order models', () => {
             expect(i.quantity).to.equal(101);
             done();
           }, done);
+        });
+
+        it('should call UserNotification.createNotificationForUser with valid params', done => {
+          let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+
+          order.abort(options).then(() => {
+            expect(userNotificationSpy.withArgs(order.id, Order.STATUS.ABORTED).calledOnce).to.be.true;
+            UserNotification.createNotificationForUser.restore();
+            done();
+          });
         });
       });
 

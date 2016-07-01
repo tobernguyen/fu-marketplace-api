@@ -91,6 +91,9 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'
             });
           }
+        }).then((o) => {
+          // TODO: Process by background job
+          return sequelize.model('UserNotification').createNotificationForUser(this.id, ORDER_STATUS.ACCEPTED).then(() => Promise.resolve(o));
         });
       },
       reject: function (reason) {
@@ -118,6 +121,9 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'
             });
           }
+        }).then((o) => {
+          // TODO: Process by background job
+          return sequelize.model('UserNotification').createNotificationForUser(this.id, ORDER_STATUS.REJECTED).then(() => Promise.resolve(o));
         });
       },
       cancel: function () {
@@ -135,6 +141,10 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'             
             });
           }
+        }).then((o) => {
+          // TODO: Process by background job
+          let UserNotification = sequelize.model('UserNotification');
+          return UserNotification.createNotificationForSeller(this.id, UserNotification.NOTIFICATION_TYPE.USER_CANCEL_ORDER).then(() => Promise.resolve(o));
         });
       },
       startShipping: function () {
@@ -149,6 +159,9 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'             
             });
           }
+        }).then((o) => {
+          // TODO: Process by background job
+          return sequelize.model('UserNotification').createNotificationForUser(this.id, ORDER_STATUS.SHIPPING).then(() => Promise.resolve(o));
         });
       },
       complete: function () {
@@ -163,6 +176,9 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'            
             });
           }
+        }).then((o) => {
+          // TODO: Process by background job
+          return sequelize.model('UserNotification').createNotificationForUser(this.id, ORDER_STATUS.COMPLETED).then(() => Promise.resolve(o));
         });
       },
       abort: function (reason) {
@@ -189,6 +205,9 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'             
             });
           }
+        }).then((o) => {
+          // TODO: Process by background job
+          return sequelize.model('UserNotification').createNotificationForUser(this.id, ORDER_STATUS.ABORTED).then(() => Promise.resolve(o));
         });
       }
     }

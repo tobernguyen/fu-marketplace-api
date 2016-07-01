@@ -227,7 +227,7 @@ var createItem = (attrs) => {
 
   if (!attrs.shopId) {
     createShopPromise = createUserWithRole({}, 'seller').then(u => {
-      return createShop({ userId: u.id});
+      return createShop({ ownerId: u.id});
     });
   } else {
     createShopPromise = Promise.resolve();
@@ -300,7 +300,8 @@ var createOrder = (attrs) => {
       shopId: items[0].shopId,
       note: attrs.note || faker.lorem.sentence(),
       shipAddress: attrs.shipAddress || faker.address.streetAddress(),
-      status: attrs.status
+      status: attrs.status,
+      sellerMessage: attrs.sellerMessage
     });
   }).then(o => {
     order = o;
