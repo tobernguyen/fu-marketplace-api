@@ -204,7 +204,7 @@ describe('POST /api/v1/seller/orders/:id/accept', () => {
   });
   
 
-  describe('with invalid accesToken', () => {
+  describe('with invalid accessToken', () => {
     it('should return 404 order is not exits', done => {
       request(app)
         .post(`/api/v1/seller/orders/${order.id}/accept`)
@@ -272,8 +272,34 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
     });
   });
 
+  describe('with valid accessToken and without sellerMessage', () => {
+    beforeEach(done => {
+      item.update({
+        quantity: 100
+      }).then(i => {
+        expect(i.quantity).to.equal(100);
+        expect(i.id).to.equal(item.id);
+        done();
+      });
+    });
+
+    it('should return 404 with all orderInfo and quantity of item is 100', done => {
+      request(app)
+        .post(`/api/v1/seller/orders/${order.id}/reject`)
+        .set('X-Access-Token', sellerToken)
+        .set('Content-Type', 'application/json')
+        .expect(404)
+        .then(res => {
+          expect(res.body.status).to.equal(404);
+          expect(res.body.message_code).to.equal('error.order.must_provide_seller_message_when_reject');
+          done();
+        }).catch(done);
+    });
+  });
+
+
   describe('with new order', () => {
-    describe('with valid accesToken and item has quantity is 100', () => {
+    describe('with valid accessToken and item has quantity is 100', () => {
       beforeEach(done => {
         item.update({
           quantity: 100
@@ -289,11 +315,15 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
           .post(`/api/v1/seller/orders/${order.id}/reject`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
             expect(body.id).to.equal(order.id);
             expect(body.status).to.equal(Order.STATUS.REJECTED);
+            expect(body.sellerMessage).to.equal('minh het hang roi ban a');
             return Item.findById(item.id);
           }).then(i => {
             expect(i.name).to.equal(item.name);
@@ -303,7 +333,7 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
       });
     });
 
-    describe('with valid accesToken and item has quantity is 0', () => {
+    describe('with valid accessToken and item has quantity is 0', () => {
       beforeEach(done => {
         item.update({
           quantity: 0
@@ -319,6 +349,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
           .post(`/api/v1/seller/orders/${order.id}/reject`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
@@ -340,6 +373,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
           .post(`/api/v1/seller/orders/${order.id}/reject`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
@@ -382,6 +418,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
           .post(`/api/v1/seller/orders/${order.id}/reject`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
@@ -412,6 +451,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
           .post(`/api/v1/seller/orders/${order.id}/reject`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
@@ -433,6 +475,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
           .post(`/api/v1/seller/orders/${order.id}/reject`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
@@ -454,6 +499,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
         .post(`/api/v1/seller/orders/${order.id}/reject`)
         .set('X-Access-Token', invalidToken)
         .set('Content-Type', 'application/json')
+        .send({
+          sellerMessage: 'minh het hang roi ban a'
+        })
         .expect(res => {
           expect(res.body.status).to.equal(404);
           expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
@@ -482,6 +530,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
         .post(`/api/v1/seller/orders/${shippingOrder.id}/reject`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
+        .send({
+          sellerMessage: 'minh het hang roi ban a'
+        })
         .expect(res => {
           expect(res.body.status).to.equal(403);
           expect(res.body.message_code).to.equal('error.order.only_new_or_accepted_order_can_be_rejected');
@@ -653,6 +704,37 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
     });
   });
 
+  describe('with valid accessToken and without sellerMessage', () => {
+    beforeEach(done => {
+      helper.factory.createItem({shopId: shop.id}).then(i => {
+        item = i;
+        expect(item.quantity).not.to.be.ok;
+        return helper.factory.createOrder({
+          shopId: shop.id,
+          items: [item],
+          status: Order.STATUS.SHIPPING}
+        );
+      }).then(o => {
+        order = o;
+        expect(o.status).to.equal(Order.STATUS.SHIPPING);
+        done();
+      });
+    });
+
+    it('should return 404', done => {
+      request(app)
+        .post(`/api/v1/seller/orders/${order.id}/abort`)
+        .set('X-Access-Token', sellerToken)
+        .set('Content-Type', 'application/json')
+        .expect(404)
+        .then(res => {
+          expect(res.body.status).to.equal(404);
+          expect(res.body.message_code).to.equal('error.order.must_provide_seller_message_when_abort');
+          done();
+        }).catch(done);
+    });
+  });
+
   describe('with shipping order', () => {
     beforeEach(done => {
       helper.factory.createItem({shopId: shop.id}).then(i => {
@@ -686,11 +768,15 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
           .post(`/api/v1/seller/orders/${order.id}/abort`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh khong thay ai o phong'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
             expect(body.id).to.equal(order.id);
             expect(body.status).to.equal(Order.STATUS.ABORTED);
+            expect(body.sellerMessage).to.equal('minh khong thay ai o phong');
             return Item.findById(item.id);
           }).then(i => {
             expect(i.name).to.equal(item.name);
@@ -717,6 +803,9 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
           .expect(200)
+          .send({
+            sellerMessage: 'minh khong thay ai o phong'
+          })
           .then(res => {
             let body = res.body;
             expect(body.id).to.equal(order.id);
@@ -736,6 +825,9 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
           .post(`/api/v1/seller/orders/${order.id}/abort`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh khong thay ai o phong'
+          })
           .expect(200)
           .then(res => {
             let body = res.body;
@@ -757,6 +849,9 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
         .post(`/api/v1/seller/orders/${order.id}/abort`)
         .set('X-Access-Token', invalidToken)
         .set('Content-Type', 'application/json')
+        .send({
+          sellerMessage: 'minh khong thay ai o phong'
+        })
         .expect(res => {
           expect(res.body.status).to.equal(404);
           expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
@@ -783,6 +878,9 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
         .post(`/api/v1/seller/orders/${newOrder.id}/abort`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
+        .send({
+          sellerMessage: 'minh khong thay ai o phong'
+        })
         .expect(res => {
           expect(res.body.status).to.equal(403);
           expect(res.body.message_code).to.equal('error.order.only_shipping_order_has_able_to_be_aborted');
