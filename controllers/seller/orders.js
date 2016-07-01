@@ -82,6 +82,7 @@ var tryToChangeOrderStatus = (req, res, action) => {
   let seller = req.user;
   let orderId = req.params.orderId;
 
+
   Order.findOne({
     where: {
       id: orderId
@@ -100,7 +101,7 @@ var tryToChangeOrderStatus = (req, res, action) => {
       let error = 'Order does not exits';
       return Promise.reject({status: 404, message: error, type: 'model'});
     }
-    return o[action]();
+    return o[action](req.body);
   }).then(o => {
     responseOrder(o, res);
   }).catch(err => {

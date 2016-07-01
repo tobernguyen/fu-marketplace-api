@@ -115,6 +115,29 @@ describe('Order models', () => {
   });
 
   describe('#reject', () => {
+    let options = {
+      sellerMessage: 'toi khong thay ai o phong'
+    };
+    describe('with out sellerMesage attribute', () => {
+      let order;
+
+      beforeEach(done => {
+        helper.factory.createOrder().then(o => {
+          order = o;
+          done();
+        });
+      });
+
+      it('should return error', done => {
+        order.reject({}).catch(err => {
+          expect(err.status).to.equal(404);
+          expect(err.message).to.equal('Must provide seller message when reject');
+          expect(err.type).to.equal('order');
+          done();
+        }, done);
+      });
+    });
+
     describe('with new order', () => {
       let order;
 
@@ -126,13 +149,14 @@ describe('Order models', () => {
       });
 
       it('should be ok', done => {
-        order.reject().then(o => {
+        order.reject(options).then(o => {
           expect(o).to.be.ok;
           return Order.findById(o.id);
         }).then(orderFromDb => {
           expect(orderFromDb.note).to.equal(order.note);
           expect(orderFromDb.shipAddress).to.equal(order.shipAddress);
           expect(orderFromDb.id).to.equal(order.id);
+          expect(orderFromDb.sellerMessage).to.equal(order.sellerMessage);
           expect(orderFromDb.status).to.equal(Order.STATUS.REJECTED);
           done();
         }, done);
@@ -159,7 +183,7 @@ describe('Order models', () => {
         });
 
         it('should be ok', done => {
-          order.reject().then(o => {
+          order.reject(options).then(o => {
             expect(o).to.be.ok;
             return Order.findById(o.id);
           }).then(orderFromDb => {
@@ -190,7 +214,7 @@ describe('Order models', () => {
         });
 
         it('should be ok', done => {
-          order.reject().then(o => {
+          order.reject(options).then(o => {
             expect(o).to.be.ok;
             return Order.findById(o.id);
           }).then(orderFromDb => {
@@ -218,7 +242,7 @@ describe('Order models', () => {
       });
 
       it('should be return error', done => {
-        order.reject().catch(error => {
+        order.reject(options).catch(error => {
           expect(error.status).to.equal(403);
           expect(error.message).to.equal('Only new or accepted order can be rejected');
           expect(error.type).to.equal('order');
@@ -459,6 +483,29 @@ describe('Order models', () => {
   });
 
   describe('#abort', () => {
+    let options = {
+      sellerMessage: 'toi het hang roi'
+    };
+    describe('with out sellerMesage attribute', () => {
+      let order;
+
+      beforeEach(done => {
+        helper.factory.createOrder().then(o => {
+          order = o;
+          done();
+        });
+      });
+
+      it('should return error', done => {
+        order.abort ({}).catch(err => {
+          expect(err.status).to.equal(404);
+          expect(err.message).to.equal('Must provide seller message when abort');
+          expect(err.type).to.equal('order');
+          done();
+        }, done);
+      });
+    });
+
     describe('with shipping order', () => {
       let order, item;
 
@@ -479,7 +526,7 @@ describe('Order models', () => {
         });
 
         it('should be ok and quantity of item should be increase', done => {
-          order.abort().then(o => {
+          order.abort(options).then(o => {
             expect(o).to.be.ok;
             return Order.findById(o.id);
           }).then(orderFromDb => {
@@ -510,7 +557,7 @@ describe('Order models', () => {
         });
 
         it('should be ok and quantity of item should not be update', done => {
-          order.abort().then(o => {
+          order.abort(options).then(o => {
             expect(o).to.be.ok;
             return Order.findById(o.id);
           }).then(orderFromDb => {
@@ -538,7 +585,7 @@ describe('Order models', () => {
       });
 
       it('should be return error', done => {
-        order.abort().catch(error => {
+        order.abort(options).catch(error => {
           expect(error.status).to.equal(403);
           expect(error.message).to.equal('Only shipping order has able to be aborted');
           expect(error.type).to.equal('order');
