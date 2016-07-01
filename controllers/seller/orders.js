@@ -101,7 +101,23 @@ var tryToChangeOrderStatus = (req, res, action) => {
       let error = 'Order does not exits';
       return Promise.reject({status: 404, message: error, type: 'model'});
     }
-    return o[action](req.body);
+
+    let param = {};
+    if (action === 'reject' || action === 'abort') {
+      if (!req.body.sellerMessage) {
+        let error = `Must provide seller message when ${action}`;
+        return Promise.reject({
+          status: 404,
+          message: error,
+          type: 'order'
+        });
+      } else {
+        param = _.pick(req.body, 'sellerMessage');
+        return o[action](param);
+      }
+    } else {
+      return o[action]();
+    }
   }).then(o => {
     responseOrder(o, res);
   }).catch(err => {

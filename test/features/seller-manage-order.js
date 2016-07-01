@@ -204,7 +204,7 @@ describe('POST /api/v1/seller/orders/:id/accept', () => {
   });
   
 
-  describe('with invalid accesToken', () => {
+  describe('with invalid accessToken', () => {
     it('should return 404 order is not exits', done => {
       request(app)
         .post(`/api/v1/seller/orders/${order.id}/accept`)
@@ -723,15 +723,15 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
 
     it('should return 404', done => {
       request(app)
-          .post(`/api/v1/seller/orders/${order.id}/abort`)
-          .set('X-Access-Token', sellerToken)
-          .set('Content-Type', 'application/json')
-          .expect(404)
-          .then(res => {
-            expect(res.body.status).to.equal(404);
-            expect(res.body.message_code).to.equal('error.order.must_provide_seller_message_when_abort');
-            done();
-          }).catch(done);
+        .post(`/api/v1/seller/orders/${order.id}/abort`)
+        .set('X-Access-Token', sellerToken)
+        .set('Content-Type', 'application/json')
+        .expect(404)
+        .then(res => {
+          expect(res.body.status).to.equal(404);
+          expect(res.body.message_code).to.equal('error.order.must_provide_seller_message_when_abort');
+          done();
+        }).catch(done);
     });
   });
 

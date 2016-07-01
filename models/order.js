@@ -56,7 +56,7 @@ module.exports = function(sequelize, DataTypes) {
     sellerMessage: {
       type: DataTypes.STRING,
       validate: {
-        len: [0, 100]
+        len: [1, 100]
       }
     }
   }, {
@@ -78,10 +78,10 @@ module.exports = function(sequelize, DataTypes) {
       toJSON: function () {
         return this.get();
       },
-      accept: function (reqBody) {
+      accept: function () {
         return new Promise((resolve, reject) => {
           if (this.status === ORDER_STATUS.NEW) {
-            let updateData = { status: ORDER_STATUS.ACCEPTED};
+            let updateData = {status: ORDER_STATUS.ACCEPTED};
             changeStatusAndUpdateQuantityItem.apply(this, [updateData, resolve, reject]);
           } else {
             let error = 'Only new order can be accepted';
@@ -93,9 +93,9 @@ module.exports = function(sequelize, DataTypes) {
           }
         });
       },
-      reject: function (reqBody) {
+      reject: function (reason) {
         return new Promise((resolve, reject) => {
-          if (!reqBody.sellerMessage) {
+          if (!reason.sellerMessage) {
             let error = 'Must provide seller message when reject';
             reject({
               status: 404,
@@ -104,7 +104,7 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          let updateData = reqBody;
+          let updateData = reason;
           updateData.status = ORDER_STATUS.REJECTED;
           if (this.status === ORDER_STATUS.NEW) {
             this.update(updateData).then(resolve, reject);
@@ -122,7 +122,7 @@ module.exports = function(sequelize, DataTypes) {
       },
       cancel: function () {
         return new Promise((resolve, reject) => {
-          let updateData = { status: ORDER_STATUS.CANCELED};
+          let updateData = {status: ORDER_STATUS.CANCELED};
           if (this.status === ORDER_STATUS.NEW) {
             this.update(updateData).then(resolve, reject);
           } else if (this.status === ORDER_STATUS.ACCEPTED) {
@@ -137,10 +137,10 @@ module.exports = function(sequelize, DataTypes) {
           }
         });
       },
-      startShipping: function (reqBody) {
+      startShipping: function () {
         return new Promise((resolve, reject) =>{
           if (this.status === ORDER_STATUS.ACCEPTED) {
-            this.update({ status: ORDER_STATUS.SHIPPING}).then(resolve, reject);
+            this.update({status: ORDER_STATUS.SHIPPING}).then(resolve, reject);
           } else {
             let error = 'Only accepted order has able to be start shipping';
             reject({               
@@ -151,10 +151,10 @@ module.exports = function(sequelize, DataTypes) {
           }
         });
       },
-      complete: function (reqBody) {
+      complete: function () {
         return new Promise((resolve, reject) => {
           if (this.status === ORDER_STATUS.SHIPPING) {
-            this.update({ status: ORDER_STATUS.COMPLETED}).then(resolve, reject);
+            this.update({status: ORDER_STATUS.COMPLETED}).then(resolve, reject);
           } else {
             let error = 'Only shipping order has able to be completed';
             reject({               
@@ -165,9 +165,9 @@ module.exports = function(sequelize, DataTypes) {
           }
         });
       },
-      abort: function (reqBody) {
+      abort: function (reason) {
         return new Promise((resolve, reject) => {
-          if (!reqBody.sellerMessage) {
+          if (!reason.sellerMessage) {
             let error = 'Must provide seller message when abort';
             reject({
               status: 404,
@@ -176,7 +176,7 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          let updateData = reqBody;
+          let updateData = reason;
           updateData.status = ORDER_STATUS.ABORTED;
 
           if (this.status === ORDER_STATUS.SHIPPING) {
