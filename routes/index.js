@@ -47,6 +47,7 @@ router.get('/api/v1/categories', category.getCategories);
 router.get('/api/v1/metadata', application.getMetadata);
 router.get('/api/v1/shops/:shopId', users.getShop);
 router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
+router.post('/api/v1/shops/:shopId/review', users.reviewShop);
 
 router.get('/api/v1/orders', orders.getOrders);
 router.put('/api/v1/orders/:orderId', orders.putUpdateOrder);

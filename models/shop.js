@@ -109,6 +109,10 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'shopId',
           constraints: false
         });
+        Shop.hasMany(models.Review, {
+          foreignKey: 'shopId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {
@@ -186,6 +190,66 @@ module.exports = function(sequelize, DataTypes) {
       reindex: function() {
         // TODO: Process by background job
         return elasticsearch.indexShopById(this.id);
+      },
+      review: function (rateInfo) {
+        return new Promise((resolve, reject) => {
+          let userId = rateInfo.userId;
+          let rawInfo = _.pick(rateInfo, ['rate', 'comment']);
+
+          if (!userId && userId!==0) {
+            let error = 'Must provide userId when review shop';
+            reject({
+              status: 404,
+              message: error,
+              type: 'review'
+            });
+          }
+
+          if (!rawInfo.rate || !rawInfo.comment) {
+            let error = 'Must provide rate and comment when review shop';
+            reject({
+              status: 404,
+              message: error,
+              type: 'review'
+            });
+          }
+
+          return sequelize.transaction(t => {
+            return sequelize.model('Order').findOne({
+              where: {
+                shopId: this.id,
+                userId: userId
+              },
+              transaction: t
+            }).then(order => {
+              if (!order) {
+                let error = 'You must order at this shop at least one time';
+                reject({
+                  status: 404,
+                  message: error,
+                  type: 'review'
+                });
+              } else {
+                sequelize.model('Review').findOrCreate({
+                  where: {
+                    shopId: this.id,
+                    userId: userId
+                  },
+                  transaction: t
+                }).spread(review => {
+                  rawInfo.transaction = t;
+                  review.update(rawInfo).then(resolve, reject);
+                });
+              }
+            }).catch(err =>  {
+              reject(err);
+            });
+          }).then(review => {
+            return Promise.resolve(review);
+          }).catch(err =>  {
+            return Promise.reject(err);
+          });
+        });
       }
     }
   });
