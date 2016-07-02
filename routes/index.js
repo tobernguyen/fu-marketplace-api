@@ -36,6 +36,7 @@ router.post('/api/v1/users/me/uploadIdentityPhoto', users.postUserUploadIdentity
 router.get('/api/v1/users/me/notifications', userNotifications.getUserNotifications);
 router.post('/api/v1/users/me/notifications/:id/read', userNotifications.postMarkUserNotificationAsRead);
 router.post('/api/v1/users/me/notifications/read', userNotifications.postMarkAllUserNotificationAsRead);
+router.post('/api/v1/users/me/registerOneSignal', users.postRegisterOneSignal);
 
 router.post('/api/v1/users/signOutAll', users.postSignOutAll);
 

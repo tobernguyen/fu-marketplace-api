@@ -1,5 +1,8 @@
 'use strict';
 
+var onesignal = require('../libs/onesignal');
+var logger = require('../libs/logger');
+
 var NOTIFICATION_TYPE = {
   SELLER_CHANGE_ORDER_STATUS: 1,
   OPEN_SHOP_REQUEST_CHANGE: 2,
@@ -38,9 +41,16 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
+  
+  UserNotification.createShopRequestNotification = () => {
+    // TODO: add code and tests
+  },
 
-  UserNotification.createNotificationForUser = (orderId, newStatus) => {
-    return sequelize.model('Order').findOne({
+  UserNotification.createOrderChangeNotificationForUser = (orderId, newStatus) => {
+    let fetchedOrder, createdNotification;
+    let Order = sequelize.model('Order');
+
+    return Order.findOne({
       where: {
         id: orderId
       },
@@ -48,25 +58,66 @@ module.exports = function(sequelize, DataTypes) {
       include: [
         {
           model: sequelize.model('Shop'),
-          attributes: ['name', 'id']
+          attributes: ['name', 'id', 'avatar']
         }
       ]
     }).then(order => {
+      fetchedOrder = order;
+
       return UserNotification.create({
         userId: order.userId,
         type: UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
         data: {
           shopId: order.Shop.id,
           shopName: order.Shop.name,
+          shopAvatar: order.Shop.avatar,
           orderId: order.id,
           newStatus: newStatus,
           sellerMessage: order.sellerMessage
         }
       });
-    });
+    }).then((notification) => {
+      createdNotification = notification;
+      let message;
+
+      switch(newStatus) {
+      case Order.STATUS.ACCEPTED:
+        message = `Đơn hàng #${fetchedOrder.id} tại ${fetchedOrder.Shop.name} đã bắt đầu được xử lý.`;
+        break;
+      case Order.STATUS.REJECTED:
+        message = `Đơn hàng #${fetchedOrder.id} tại ${fetchedOrder.Shop.name} đã bị từ chối với lý do: ${fetchedOrder.sellerMessage}`;
+        break;
+      case Order.STATUS.SHIPPING:
+        message = `Đơn hàng #${fetchedOrder.id} tại ${fetchedOrder.Shop.name} đã bắt đầu được vận chuyển.`;
+        break;
+      case Order.STATUS.COMPLETED:
+        message = `Đơn hàng của bạn tại ${fetchedOrder.Shop.name} vừa mới hoàn thành. Nếu có thời gian, xin bạn hãy đánh giá chất lượng dịch vụ. Xin cám ơn.`;
+        break;
+      case Order.STATUS.ABORTED:
+        message = `Đơn hàng #${fetchedOrder.id} tại ${fetchedOrder.Shop.name} đã bị huỷ với lý do: ${fetchedOrder.sellerMessage}`;
+        break;
+      }
+
+      // TODO: process by background job and add test
+      return onesignal.pushNotificationToUserId(fetchedOrder.userId, {
+        headings: {
+          'en': 'Cập nhật về đơn hàng tại FU Marketplace'
+        },
+        contents: {
+          'en': message
+        },
+        url: `${process.env.SITE_ROOT_URL}/`
+      }).catch(err => {
+        // Do nothing if push failed
+        logger.error(err);
+        return Promise.resolve();
+      });
+    }).then(() => Promise.resolve(createdNotification));
   };
 
   UserNotification.createNotificationForSeller = (orderId, notificationType) => {
+    let fetchedOrder, createdNotification;
+
     return sequelize.model('Order').findOne({
       where: {
         id: orderId
@@ -74,25 +125,55 @@ module.exports = function(sequelize, DataTypes) {
       include: [
         {
           model: sequelize.model('Shop'),
-          required: false
+          attributes: ['id', 'ownerId', 'name']
         },
         {
           model: sequelize.model('User'),
-          required: false
+          attributes: ['fullName', 'avatar']
         }
       ]
     }).then(order => {
+      fetchedOrder = order;
+
       return UserNotification.create({
         userId: order.Shop.ownerId,
         type: notificationType,
         data: {
           buyerName: order.User.fullName,
+          buyerAvatar: order.User.avatar,
           orderId: order.id,
           shopId: order.Shop.id,
           shopName: order.Shop.name
         }
       });
-    });
+    }).then((notification) => {
+      createdNotification = notification;
+      let message;
+
+      switch (notificationType) {
+      case NOTIFICATION_TYPE.USER_PLACE_ORDER:
+        message = `Bạn có đơn hàng mới tại ${notification.data.shopName} với mã số #${notification.data.orderId} được đặt bởi ${notification.data.buyerName}`;
+        break;
+      case NOTIFICATION_TYPE.USER_CANCEL_ORDER:
+        message = `Đơn hàng #${notification.data.orderId} đã bị huỳ bởi người mua`;
+        break;
+      }
+
+      // TODO: process by background job and add test
+      return onesignal.pushNotificationToUserId(fetchedOrder.userId, {
+        headings: {
+          'en': 'Cập nhật về đơn hàng tại FU Marketplace'
+        },
+        contents: {
+          'en': message
+        },
+        url: `${process.env.SITE_ROOT_URL}/`
+      }).catch(err => {
+        // Do nothing if push failed
+        logger.error(err);
+        return Promise.resolve();
+      });
+    }).then(() => Promise.resolve(createdNotification));
   };
 
   UserNotification.NOTIFICATION_TYPE = NOTIFICATION_TYPE;

@@ -6,7 +6,7 @@ const Order = require('../../models').Order;
 const UserNotification = require('../../models').UserNotification;
 
 describe('UserNotification Model', () => {
-  describe('.createNotificationForUser', () => {
+  describe('.createOrderChangeNotificationForUser', () => {
     let order;
 
     before(done => {
@@ -17,7 +17,7 @@ describe('UserNotification Model', () => {
     });
 
     it('should create notification for user with correct data', done => {
-      UserNotification.createNotificationForUser(order.id, Order.STATUS.REJECTED).then(un => {
+      UserNotification.createOrderChangeNotificationForUser(order.id, Order.STATUS.REJECTED).then(un => {
         expect(un.type).to.equal(UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS);
         expect(un.userId).to.equal(order.userId);
 
@@ -33,6 +33,10 @@ describe('UserNotification Model', () => {
         });
       });
     });
+  });
+
+  describe('.createShopRequestNotification', () => {
+    // TODO: add tests
   });
 
   describe('.createNotificationForSeller', () => {

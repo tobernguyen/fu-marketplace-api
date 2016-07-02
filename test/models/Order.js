@@ -59,12 +59,12 @@ describe('Order models', () => {
           }, done);
         });
 
-        it('should call UserNotification.createNotificationForUser with valid params', done => {
-          let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+        it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
+          let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
 
           order.accept().then(() => {
             expect(userNotificationSpy.withArgs(order.id, Order.STATUS.ACCEPTED).calledOnce).to.be.true;
-            UserNotification.createNotificationForUser.restore();
+            UserNotification.createOrderChangeNotificationForUser.restore();
             done();
           });
         });
@@ -174,12 +174,12 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createNotificationForUser with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+      it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
 
         order.reject(options).then(() => {
           expect(userNotificationSpy.withArgs(order.id, Order.STATUS.REJECTED).calledOnce).to.be.true;
-          UserNotification.createNotificationForUser.restore();
+          UserNotification.createOrderChangeNotificationForUser.restore();
           done();
         });
       });
@@ -434,12 +434,12 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createNotificationForUser with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+      it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
 
         order.startShipping().then(() => {
           expect(userNotificationSpy.withArgs(order.id, Order.STATUS.SHIPPING).calledOnce).to.be.true;
-          UserNotification.createNotificationForUser.restore();
+          UserNotification.createOrderChangeNotificationForUser.restore();
           done();
         });
       });
@@ -496,12 +496,12 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createNotificationForUser with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+      it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
+        let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
 
         order.complete().then(() => {
           expect(userNotificationSpy.withArgs(order.id, Order.STATUS.COMPLETED).calledOnce).to.be.true;
-          UserNotification.createNotificationForUser.restore();
+          UserNotification.createOrderChangeNotificationForUser.restore();
           done();
         });
       });
@@ -593,12 +593,12 @@ describe('Order models', () => {
           }, done);
         });
 
-        it('should call UserNotification.createNotificationForUser with valid params', done => {
-          let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForUser');
+        it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
+          let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
 
           order.abort(options).then(() => {
             expect(userNotificationSpy.withArgs(order.id, Order.STATUS.ABORTED).calledOnce).to.be.true;
-            UserNotification.createNotificationForUser.restore();
+            UserNotification.createOrderChangeNotificationForUser.restore();
             done();
           });
         });

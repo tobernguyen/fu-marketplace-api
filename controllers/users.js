@@ -13,6 +13,7 @@ var Shop = models.Shop;
 var ShipPlace = models.ShipPlace;
 var Item = models.Item;
 var crypto = require('crypto');
+var oneSignal = require('../libs/onesignal');
 
 exports.getCurrentUser = (req, res) => {
   let result = req.user.toJSON();
@@ -229,6 +230,18 @@ exports.getShopOpeningRequests = (req, res) => {
 exports.getShop = (req, res) => {
   let shopId = req.params.shopId;
   responseShopById(shopId, res);
+};
+
+exports.postRegisterOneSignal = (req, res) => {
+  let playerId = req.body.playerId;
+  if (!playerId) return errorHandlers.responseError(400, 'Must provide playerId', 'one_signal', res);
+
+  oneSignal.addUserToPlayerId(playerId, req.user.id).then(() => {
+    res.status(200).end();
+  }).catch(err => {
+    res.status(err.status);
+    res.json(err.data);
+  });
 };
 
 var validateRequestOpeningShopFirstTime = (user) => {
