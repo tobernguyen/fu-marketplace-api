@@ -241,6 +241,21 @@ describe('POST /api/v1/admin/shops/:id/uploadAvatar', () => {
   });
 
   describe('with valid access token and ', () => {
+    describe('invalid shopid', () => {
+      it('should return 404 error', done => {
+        request(app)
+          .post('/api/v1/admin/shops/0/uploadAvatar')
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
+          })
+          .expect(404, done);
+      });
+    });
+
     describe('valid image file', () => {
       it('should return 200 and return user with valid avatar file', done => {
         request(app)
@@ -312,6 +327,21 @@ describe('POST /api/v1/admin/shops/:id/uploadCover', () => {
   });
 
   describe('with valid access token and ', () => {
+    describe('invalid shopid', () => {
+      it('should return 404 error', done => {
+        request(app)
+          .post('/api/v1/admin/shops/0/uploadCover')
+          .set('X-Access-Token', adminToken)
+          .attach('file', 'test/fixtures/user-avatar.jpg')
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
+          })
+          .expect(404, done);
+      });
+    });
+
     describe('valid image file', () => {
       it('should return 200 and return user with valid cover file', done => {
         request(app)
@@ -454,6 +484,23 @@ describe('POST /api/v1/admin/shops/:id/shipPlaces', () => {
             expect(res.body.message_code).to.equal('error.param.must_provide_ship_places');
           })
           .expect(422, done);
+      });
+    });
+
+    describe('invalid shopid', () => {
+      it('should return 404 error', done => {
+        request(app)
+            .post('/api/v1/admin/shops/0/shipPlaces')
+            .set('X-Access-Token', adminToken)
+            .send({
+              shipPlaces: shipPlace
+            })
+            .set('Content-Type', 'application/json')
+            .expect(res => {
+              expect(res.body.status).to.equal(404);
+              expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
+            })
+            .expect(404, done);
       });
     });
   });

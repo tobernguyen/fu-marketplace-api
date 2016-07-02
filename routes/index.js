@@ -50,6 +50,7 @@ router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
 router.get('/api/v1/orders', orders.getOrders);
 router.put('/api/v1/orders/:orderId', orders.putUpdateOrder);
 router.post('/api/v1/orders/:orderId/cancel', orders.cancelOrder);
+router.post('/api/v1/orders/:orderId/rate', orders.rateOrder);
 
 router.post('/api/v1/feed/shops', shopFeed.searchShop);
 

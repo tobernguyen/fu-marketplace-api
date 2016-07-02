@@ -42,7 +42,7 @@ gulp.task('lint', function() {
 });
 
 gulp.task('pre-istanbul', function () {
-  return gulp.src(['controllers/**/*.js', 'libs/**/*.js', 'middlewares/**/*.js', 'models/**/*.js', 'routes/**/*.js'])
+  return gulp.src(['controllers/**/*.js', '!controllers/index.js', 'libs/**/*.js', 'middlewares/**/*.js', 'models/**/*.js', '!models/index.js', 'routes/**/*.js'])
     // Covering files
     .pipe(istanbul())
     // Force `require` to return covered files

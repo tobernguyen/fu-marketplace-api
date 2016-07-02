@@ -662,4 +662,97 @@ describe('Order models', () => {
       });
     });
   });
+
+  describe('#rate', () => {
+
+    describe('with out rate or comment attribute', () => {
+      let order;
+
+      beforeEach(done => {
+        helper.factory.createOrder().then(o => {
+          order = o;
+          done();
+        });
+      });
+
+      it('should return error', done => {
+        order.rateOrder({}).catch(err => {
+          expect(err.status).to.equal(404);
+          expect(err.message).to.equal('Must provide rate or comment when rate order');
+          expect(err.type).to.equal('order');
+          done();
+        }, done);
+      });
+    });
+
+    describe('with completed order', () => {
+      let order;
+
+      beforeEach(done => {
+        helper.factory.createOrder({status: Order.STATUS.COMPLETED}).then(o => {
+          order = o;
+          done();
+        });
+      });
+
+      describe('without invalid attribute', () => {
+        it('should be ok and quantity of item should be increase', done => {
+          order.rateOrder({
+            rate: 1,
+            comment: 'Cơm của bạn chán quá'
+          }).then(o => {
+            expect(o.id).to.equal(order.id);
+            expect(o.status).to.equal(Order.STATUS.COMPLETED);
+            expect(o.comment).to.equal('Cơm của bạn chán quá');
+            expect(o.rate).to.equal(1);
+            done();
+          }, done);
+        });
+      });
+
+      describe('with invalid attribute', () => {
+        it('should be ok and quantity of item should be increase', done => {
+          order.rateOrder({
+            rate: 1,
+            comment: 'Cơm của bạn chán quá',
+            invalid: 'invalid'
+          }).then(o => {
+            expect(o.id).to.equal(order.id);
+            expect(o.status).to.equal(Order.STATUS.COMPLETED);
+            expect(o.comment).to.equal('Cơm của bạn chán quá');
+            expect(o.rate).to.equal(1);
+            expect(o.invalid).not.to.be.ok;
+            done();
+          }, done);
+        });
+      });
+    });
+
+    describe('with shipping order', () => {
+      let order;
+
+      beforeEach(done => {
+        helper.factory.createOrder({ status: Order.STATUS.SHIPPING}).then(o => {
+          order = o;
+          done();
+        });
+      });
+
+      it('should be return error', done => {
+        order.rateOrder({
+          rate: 1,
+          comment: 'Cơm của bạn chán quá'
+        }).catch(error => {
+          expect(error.status).to.equal(403);
+          expect(error.message).to.equal('Can only rate completed or aborted order');
+          expect(error.type).to.equal('order');
+          return Order.findById(order.id);
+        }).then(orderFromDb => {
+          expect(orderFromDb.id).to.equal(order.id);
+          expect(orderFromDb.status).to.equal(Order.STATUS.SHIPPING);
+          done();
+        }, done);
+      });
+    });
+  });
 });

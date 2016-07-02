@@ -167,6 +167,8 @@ module.exports = function(sequelize, DataTypes) {
           // TODO: Process by background job
           return UserNotification.createNotificationForSeller(order.id, UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER).then(() => {
             return Promise.resolve(order);
+          }).catch(err => {
+            return Promise.reject(err);
           });
         }).catch(err =>  {
           return Promise.reject(err);

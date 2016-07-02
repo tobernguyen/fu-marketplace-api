@@ -153,7 +153,8 @@ exports.putItem = (req, res) => {
         model: Item,
         where: {
           id: itemId
-        }
+        },
+        required: false
       }
     ],
     order:[
@@ -241,7 +242,8 @@ exports.deleteItem = (req, res) => {
       model: Item,
       where: {
         id: itemId
-      }
+      },
+      required: false
     }
   }).then(shop => {
     if (!shop) {

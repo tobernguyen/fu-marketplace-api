@@ -296,6 +296,34 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
     });
   });
 
+  describe('with invalid item', () => {
+    it('should return 404', done => {
+      request(app)
+          .put(`/api/v1/seller/shops/${shop.id}/items/0`)
+          .set('X-Access-Token', sellerToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message).to.equal('Item does not exist');
+            expect(res.body.message_code).to.equal('error.model.item_does_not_exist');
+          })
+          .expect(404, done);
+    });
+  });
+
+  describe('with invalid shop', () => {
+    it('should return 404', done => {
+      request(app)
+          .put(`/api/v1/seller/shops/0/items/${item.id}`)
+          .set('X-Access-Token', sellerToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message).to.equal('Shop does not exist');
+            expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
+          })
+          .expect(404, done);
+    });
+  });
+
   describe('with valid item attribute and without image via multipart form', () => {
     it('should return 200 with new item information', done => {
       request(app)
@@ -408,7 +436,6 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
     });
   });
 
-
   describe('with some invalid foreign key fields in multipart form data', () => {
     it('should return 400 with message about invalid fields', done => {
       request(app)
@@ -482,6 +509,34 @@ describe('DELETE /api/v1/seller/shops/:shopId/items/:itemId', () => {
         .delete(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
         .set('X-Access-Token', sellerToken)
         .expect(200, done);
+    });
+  });
+
+  describe('with invalid item', () => {
+    it('should return 404', done => {
+      request(app)
+          .delete(`/api/v1/seller/shops/${shop.id}/items/0`)
+          .set('X-Access-Token', sellerToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message).to.equal('Item does not exist');
+            expect(res.body.message_code).to.equal('error.model.item_does_not_exist');
+          })
+          .expect(404, done);
+    });
+  });
+
+  describe('with invalid shop', () => {
+    it('should return 404', done => {
+      request(app)
+          .delete(`/api/v1/seller/shops/0/items/${item.id}`)
+          .set('X-Access-Token', sellerToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message).to.equal('Shop does not exist');
+            expect(res.body.message_code).to.equal('error.model.shop_does_not_exist');
+          })
+          .expect(404, done);
     });
   });
 });
