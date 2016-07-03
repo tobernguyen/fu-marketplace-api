@@ -227,7 +227,7 @@ module.exports = function(sequelize, DataTypes) {
             rawInfo.comment = '';
           }
 
-          if (this.status === ORDER_STATUS.COMPLETED || this.status === ORDER_STATUS.REJECTED) {
+          if (this.status === ORDER_STATUS.COMPLETED || this.status === ORDER_STATUS.ABORTED) {
             this.update(rawInfo).then(resolve, reject);
           } else {
             let error = 'Can only rate completed or aborted order';
