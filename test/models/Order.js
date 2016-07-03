@@ -676,9 +676,11 @@ describe('Order models', () => {
       });
 
       it('should return error', done => {
-        order.rateOrder({}).catch(err => {
+        order.rateOrder({
+          comment: 'xxx'
+        }).catch(err => {
           expect(err.status).to.equal(404);
-          expect(err.message).to.equal('Must provide rate or comment when rate order');
+          expect(err.message).to.equal('Must provide rate when rate order');
           expect(err.type).to.equal('order');
           done();
         }, done);
