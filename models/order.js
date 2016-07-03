@@ -214,13 +214,17 @@ module.exports = function(sequelize, DataTypes) {
         return new Promise((resolve, reject) => {
           let rawInfo = _.pick(rateInfo, ['rate', 'comment']);
 
-          if (_.isEmpty(rawInfo)) {
-            let error = 'Must provide rate or comment when rate order';
+          if (!rawInfo.rate) {
+            let error = 'Must provide rate when rate order';
             reject({
               status: 404,
               message: error,
               type: 'order'
             });
+          }
+
+          if (!rawInfo.comment) {
+            rawInfo.comment = '';
           }
 
           if (this.status === ORDER_STATUS.COMPLETED || this.status === ORDER_STATUS.REJECTED) {
