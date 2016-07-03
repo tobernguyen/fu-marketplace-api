@@ -161,11 +161,9 @@ module.exports = function(sequelize, DataTypes) {
         }).then(() => {
           let UserNotification = sequelize.model('UserNotification');
           
-          // Create notification to inform seller that there is new order
-          // TODO: Process by background job
-          return UserNotification.createNotificationForSeller(order.id, UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER).then(() => {
-            return Promise.resolve(order);
-          });
+          // Create notification to inform seller there is new order
+          kue.createSendOrderNotificationToSellerJob({orderId: order.id, notificationType: UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER});
+          return Promise.resolve(order);
         }).catch(err =>  {
           return Promise.reject(err);
         });

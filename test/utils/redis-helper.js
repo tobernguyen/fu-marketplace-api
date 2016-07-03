@@ -12,3 +12,8 @@ var flushAll = () => {
   return client.flushallAsync();
 };
 exports.flushAll = flushAll;
+
+var closeConnection = () => {
+  client.quit();
+};
+exports.closeConnection = closeConnection;

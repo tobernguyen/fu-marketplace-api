@@ -5,7 +5,6 @@ const request = require('supertest');
 const app = require('../../app.js');
 const Order = require('../../models').Order;
 const UserNotification = require('../../models').UserNotification;
-const sinon = require('sinon');
 
 var _ = require('lodash');
 
@@ -27,17 +26,11 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
   });
 
   describe('with valid shop route', () => {
+    beforeEach(() => {
+      helper.queue.testMode.clear();
+    });
+
     describe('with valid order attribute and valid accesToken', () => {
-      let userNotificationSpy;
-
-      beforeEach(() => {
-        userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForSeller');
-      });
-
-      afterEach(() => {
-        UserNotification.createNotificationForSeller.restore();
-      });
-
       it('should return 200 with orderInfo', done => {
         request(app)
           .post(`/api/v1/shops/${item1.shopId}/orders`)
@@ -75,7 +68,13 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
             expect(item.name).to.equal(item1.name);
             expect(item.description).to.equal(item1.description);
             expect(item.price).to.equal(item1.price);
-            expect(userNotificationSpy.withArgs(body.id, UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER).calledOnce).to.be.true;
+
+            // Expect the system to create the job to create notification
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(1);
+            expect(jobs[0].type).to.equal('send order notification to seller');
+            expect(jobs[0].data).to.eql({orderId: body.id, notificationType: UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER});
+            done();
           })
           .expect(200, done);
       });

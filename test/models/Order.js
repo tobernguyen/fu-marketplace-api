@@ -59,12 +59,14 @@ describe('Order models', () => {
           }, done);
         });
 
-        it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
-          let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
+        it('should enqueue new job "send order notification to user"', done => {
+          helper.queue.testMode.clear();
 
           order.accept().then(() => {
-            expect(userNotificationSpy.withArgs(order.id, Order.STATUS.ACCEPTED).calledOnce).to.be.true;
-            UserNotification.createOrderChangeNotificationForUser.restore();
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(1);
+            expect(jobs[0].type).to.equal('send order notification to user');
+            expect(jobs[0].data).to.eql({orderId: order.id, orderStatus: Order.STATUS.ACCEPTED});
             done();
           });
         });
@@ -174,12 +176,14 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
+      it('should enqueue new job "send order notification to user"', done => {
+        helper.queue.testMode.clear();
 
         order.reject(options).then(() => {
-          expect(userNotificationSpy.withArgs(order.id, Order.STATUS.REJECTED).calledOnce).to.be.true;
-          UserNotification.createOrderChangeNotificationForUser.restore();
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('send order notification to user');
+          expect(jobs[0].data).to.eql({orderId: order.id, orderStatus: Order.STATUS.REJECTED});
           done();
         });
       });
@@ -304,12 +308,14 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createNotificationForSeller with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createNotificationForSeller');
+      it('should enqueue new job "send order notification to seller"', done => {
+        helper.queue.testMode.clear();
 
         order.cancel().then(() => {
-          expect(userNotificationSpy.withArgs(order.id, UserNotification.NOTIFICATION_TYPE.USER_CANCEL_ORDER).calledOnce).to.be.true;
-          UserNotification.createNotificationForSeller.restore();
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('send order notification to seller');
+          expect(jobs[0].data).to.eql({orderId: order.id, notificationType: UserNotification.NOTIFICATION_TYPE.USER_CANCEL_ORDER});
           done();
         });
       });
@@ -434,12 +440,14 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
+      it('should enqueue new job "send order notification to user"', done => {
+        helper.queue.testMode.clear();
 
         order.startShipping().then(() => {
-          expect(userNotificationSpy.withArgs(order.id, Order.STATUS.SHIPPING).calledOnce).to.be.true;
-          UserNotification.createOrderChangeNotificationForUser.restore();
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('send order notification to user');
+          expect(jobs[0].data).to.eql({orderId: order.id, orderStatus: Order.STATUS.SHIPPING});
           done();
         });
       });
@@ -496,12 +504,14 @@ describe('Order models', () => {
         }, done);
       });
 
-      it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
-        let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
+      it('should enqueue new job "send order notification to user"', done => {
+        helper.queue.testMode.clear();
 
         order.complete().then(() => {
-          expect(userNotificationSpy.withArgs(order.id, Order.STATUS.COMPLETED).calledOnce).to.be.true;
-          UserNotification.createOrderChangeNotificationForUser.restore();
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('send order notification to user');
+          expect(jobs[0].data).to.eql({orderId: order.id, orderStatus: Order.STATUS.COMPLETED});
           done();
         });
       });
@@ -593,12 +603,14 @@ describe('Order models', () => {
           }, done);
         });
 
-        it('should call UserNotification.createOrderChangeNotificationForUser with valid params', done => {
-          let userNotificationSpy = sinon.spy(UserNotification, 'createOrderChangeNotificationForUser');
+        it('should enqueue new job "send order notification to user"', done => {
+          helper.queue.testMode.clear();
 
           order.abort(options).then(() => {
-            expect(userNotificationSpy.withArgs(order.id, Order.STATUS.ABORTED).calledOnce).to.be.true;
-            UserNotification.createOrderChangeNotificationForUser.restore();
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(1);
+            expect(jobs[0].type).to.equal('send order notification to user');
+            expect(jobs[0].data).to.eql({orderId: order.id, orderStatus: Order.STATUS.ABORTED});
             done();
           });
         });

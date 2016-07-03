@@ -1,6 +1,6 @@
 'use strict';
 
-var onesignal = require('../libs/onesignal');
+var kue = require('../libs/kue');
 var logger = require('../libs/logger');
 
 var NOTIFICATION_TYPE = {
@@ -47,7 +47,7 @@ module.exports = function(sequelize, DataTypes) {
   },
 
   UserNotification.createOrderChangeNotificationForUser = (orderId, newStatus) => {
-    let fetchedOrder, createdNotification;
+    let fetchedOrder;
     let Order = sequelize.model('Order');
 
     return Order.findOne({
@@ -77,7 +77,6 @@ module.exports = function(sequelize, DataTypes) {
         }
       });
     }).then((notification) => {
-      createdNotification = notification;
       let message;
 
       switch(newStatus) {
@@ -98,25 +97,26 @@ module.exports = function(sequelize, DataTypes) {
         break;
       }
 
-      // TODO: process by background job and add test
-      return onesignal.pushNotificationToUserId(fetchedOrder.userId, {
-        headings: {
-          'en': 'Cập nhật về đơn hàng tại FU Marketplace'
-        },
-        contents: {
-          'en': message
-        },
-        url: `${process.env.SITE_ROOT_URL}/`
-      }).catch(err => {
-        // Do nothing if push failed
-        logger.error(err);
-        return Promise.resolve();
+      // TODO: add test
+      kue.createPushOneSignalNotification({
+        userId: fetchedOrder.userId,
+        pushData: {
+          headings: {
+            'en': 'Cập nhật về đơn hàng tại FU Marketplace'
+          },
+          contents: {
+            'en': message
+          },
+          url: `${process.env.SITE_ROOT_URL}/`
+        }
       });
-    }).then(() => Promise.resolve(createdNotification));
+
+      return Promise.resolve(notification);
+    });
   };
 
   UserNotification.createNotificationForSeller = (orderId, notificationType) => {
-    let fetchedOrder, createdNotification;
+    let fetchedOrder;
 
     return sequelize.model('Order').findOne({
       where: {
@@ -147,7 +147,6 @@ module.exports = function(sequelize, DataTypes) {
         }
       });
     }).then((notification) => {
-      createdNotification = notification;
       let message;
 
       switch (notificationType) {
@@ -159,21 +158,22 @@ module.exports = function(sequelize, DataTypes) {
         break;
       }
 
-      // TODO: process by background job and add test
-      return onesignal.pushNotificationToUserId(fetchedOrder.userId, {
-        headings: {
-          'en': 'Cập nhật về đơn hàng tại FU Marketplace'
-        },
-        contents: {
-          'en': message
-        },
-        url: `${process.env.SITE_ROOT_URL}/`
-      }).catch(err => {
-        // Do nothing if push failed
-        logger.error(err);
-        return Promise.resolve();
+      // TODO: add test
+      kue.createPushOneSignalNotification({
+        userId: fetchedOrder.userId,
+        pushData: {
+          headings: {
+            'en': 'Cập nhật về đơn hàng tại FU Marketplace'
+          },
+          contents: {
+            'en': message
+          },
+          url: `${process.env.SITE_ROOT_URL}/`
+        }
       });
-    }).then(() => Promise.resolve(createdNotification));
+
+      return Promise.resolve(notification);
+    });
   };
 
   UserNotification.NOTIFICATION_TYPE = NOTIFICATION_TYPE;

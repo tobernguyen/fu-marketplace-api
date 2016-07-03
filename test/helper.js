@@ -40,6 +40,8 @@ afterEach(() => {
 
 after(() => {
   kue.queue.testMode.exit();
+  redisHelper.closeConnection();
+  kue.queue.shutdown();
   _sequelize.close();
   fs.emptyDirSync('public/uploads/__test__');
 });
