@@ -81,8 +81,33 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
       });
     });
 
-    describe('with invalid order attribute and valid accesToken', () => {
+    describe('with not exist item id and valid accesToken', () => {
       it('should return 403', done => {
+        request(app)
+            .post(`/api/v1/shops/${item1.shopId}/orders`)
+            .set('X-Access-Token', userToken)
+            .set('Content-Type', 'application/json')
+            .send({
+              items: [
+                {
+                  id: 0,
+                  quantity: 2,
+                  note: 'không hành nhiều dứa'
+                }
+              ],
+              note: 'ship truoc 12h',
+              shipAddress: 'D201'
+            })
+            .expect(res => {
+              expect(res.body.status).to.equal(403);
+              expect(res.body.message_code).to.equal('error.order.item_not_found');
+            })
+            .expect(403, done);
+      });
+    });
+
+    describe('with invalid order attribute', () => {
+      it('should return 422', done => {
         request(app)
           .post(`/api/v1/shops/${item1.shopId}/orders`)
           .set('X-Access-Token', userToken)
@@ -90,19 +115,22 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
           .send({
             items: [
               {
-                id: 0,
+                id: item1.id,
                 quantity: 2,
-                note: 'không hành nhiều dứa'
+                note: 'Raigor Stonehoof the Earthshaker is a melee strength hero with several area of effect disables, commonly played as a ganker or initiator. Unlike most strength heroes, he is played more like an intelligence caster hero and is almost entirely reliant on his spells to inflict heavy damage.'
               }
             ],
             note: 'ship truoc 12h',
             shipAddress: 'D201'
           })
           .expect(res => {
-            expect(res.body.status).to.equal(403);
-            expect(res.body.message_code).to.equal('error.order.item_not_found');
+            expect(res.body.status).to.equal(422);
+            let errors = res.body.errors;
+            expect(_.toPairs(errors)).to.have.lengthOf(1);
+            expect(errors['SequelizeModel:OrderLine.note'].message).to.equal('Validation len failed');
+            expect(errors['SequelizeModel:OrderLine.note'].message_code).to.equal('error.model.validation_len_failed');
           })
-          .expect(403, done);
+          .expect(422, done);
       });
     });
 
@@ -133,7 +161,6 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
     });
   });
 
-  
   describe('with invalid shop route', () => {
     it('should return 200 with orderInfo', done => {
       request(app)
@@ -237,6 +264,27 @@ describe('PUT /api/v1/orders/:orderId', () => {
             expect(_.toPairs(errors)).to.have.lengthOf(1);
             expect(errors.shipAddress.message).to.equal('Validation len failed');
             expect(errors.shipAddress.message_code).to.equal('error.model.validation_len_failed');
+          })
+          .expect(422, done);
+      });
+    });
+
+    describe('with invalid note attribute', () => {
+      it('should return 422 valid fail', done => {
+        request(app)
+          .put(`/api/v1/orders/${order.id}`)
+          .set('X-Access-Token', userToken1)
+          .set('Content-Type', 'application/json')
+          .send({
+            note: 'The barn owl (Tyto alba) is the most widely distributed species of owl, and one of the most widespread of all birds. It is found in most parts of the world, with one major lineage in the New World, one in Australasia, and another in Eurasia and Africa. The 28 subspecies, between 33 and 39 cm (13 and 15 in) in length',
+            shipAddress: 'D201'
+          })
+          .expect(res => {
+            expect(res.body.status).to.equal(422);
+            let errors = res.body.errors;
+            expect(_.toPairs(errors)).to.have.lengthOf(1);
+            expect(errors.note.message).to.equal('Validation len failed');
+            expect(errors.note.message_code).to.equal('error.model.validation_len_failed');
           })
           .expect(422, done);
       });
@@ -347,6 +395,118 @@ describe('POST /api/v1/orders/:orderId/cancel', () => {
         .expect(res => {
           expect(res.body.status).to.equal(403);
           expect(res.body.message_code).to.equal('error.order.only_new_or_accepted_order_can_be_cancelled');
+        })
+        .expect(403, done);
+    });
+  });
+});
+
+describe('POST /api/v1/orders/:orderId/rate', () => {
+  let userToken1, userToken2, user;
+
+  before(done => {
+    helper.factory.createUser().then(u => {
+      user = u;
+      userToken1 = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createUser();
+    }).then(u => {
+      userToken2 = helper.createAccessTokenForUserId(u.id);
+      done();
+    });
+  });
+
+  describe('with completed order', () => {
+    let completedOrder;
+    beforeEach(done => {
+      helper.factory.createOrder({
+        userId: user.id,
+        status: Order.STATUS.COMPLETED
+      }).then(o => {
+        expect(o.status).to.equal(Order.STATUS.COMPLETED);
+        completedOrder = o;
+        done();
+      });
+    });
+
+    describe('with valid rate attribute and valid accessToken', () => {
+      it('should return 200 with canceled orderInfo', done => {
+        request(app)
+          .post(`/api/v1/orders/${completedOrder.id}/rate`)
+          .set('X-Access-Token', userToken1)
+          .set('Content-Type', 'application/json')
+          .send({
+            rate: 5
+          })
+          .expect(res => {
+            let body = res.body;
+            expect(body.status).to.equal(Order.STATUS.COMPLETED);
+            expect(body.id).to.equal(completedOrder.id);
+            expect(body.rate).to.equal(5);
+            expect(body.comment).not.to.be.ok;
+          })
+          .expect(200, done);
+      });
+    });
+
+    describe('with valid rate attribute and valid accessToken', () => {
+      it('should return 200 with canceled orderInfo', done => {
+        request(app)
+            .post(`/api/v1/orders/${completedOrder.id}/rate`)
+            .set('X-Access-Token', userToken1)
+            .set('Content-Type', 'application/json')
+            .send({
+              rate: 5,
+              comment: 'Good'
+            })
+            .expect(res => {
+              let body = res.body;
+              expect(body.status).to.equal(Order.STATUS.COMPLETED);
+              expect(body.id).to.equal(completedOrder.id);
+              expect(body.comment).to.equal('Good');
+            })
+            .expect(200, done);
+      });
+    });
+
+    describe('with invalid accessToken', () => {
+      it('should return 404 order is not exits', done => {
+        request(app)
+          .post(`/api/v1/orders/${completedOrder.id}/rate`)
+          .set('X-Access-Token', userToken2)
+          .set('Content-Type', 'application/json')
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message_code).to.equal('error.model.order_does_not_exits');
+          })
+          .expect(404, done);
+      });
+    });
+  });
+
+  describe('with shipping order', () => {
+    let shippingOrder;
+    beforeEach(done => {
+      helper.factory.createOrder({
+        userId: user.id,
+        status: Order.STATUS.SHIPPING
+      }).then(o => {
+        expect(o.status).to.equal(Order.STATUS.SHIPPING);
+        shippingOrder = o;
+        done();
+      });
+    });
+
+    it('should return 403', done => {
+      request(app)
+        .post(`/api/v1/orders/${shippingOrder.id}/rate`)
+        .set('X-Access-Token', userToken1)
+        .set('Content-Type', 'application/json')
+        .send({
+          rate: 2
+        })
+        .expect(res => {
+          expect(res.body.status).to.equal(403);
+          expect(res.body.message_code).to.equal('error.order.can_only_rate_completed_or_aborted_order');
         })
         .expect(403, done);
     });

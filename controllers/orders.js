@@ -84,7 +84,11 @@ exports.putUpdateOrder = (req, res) => {
 };
 
 exports.cancelOrder = (req, res) => {
-  tryChangeOrderStatus(req, res, 'cancel');
+  tryUpdateOrder(req, res, 'cancel');
+};
+
+exports.rateOrder = (req, res) => {
+  tryUpdateOrder(req, res, 'rateOrder');
 };
 
 exports.getOrders = (req, res) => {
@@ -126,7 +130,7 @@ exports.getOrders = (req, res) => {
   });
 };
 
-var tryChangeOrderStatus = (req, res, action) => {
+var tryUpdateOrder = (req, res, action) => {
   let user = req.user;
   let orderId = req.params.orderId;
 
@@ -140,7 +144,13 @@ var tryChangeOrderStatus = (req, res, action) => {
       let error = 'Order does not exits';
       return Promise.reject({status: 404, message: error, type: 'model'});
     }
-    return o[action]();
+
+    if (action === 'rateOrder') {
+      let rateInfo = _.pick(req.body, ['rate', 'comment']);
+      return o.rateOrder(rateInfo);
+    } else {
+      return o[action]();
+    }
   }).then(o => {
     responseOrder(o, res);
   }).catch(err => {

@@ -107,7 +107,7 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          let updateData = reason;
+          let updateData = _.pick(reason, ['sellerMessage']);
           updateData.status = ORDER_STATUS.REJECTED;
           if (this.status === ORDER_STATUS.NEW) {
             this.update(updateData).then(resolve, reject);
@@ -192,7 +192,7 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          let updateData = reason;
+          let updateData = _.pick(reason, ['sellerMessage']);
           updateData.status = ORDER_STATUS.ABORTED;
 
           if (this.status === ORDER_STATUS.SHIPPING) {
@@ -208,6 +208,35 @@ module.exports = function(sequelize, DataTypes) {
         }).then((o) => {
           // TODO: Process by background job
           return sequelize.model('UserNotification').createOrderChangeNotificationForUser(this.id, ORDER_STATUS.ABORTED).then(() => Promise.resolve(o));
+        });
+      },
+      rateOrder: function (rateInfo) {
+        return new Promise((resolve, reject) => {
+          let rawInfo = _.pick(rateInfo, ['rate', 'comment']);
+
+          if (!rawInfo.rate) {
+            let error = 'Must provide rate when rate order';
+            reject({
+              status: 404,
+              message: error,
+              type: 'order'
+            });
+          }
+
+          if (!rawInfo.comment) {
+            rawInfo.comment = '';
+          }
+
+          if (this.status === ORDER_STATUS.COMPLETED || this.status === ORDER_STATUS.ABORTED) {
+            this.update(rawInfo).then(resolve, reject);
+          } else {
+            let error = 'Can only rate completed or aborted order';
+            reject({
+              status: 403,
+              message: error,
+              type: 'order'
+            });
+          }
         });
       }
     }
