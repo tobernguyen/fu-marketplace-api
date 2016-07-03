@@ -3,6 +3,7 @@
 const imageUploader = require('../libs/image-uploader');
 const _ = require('lodash');
 const elasticsearch = require('../libs/elasticsearch');
+const kue = require('../libs/kue');
 
 var IGNORE_ATTRIBUTES = [
   'updatedAt',
@@ -66,21 +67,17 @@ module.exports = function(sequelize, DataTypes) {
     hooks: {
       afterCreate: function(item, options) {
         // Run the index immediately if Item is for sell
-        if (item.status === ITEM_STATUS.FOR_SELL) return elasticsearch.indexShopById(item.shopId);
+        if (item.status === ITEM_STATUS.FOR_SELL) kue.createUpdateShopIndexJob({shopId: item.shopId});
       },
       afterUpdate: function(item, options) {
-        return elasticsearch.indexShopById(item.shopId);
+        kue.createUpdateShopIndexJob({shopId: item.shopId});
       },
       afterDestroy: function(item, options) {
-        let promises = [];
+        kue.createUpdateShopIndexJob({shopId: item.shopId});
 
         if (item.imageFile && _.isArray(item.imageFile.versions)) {
-          promises[promises.length] = imageUploader.deleteImages(item.imageFile.versions);
+          return imageUploader.deleteImages(item.imageFile.versions);
         }
-
-        promises[promises.length] = elasticsearch.indexShopById(item.shopId);
-
-        return Promise.all(promises);
       }
     },
     classMethods: {

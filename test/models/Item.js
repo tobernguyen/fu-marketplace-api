@@ -5,8 +5,6 @@ const Category = require('../../models').Category;
 const Item = require('../../models').Item;
 const rewire = require('rewire');
 const fs = require('fs-extra');
-const sinon = require('sinon');
-const elasticsearch = require('../../libs/elasticsearch');
 
 describe('Item Model', () => {
   describe('factory', () => {
@@ -57,47 +55,40 @@ describe('Item Model', () => {
   describe('hooks', () => {
     describe('afterCreate', () => {
       describe('item created with status is not for sell', () => {
-        let elasticsearchSpy;
-
         beforeEach(done => {
           helper.factory.createShop({}).then(shop => {
-            elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+            helper.queue.testMode.clear();
             return helper.factory.createItem({shopId: shop.id, categoryId: 1, status: 0});
           }).then(() => {
             done();
           });
         });
 
-        afterEach(() => {
-          elasticsearch.indexShopById.restore();
-        });
-
-        it('should not call elasticsearch.indexShopById', done => {
-          expect(elasticsearchSpy.callCount).to.equal(0);
+        it('should not enqueue new job', done => {
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(0);
           done();
         });
       });
 
       describe('item created with status is for sell', () => {
-        let elasticsearchSpy;
         let shop;
 
         beforeEach(done => {
           helper.factory.createShop({}).then(s => {
             shop = s;
-            elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+            helper.queue.testMode.clear();
             return helper.factory.createItem({shopId: s.id, categoryId: 1, status: Item.STATUS.FOR_SELL});
           }).then(s => {
             done();
           });
         });
 
-        afterEach(() => {
-          elasticsearch.indexShopById.restore();
-        });
-
-        it('should not call elasticsearch.indexShopById', done => {
-          expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+        it('should enqueue new job "update shop index"', done => {
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('update shop index');
+          expect(jobs[0].data).to.eql({shopId: shop.id});
           done();
         });
       });
@@ -105,25 +96,22 @@ describe('Item Model', () => {
 
     describe('afterUpdate', () => {
       let item;
-      let elasticsearchSpy;
       beforeEach(done => {
         helper.factory.createShop({}).then(shop => {
           return helper.factory.createItem({shopId: shop.id, categoryId: 1, status: 0});
         }).then(i => {
           item = i;
-          elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+          helper.queue.testMode.clear();
           done();
         });
       });
 
-
-      afterEach(() => {
-        elasticsearch.indexShopById.restore();
-      });
-
-      it('should call elasticsearch.indexShopById', done => {
+      it('should enqueue new job "update shop index"', done => {
         item.update({name: 'Updated name'}).then(_ => {
-          expect(elasticsearchSpy.withArgs(item.shopId).calledOnce).to.be.true;
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('update shop index');
+          expect(jobs[0].data).to.eql({shopId: item.shopId});
           done();
         });
       });
@@ -135,7 +123,6 @@ describe('Item Model', () => {
       let checkImageFileExist = () => {
         fs.accessSync(imageFile);
       };
-      let elasticsearchSpy;
 
       beforeEach(done => {
         fs.ensureFileSync(imageFile);
@@ -165,13 +152,9 @@ describe('Item Model', () => {
           });
         }).then(i => {
           item = i;
-          elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+          helper.queue.testMode.clear();
           done();
         });
-      });
-
-      afterEach(() => {
-        elasticsearch.indexShopById.restore();
       });
       
       it('should delete all user image files after user destroyed', done => {
@@ -181,9 +164,12 @@ describe('Item Model', () => {
         }, done);
       });
 
-      it('should call elasticsearch.indexShopById', done => {
+      it('should enqueue new job "update shop index"', done => {
         item.destroy().then(() => {
-          expect(elasticsearchSpy.withArgs(item.shopId).calledOnce).to.be.true;
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('update shop index');
+          expect(jobs[0].data).to.eql({shopId: item.shopId});
           done();
         });
       });

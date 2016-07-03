@@ -5,8 +5,6 @@ const Shop = require('../../models').Shop;
 const rewire = require('rewire');
 const _ = require('lodash');
 const fs = require('fs-extra');
-const sinon = require('sinon');
-const elasticsearch = require('../../libs/elasticsearch');
 
 describe('Shop Model', () => {
   describe('factory', () => {
@@ -60,43 +58,40 @@ describe('Shop Model', () => {
   describe('hooks', () => {
     describe('afterCreate', () => {
       let shop;
-      let elasticsearchSpy;
+
       beforeEach(done => {
-        elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
         helper.factory.createShop({}, 1).then(s => {
           shop = s;
           done();
         });
       });
 
-      afterEach(() => {
-        elasticsearch.indexShopById.restore();
-      });
-
-      it('should call elasticsearch.indexShopById', done => {
-        expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+      it('should enqueue new job "update shop index"', done => {
+        let jobs = helper.queue.testMode.jobs;
+        expect(jobs).to.have.lengthOf(1);
+        expect(jobs[0].type).to.equal('update shop index');
+        expect(jobs[0].data).to.eql({shopId: shop.id});
         done();
       });
     });
 
     describe('afterUpdate', () => {
       let shop;
-      let elasticsearchSpy;
+
       beforeEach(done => {
         helper.factory.createShop({}, 1).then(s => {
-          elasticsearchSpy = sinon.spy(elasticsearch, 'indexShopById');
+          helper.queue.testMode.clear();
           shop = s;
           done();
         });
       });
 
-      afterEach(() => {
-        elasticsearch.indexShopById.restore();
-      });
-
-      it('should call elasticsearch.indexShopById', done => {
+      it('should enqueue new job "update shop index"', done => {
         shop.update({name: 'Updated name'}).then(_ => {
-          expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('update shop index');
+          expect(jobs[0].data).to.eql({shopId: shop.id});
           done();
         });
       });
@@ -112,8 +107,7 @@ describe('Shop Model', () => {
       let checkCoverFileExist = () => {
         fs.accessSync(coverFile);        
       };
-      let elasticsearchSpy;
-      
+
       beforeEach(done => {
         fs.ensureFileSync(avatarFile);
         fs.ensureFileSync(coverFile);
@@ -137,13 +131,9 @@ describe('Shop Model', () => {
           }
         }, 1).then(u => {
           shop = u;
-          elasticsearchSpy = sinon.spy(elasticsearch, 'deleteShopIndexById');
+          helper.queue.testMode.clear();
           done();
         });
-      });
-
-      afterEach(() => {
-        elasticsearch.deleteShopIndexById.restore();
       });
       
       it('should delete all user avatar files after user destroyed', done => {
@@ -154,9 +144,12 @@ describe('Shop Model', () => {
         }, done);
       });
 
-      it('should call elasticsearch.deleteShopIndexById', done => {
+      it('should enqueue new job "delete shop index"', done => {
         shop.destroy().then(() => {
-          expect(elasticsearchSpy.withArgs(shop.id).calledOnce).to.be.true;
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('delete shop index');
+          expect(jobs[0].data).to.eql({shopId: shop.id});
           done();
         });
       });

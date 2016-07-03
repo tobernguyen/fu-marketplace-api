@@ -67,8 +67,6 @@ var indexShopById = (shopId) => {
       id: shopId,
       body: shopDocument
     });
-  }).catch(err => {
-    logger.error(err);
   });
 };
 exports.indexShopById = indexShopById;
@@ -79,8 +77,6 @@ var deleteShopIndexById = (shopId) => {
     type: SHOP_DOCUMENT_NAME,
     id: shopId,
     ignore: [404] // Dont reject promise if document not exist
-  }).catch(err => {
-    logger.error(err);
   });
 };
 exports.deleteShopIndexById = deleteShopIndexById;

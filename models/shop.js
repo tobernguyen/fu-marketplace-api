@@ -2,6 +2,7 @@
 
 const imageUploader = require('../libs/image-uploader');
 const _ = require('lodash');
+const kue = require('../libs/kue');
 var elasticsearch = require('../libs/elasticsearch');
 
 var SHOP_STATUS = {
@@ -67,14 +68,14 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     hooks: {
       afterCreate: function(shop, options) {
-        // TODO: Process by background job
-        return elasticsearch.indexShopById(shop.id);
+        kue.createUpdateShopIndexJob({shopId: shop.id});
       },
       afterUpdate: function(shop, options) {
-        // TODO: Process by background job
-        return shop.reindex();
+        kue.createUpdateShopIndexJob({shopId: shop.id});
       },
       afterDestroy: function(shop, options) {
+        kue.createDeleteShopIndexJob({shopId: shop.id});
+
         var promises = [];
         
         // Delete shop's avatar files
@@ -86,9 +87,6 @@ module.exports = function(sequelize, DataTypes) {
         if (shop.coverFile && _.isArray(shop.coverFile.versions)) {
           promises.push(imageUploader.deleteImages(shop.coverFile.versions));
         }
-
-        // TODO: Process by background job
-        promises.push(elasticsearch.deleteShopIndexById(shop.id));
 
         if (promises.length) {
           return Promise.all(promises);
@@ -182,8 +180,7 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
       reindex: function() {
-        // TODO: Process by background job
-        return elasticsearch.indexShopById(this.id);
+        kue.createDeleteShopIndexJob({shopId: this.id});
       }
     }
   });

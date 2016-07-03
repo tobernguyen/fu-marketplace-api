@@ -20,18 +20,26 @@ require('sinon-as-promised');
 var fs = require('fs-extra');
 var _ = require('lodash');
 var elasticsearchHelper = require('./utils/elasticsearch-helper');
-
+var redisHelper= require('./utils/redis-helper');
+var kue = require('../libs/kue');
 
 before(function(done) {
   this.timeout(5000);
+  kue.queue.testMode.enter();
   dbUtils.clearDatabase()
     .then(dbUtils.runMigrations)
     .then(elasticsearchHelper.deleteAll)
     .then(elasticsearchHelper.createIndexWithConfig)
+    .then(redisHelper.flushAll)
     .then(() => done(), done);
 });
 
+afterEach(() => {
+  kue.queue.testMode.clear();
+});
+
 after(() => {
+  kue.queue.testMode.exit();
   _sequelize.close();
   fs.emptyDirSync('public/uploads/__test__');
 });
@@ -344,6 +352,7 @@ exports.factory = {
   createItem: createItem,
   createOrder: createOrder
 };
+exports.queue = kue.queue;
 
 // Setup some global helper
 global.expect = expect;
