@@ -14,6 +14,7 @@ describe('POST /api/v1/feed/shops', () => {
 
   before(function(done) {
     this.timeout(5000);
+    helper.queue.testMode.enter(true);
 
     // This test case is sensitive to number of shops
     // so we have to clear all shops first
@@ -92,14 +93,35 @@ describe('POST /api/v1/feed/shops', () => {
 
       return Promise.all(promises);
     }).then(() => {
+      // Wait for all "update shop index" jobs done
+      let promise = new Promise((resolve, reject) => {
+        let checkPendingJobInterval = setInterval(() => {
+          helper.queue.activeCount('update shop index', (err, total) => {
+            if (err) {
+              clearInterval(checkPendingJobInterval);
+              return reject(err);
+            }
+            if (total == 0) {
+              clearInterval(checkPendingJobInterval);
+              return resolve();
+            }
+          });
+        }, 50);
+      });
+      return promise;
+    }).then(() => {
       return elasticsearchHelper.refreshIndexNow();
     }).then(() => {
       done();
     }).catch(done);
   });
 
+  after(() => {
+    helper.queue.testMode.enter();
+  });
+
   describe('without any params', () => {
-    it('should return all publised shops and from opening shops to closing shops', done => {
+    it('should return all published shops and from opening shops to closing shops', done => {
       let lastShopData;
 
       request(app)

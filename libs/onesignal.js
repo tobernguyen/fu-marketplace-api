@@ -18,7 +18,6 @@ var axios = _axios.create({
   }
 });
 
-// TODO: write test for this
 var addUserToPlayerId = (playerId, userId) => {
   let hashedUserTag = sha1(`userId_${userId}`);
   let tags = {};
@@ -31,7 +30,6 @@ var addUserToPlayerId = (playerId, userId) => {
 };
 exports.addUserToPlayerId = addUserToPlayerId;
 
-// TODO: write test for this
 var pushNotificationToUserId = (userId, data) => {
   if (process.env.NODE_ENV === 'test') return Promise.resolve();
 

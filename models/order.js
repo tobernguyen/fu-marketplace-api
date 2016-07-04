@@ -2,6 +2,7 @@
 
 const Promise = require('bluebird');
 const _ = require('lodash');
+const kue = require('../libs/kue');
 
 var ORDER_STATUS = {
   NEW: 0,
@@ -92,8 +93,8 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         }).then((o) => {
-          // TODO: Process by background job
-          return sequelize.model('UserNotification').createOrderChangeNotificationForUser(this.id, ORDER_STATUS.ACCEPTED).then(() => Promise.resolve(o));
+          kue.createSendOrderNotificationToUserJob({orderId: this.id, orderStatus: ORDER_STATUS.ACCEPTED});
+          return Promise.resolve(o);
         });
       },
       reject: function (reason) {
@@ -122,8 +123,8 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         }).then((o) => {
-          // TODO: Process by background job
-          return sequelize.model('UserNotification').createOrderChangeNotificationForUser(this.id, ORDER_STATUS.REJECTED).then(() => Promise.resolve(o));
+          kue.createSendOrderNotificationToUserJob({orderId: this.id, orderStatus: ORDER_STATUS.REJECTED});
+          return Promise.resolve(o);
         });
       },
       cancel: function () {
@@ -142,9 +143,9 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         }).then((o) => {
-          // TODO: Process by background job
           let UserNotification = sequelize.model('UserNotification');
-          return UserNotification.createNotificationForSeller(this.id, UserNotification.NOTIFICATION_TYPE.USER_CANCEL_ORDER).then(() => Promise.resolve(o));
+          kue.createSendOrderNotificationToSellerJob({orderId: this.id, notificationType: UserNotification.NOTIFICATION_TYPE.USER_CANCEL_ORDER});
+          return Promise.resolve(o);
         });
       },
       startShipping: function () {
@@ -160,8 +161,8 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         }).then((o) => {
-          // TODO: Process by background job
-          return sequelize.model('UserNotification').createOrderChangeNotificationForUser(this.id, ORDER_STATUS.SHIPPING).then(() => Promise.resolve(o));
+          kue.createSendOrderNotificationToUserJob({orderId: this.id, orderStatus: ORDER_STATUS.SHIPPING});
+          return Promise.resolve(o);
         });
       },
       complete: function () {
@@ -177,8 +178,8 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         }).then((o) => {
-          // TODO: Process by background job
-          return sequelize.model('UserNotification').createOrderChangeNotificationForUser(this.id, ORDER_STATUS.COMPLETED).then(() => Promise.resolve(o));
+          kue.createSendOrderNotificationToUserJob({orderId: this.id, orderStatus: ORDER_STATUS.COMPLETED});
+          return Promise.resolve(o);
         });
       },
       abort: function (reason) {
@@ -206,8 +207,8 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         }).then((o) => {
-          // TODO: Process by background job
-          return sequelize.model('UserNotification').createOrderChangeNotificationForUser(this.id, ORDER_STATUS.ABORTED).then(() => Promise.resolve(o));
+          kue.createSendOrderNotificationToUserJob({orderId: this.id, orderStatus: ORDER_STATUS.ABORTED});
+          return Promise.resolve(o);
         });
       },
       rateOrder: function (rateInfo) {

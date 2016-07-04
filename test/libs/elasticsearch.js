@@ -146,6 +146,10 @@ describe('libs/elasticsearch', () => {
 
         return Promise.all(promises);
       }).then(() => {
+        // Actually index shops because kue is in testMode and no jobs will be ran
+        let promises = _.map(shops, s => elasticsearch.indexShopById(s.id));
+        return Promise.all(promises);
+      }).then(() => {
         return elasticsearchHelper.refreshIndexNow();
       }).then(() => {
         done();
@@ -298,6 +302,8 @@ describe('libs/elasticsearch', () => {
           return helper.factory.createShop({
             opening: true,
             status: Shop.STATUS.PUBLISHED
+          }).then(shop => {
+            return elasticsearch.indexShopById(shop.id);
           });
         });
 
