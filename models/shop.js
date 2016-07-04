@@ -205,8 +205,12 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          if (!rawInfo.rate || !rawInfo.comment) {
-            let error = 'Must provide rate and comment when review shop';
+          if (!rawInfo.comment) {
+            rawInfo.comment = '';
+          }
+
+          if (!rawInfo.rate) {
+            let error = 'Must provide rate when review shop';
             reject({
               status: 404,
               message: error,

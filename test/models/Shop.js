@@ -134,7 +134,7 @@ describe('Shop Model', () => {
         });
 
         describe('provide comment only', () => {
-          it('should return err and review donot change', done => {
+          it('should return err and review do not change', done => {
             let review;
             shop.review({
               userId: order.userId,
@@ -152,7 +152,7 @@ describe('Shop Model', () => {
               });
             }).catch(err => {
               expect(err.status).to.equal(404);
-              expect(err.message).to.equal('Must provide rate and comment when review shop');
+              expect(err.message).to.equal('Must provide rate when review shop');
               expect(err.type).to.equal('review');
               return Review.findById(review.id);
             }).then(r => {
