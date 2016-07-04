@@ -97,7 +97,6 @@ module.exports = function(sequelize, DataTypes) {
         break;
       }
 
-      // TODO: add test
       kue.createPushOneSignalNotification({
         userId: fetchedOrder.userId,
         pushData: {
@@ -158,7 +157,6 @@ module.exports = function(sequelize, DataTypes) {
         break;
       }
 
-      // TODO: add test
       kue.createPushOneSignalNotification({
         userId: fetchedOrder.userId,
         pushData: {

@@ -4,6 +4,7 @@
 - PostgreSQL 9.1 or higher
 - GraphicMagick 1.3.x or higher
 - Elasticsearch 2.x (2.3 at this time write this README)
+- Redis 3.0.7 or higher
 
 ## Setup
 Install dependencies
