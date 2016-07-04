@@ -76,7 +76,7 @@ describe('GET /api/v1/shops/:shopId', () => {
 
 });
 
-describe.only('POST /api/v1/shops/:shopId/review', () => {
+describe('POST /api/v1/shops/:shopId/review', () => {
   let order, userToken1, userToken2;
   
   before(done => {

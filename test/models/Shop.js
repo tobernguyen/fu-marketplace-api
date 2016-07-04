@@ -77,7 +77,7 @@ describe('Shop Model', () => {
         }).catch(err => {
           expect(err.status).to.equal(404);
           expect(err.type).to.equal('review');
-          expect(err.message).to.equal('You must order at this shop at least one time before review');
+          expect(err.message).to.equal('You must order at this shop at least one time');
           return Review.findAll({
             where: {
               userId: 0,
@@ -105,60 +105,76 @@ describe('Shop Model', () => {
         });
       });
       
-      describe('provide rate and comment', () => {
-        it('should return lastest review', done => {
-          let review;
-          shop.review({
-            userId: order.userId,
-            rate: 3,
-            comment: 'xxx'
-          }).then(r => {
-            review = r;
-            expect(r.userId).to.equal(order.userId);
-            expect(r.shopId).to.equal(shop.id);
-            expect(r.rate).to.equal(3);
-            expect(r.comment).to.equal('xxx');
-            return shop.review({
+      describe('provide userId attribute', () => {
+        describe('provide rate and comment', () => {
+          it('should return lastest review', done => {
+            let review;
+            shop.review({
               userId: order.userId,
-              rate: 1,
-              comment: 'yyy'
-            });
-          }).then(r => {
-            expect(r.id).to.equal(review.id);
-            expect(r.rate).to.equal(1);
-            expect(r.comment).to.equal('yyy');
-            done();
-          }, done);
+              rate: 3,
+              comment: 'xxx'
+            }).then(r => {
+              review = r;
+              expect(r.userId).to.equal(order.userId);
+              expect(r.shopId).to.equal(shop.id);
+              expect(r.rate).to.equal(3);
+              expect(r.comment).to.equal('xxx');
+              return shop.review({
+                userId: order.userId,
+                rate: 1,
+                comment: 'yyy'
+              });
+            }).then(r => {
+              expect(r.id).to.equal(review.id);
+              expect(r.rate).to.equal(1);
+              expect(r.comment).to.equal('yyy');
+              done();
+            }, done);
+          });
+        });
+
+        describe('provide comment only', () => {
+          it('should return err and review donot change', done => {
+            let review;
+            shop.review({
+              userId: order.userId,
+              rate: 3,
+              comment: 'xxx'
+            }).then(r => {
+              review = r;
+              expect(r.userId).to.equal(order.userId);
+              expect(r.shopId).to.equal(shop.id);
+              expect(r.rate).to.equal(3);
+              expect(r.comment).to.equal('xxx');
+              return shop.review({
+                userId: order.userId,
+                comment: 'yyy'
+              });
+            }).catch(err => {
+              expect(err.status).to.equal(404);
+              expect(err.message).to.equal('Must provide rate and comment when review shop');
+              expect(err.type).to.equal('review');
+              return Review.findById(review.id);
+            }).then(r => {
+              expect(r.userId).to.equal(order.userId);
+              expect(r.rate).to.equal(3);
+              expect(r.comment).to.equal('xxx');
+              expect(r.shopId).to.equal(shop.id);
+              done();
+            }, done);
+          });
         });
       });
 
-      describe('provide comment only', () => {
-        it('should return err and review donot change', done => {
-          let review;
+      describe('do not provide userId attribute', () => {
+        it('should return err Must provide userId', done => {
           shop.review({
-            userId: order.userId,
             rate: 3,
             comment: 'xxx'
-          }).then(r => {
-            review = r;
-            expect(r.userId).to.equal(order.userId);
-            expect(r.shopId).to.equal(shop.id);
-            expect(r.rate).to.equal(3);
-            expect(r.comment).to.equal('xxx');
-            return shop.review({
-              userId: order.userId,
-              comment: 'yyy'
-            });
           }).catch(err => {
             expect(err.status).to.equal(404);
-            expect(err.message).to.equal('Must provide rate and comment when review shop');
+            expect(err.message).to.equal('Must provide userId when review shop');
             expect(err.type).to.equal('review');
-            return Review.findById(review.id);
-          }).then(r => {
-            expect(r.userId).to.equal(order.userId);
-            expect(r.rate).to.equal(3);
-            expect(r.comment).to.equal('xxx');
-            expect(r.shopId).to.equal(shop.id);
             done();
           }, done);
         });
