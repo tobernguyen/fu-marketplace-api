@@ -44,10 +44,17 @@ module.exports = {
         type: Sequelize.DATE
       }
     }).then(() => {
-      let sql = `CREATE UNIQUE INDEX "UserShopOnReviewsIndex"
+      let sql = `CREATE UNIQUE INDEX "UserIdShopIdUniqueIndexOnReviews"
                   ON public."Reviews"
                   USING btree
-                  ("userId", "shopId", "createdAt");
+                  ("userId", "shopId");
+                `;
+      return queryInterface.sequelize.query(sql, {raw: true});
+    }).then(() => {
+      let sql = `CREATE UNIQUE INDEX "ShopIdCreatedAtIndexOnReviews"
+                  ON public."Reviews"
+                  USING btree
+                  ("shopId", "createdAt");           
                 `;
       return queryInterface.sequelize.query(sql, {raw: true});
     });
