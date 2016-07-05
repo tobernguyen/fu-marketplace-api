@@ -56,6 +56,31 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
     });
   });
 
+  describe('with valid accesToken and get new order', () => {
+    it('should return 200 with 1 new orderInfo', done => {
+      request(app)
+        .get(`/api/v1/seller/shops/${shopId}/orders/?status=NEW`)
+        .set('X-Access-Token', sellerToken)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          let bodyOrder = res.body.orders;
+          let order = _.filter(orders, function(o) { return o.status === Order.STATUS.NEW; })[0];
+
+          expect(bodyOrder).to.have.lengthOf(1);
+          expect(bodyOrder[0].id).to.equal(order.id);
+          expect(bodyOrder[0].note).to.equal(order.note);
+          expect(bodyOrder[0].shipAddress).to.equal(order.shipAddress);
+
+          order.getOrderLines(ols => {
+            expect(bodyOrder[0].orderLines[0].note).to.equal(ols[0].note);
+            expect(bodyOrder[0].orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(bodyOrder[0].orderLines[0].item).to.equal(ols[0].item);
+          });
+        })
+        .expect(200, done);
+    });
+  });
+
   describe('with valid accesToken and get cancel order', () => {
     it('should return 200 with 1 cancel orderInfo', done => {
       request(app)

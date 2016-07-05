@@ -232,6 +232,30 @@ exports.getShop = (req, res) => {
   responseShopById(shopId, res);
 };
 
+exports.reviewShop = (req, res) => {
+  let shopId = req.params.shopId;
+  let user = req.user;
+
+  let reviewInfo = _.pick(req.body, ['rate', 'comment']);
+  reviewInfo.userId = user.id;
+  Shop.findById(shopId).then(s => {
+    if (!s || s.banned) {
+      let error = 'Shop does not exist';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    } else {
+      return s.review(reviewInfo);
+    }
+  }).then(review => {
+    res.json(review.toJSON());
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
+  });
+};
+
 exports.postRegisterOneSignal = (req, res) => {
   let playerId = req.body.playerId;
   if (!playerId) return errorHandlers.responseError(400, 'Must provide playerId', 'one_signal', res);
