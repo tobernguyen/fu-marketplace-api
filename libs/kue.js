@@ -13,6 +13,8 @@ var queue = kue.createQueue({
   prefix: KUE_REDIS_PREFIX
 });
 
+exports._kue = kue;
+
 var elasticsearch = require('./elasticsearch');
 var OneSignal = require('./onesignal');
 var logger = require('./logger');

@@ -53,6 +53,22 @@ if (process.env.UPLOAD_TO_S3 == 'false') {
   app.use(express.static('public'));
 }
 
+/**
+ * Mount Kue UI
+ */
+var ui = require('kue-ui');
+var kue = require('./libs/kue')._kue;
+var basicAuth = require('basic-auth-connect');
+
+ui.setup({
+  apiURL: '/kue-api', // IMPORTANT: specify the api url
+  baseURL: '/kue', // IMPORTANT: specify the base url
+  updateInterval: 5000 // Optional: Fetches new data every 5000 ms
+});
+
+app.use('/kue-api', basicAuth('tobernguyen', 'hl19941994!!!'), kue.app);
+app.use('/kue', basicAuth('tobernguyen', 'hl19941994!!!'), ui.app);
+
 // If no route is matched by now, it must be a 404
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
