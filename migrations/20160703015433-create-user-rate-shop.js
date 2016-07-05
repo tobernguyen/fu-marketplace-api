@@ -51,7 +51,7 @@ module.exports = {
                 `;
       return queryInterface.sequelize.query(sql, {raw: true});
     }).then(() => {
-      let sql = `CREATE UNIQUE INDEX "ShopIdCreatedAtIndexOnReviews"
+      let sql = `CREATE INDEX "ShopIdCreatedAtIndexOnReviews"
                   ON public."Reviews"
                   USING btree
                   ("shopId", "createdAt");           
