@@ -4,6 +4,7 @@ var _ = require('lodash');
 var models = require('../../models');
 var ShipPlace = models.ShipPlace;
 var Shop = models.Shop;
+var ShopOpeningRequest = models.ShopOpeningRequest;
 var errorHandlers = require('../helpers/errorHandlers');
 var shopUpdateNormalizer = require('../helpers/shopUpdateNormalizer');
 var sanitizeUpdateRequest = shopUpdateNormalizer.sanitizeUpdateRequest;
@@ -208,6 +209,52 @@ exports.postChangeShopShipPlaces = (req, res) => {
   }
 };
 
+exports.postRequestOpenShop = (req, res) => {
+  req.checkBody(REQUEST_OPEN_SHOP_BODY_SCHEMA);
+
+  var errs = req.validationErrors();
+
+  if (errs) {
+    let errors = {};
+    errs.forEach(err => {
+      errors[err.param] = {
+        message: err.msg,
+        message_code: `error.form_validation.${_.snakeCase(err.msg)}`
+      };
+    });
+    res.status(400);
+    res.json({
+      status: 400,
+      errors: errors
+    });
+    return;
+  }
+
+  let user = req.user;
+  let sellerInfo = {
+    phone: user.phone,
+    identityNumber: user.identityNumber
+  };
+  let shopInfo = req.body.shopInfo;
+  let note = req.body.note || '';
+
+  ShopOpeningRequest.create({
+    name: shopInfo.name,
+    description: shopInfo.description,
+    address: shopInfo.address,
+    ownerId: user.id,
+    note: note
+  }).then((shopOpeningRequest) => {
+    res.json({
+      sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),
+      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note']),
+      note: shopOpeningRequest.note || ''
+    });
+  }).catch(error => {
+    errorHandlers.handleModelError(error, res);
+  });
+};
+
 var responseShopById = (owner, id, res) => {
   Shop.findOne({
     where: {
@@ -235,4 +282,29 @@ var responseShop = (shop, res) => {
     result['shipPlaces'] = shipPlace;
     res.json(result);
   });
+};
+
+const REQUEST_OPEN_SHOP_BODY_SCHEMA = {
+  'shopInfo.name': {
+    notEmpty: {
+      errorMessage: 'Must not be empty'
+    },
+    isLength: {
+      options: [{max: 50}]
+    }
+  },
+  'shopInfo.description': {
+    notEmpty: {
+      errorMessage: 'Must not be empty'
+    },
+    isLength: {
+      options: [{max: 255}],
+      errorMessage: 'Too long. Maximum is 255 characters.'
+    }
+  },
+  'shopInfo.address': {
+    notEmpty: {
+      errorMessage: 'Must not be empty'
+    }
+  }
 };

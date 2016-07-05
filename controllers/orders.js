@@ -167,7 +167,8 @@ var responseOrder = (order, res) => {
   order.getOrderLines({
     order: 'id'
   }).then(ols => {
-    let orderLines = _.map(ols, r => _.pick(r, ['item', 'note', 'quantity']));
+    let sortedOls = _.sortBy(ols, ['item.id']);
+    let orderLines = _.map(sortedOls, r => _.pick(r, ['item', 'note', 'quantity']));
     result['orderLines'] = orderLines;
     res.json(result);
   });
