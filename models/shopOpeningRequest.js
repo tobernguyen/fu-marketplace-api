@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const kue = require('../libs/kue');
 
 const IGNORE_ATTRIBUTES = [
   'updatedAt',
@@ -112,12 +113,20 @@ module.exports = function(sequelize, DataTypes) {
               }
             });
           });
-        });        
+        }).then(() => {
+          // Create and send notification to user
+          kue.createSendShopOpeningRequestNotificationJob({shopOpeningRequestId: this.id});
+          return Promise.resolve();
+        });
       },
       reject: function(adminMessage) {
         return this.update({
           status: SHOP_OPENING_REQUEST_STATUS.REJECTED,
           adminMessage: adminMessage
+        }).then(() => {
+          // Create and send notification to user
+          kue.createSendShopOpeningRequestNotificationJob({shopOpeningRequestId: this.id});
+          return Promise.resolve();
         });
       }
     }

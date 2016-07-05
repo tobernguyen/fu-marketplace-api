@@ -1,7 +1,6 @@
 'use strict';
 
 var kue = require('../libs/kue');
-var logger = require('../libs/logger');
 
 var NOTIFICATION_TYPE = {
   SELLER_CHANGE_ORDER_STATUS: 1,
@@ -42,8 +41,48 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
   
-  UserNotification.createShopRequestNotification = () => {
-    // TODO: add code and tests
+  UserNotification.createShopRequestNotification = (sorId) => {
+    let ShopOpeningRequest = sequelize.model('ShopOpeningRequest');
+    
+    return ShopOpeningRequest.findById(sorId).then(sor => {
+      return UserNotification.create({
+        userId: sor.ownerId,
+        type: NOTIFICATION_TYPE.OPEN_SHOP_REQUEST_CHANGE,
+        data: {
+          id: sor.id,
+          name: sor.name,
+          createdAt: sor.createdAt,
+          adminMessage: sor.adminMessage,
+          status: sor.status
+        }
+      }).then(notification => {
+        let message;
+
+        switch(notification.data.status) {
+        case ShopOpeningRequest.STATUS.ACCEPTED:
+          message = `Yêu cầu mở gian hàng ${notification.data.name} của bạn đã được chấp nhận. Bạn có thể bắt đầu bán hàng ngay từ bây giờ!`;
+          break;
+        case ShopOpeningRequest.STATUS.REJECTED:
+          message = `Yêu cầu mở gian hàng ${notification.data.name} của bạn đã bị từ chối: ${notification.data.adminMessage}`;
+          break;
+        }
+        
+        kue.createPushOneSignalNotification({
+          userId: notification.userId,
+          pushData: {
+            headings: {
+              'en': 'Yêu cầu mở gian hàng tại FU Marketplace'
+            },
+            contents: {
+              'en': message
+            },
+            url: `${process.env.SITE_ROOT_URL}/`
+          }
+        });
+
+        return Promise.resolve(notification);
+      });
+    });
   },
 
   UserNotification.createOrderChangeNotificationForUser = (orderId, newStatus) => {

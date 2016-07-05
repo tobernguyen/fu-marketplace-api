@@ -223,7 +223,8 @@ var createShopOpeningRequest = (attrs) => {
       note: attrs.note || '',
       ownerId: attrs.ownerId || user.id,
       address: attrs.address || faker.address.streetAddress(),
-      status: attrs.status || 0 // Default is PENDING
+      status: attrs.status || 0, // Default is PENDING,
+      adminMessage: attrs.adminMessage
     });
   });
 };

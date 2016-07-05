@@ -102,9 +102,18 @@ describe('POST /api/v1/admin/shopOpeningRequests/:id/accept', () => {
           }).then(u => {
             // Promote user to seller if he/she is not
             expect(u.verifyRole('seller')).to.eventually.equal(true);
+
+            // Check for sending notification to user
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(2);
+            expect(jobs[1].type).to.equal('send shop opening request notification');
+            expect(jobs[1].data).to.eql({shopOpeningRequestId: pendingRequest.id});
+
             done();
           });
         };
+
+        helper.queue.testMode.clear();
 
         request(app)
           .post(`/api/v1/admin/shopOpeningRequests/${pendingRequest.id}/accept`)
@@ -169,9 +178,18 @@ describe('POST /api/v1/admin/shopOpeningRequests/:id/reject', () => {
           pendingRequest.reload().then(r => {
             expect(r.status).to.equal(ShopOpeningRequest.STATUS.REJECTED);
             expect(r.adminMessage).to.equal('Please provide Identity Photo');
+
+            // Check for sending notification to user
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(1);
+            expect(jobs[0].type).to.equal('send shop opening request notification');
+            expect(jobs[0].data).to.eql({shopOpeningRequestId: pendingRequest.id});
+
             done();
           });
         };
+
+        helper.queue.testMode.clear();
 
         request(app)
           .post(`/api/v1/admin/shopOpeningRequests/${pendingRequest.id}/reject`)

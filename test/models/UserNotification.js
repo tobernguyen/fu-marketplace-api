@@ -53,7 +53,48 @@ describe('UserNotification Model', () => {
   });
 
   describe('.createShopRequestNotification', () => {
-    // TODO: add tests
+    let sor;
+    let ShopOpeningRequest = models['ShopOpeningRequest'];
+
+    before(done => {
+      helper.factory.createShopOpeningRequest({status: ShopOpeningRequest.STATUS.ACCEPTED, adminMessage: 'Good job'}).then(s => {
+        sor = s;
+        done();
+      });
+    });
+
+    it('should create notification for user about shop opening request changes', done => {
+      helper.queue.testMode.clear();
+
+      UserNotification.createShopRequestNotification(sor.id).then(notification => {
+        expect(notification.userId).to.equal(sor.ownerId);
+        expect(notification.type).to.equal(UserNotification.NOTIFICATION_TYPE.OPEN_SHOP_REQUEST_CHANGE);
+        expect(notification.data.id).to.equal(sor.id);
+        expect(notification.data.name).to.equal(sor.name);
+        expect(notification.data.adminMessage).to.equal(sor.adminMessage);
+        expect(notification.data.status).to.equal(sor.status);
+        expect(new Date(notification.data.createdAt)).to.eql(sor.createdAt);
+
+        // Expect it to enqueue job "push one signal notification"
+        let jobs = helper.queue.testMode.jobs;
+        expect(jobs[0].type).to.equal('push one signal notification');
+        expect(jobs[0].data).to.eql({
+          userId: notification.userId,
+          pushData: {
+            headings: {
+              'en': 'Yêu cầu mở gian hàng tại FU Marketplace'
+            },
+            contents: {
+              'en': `Yêu cầu mở gian hàng ${notification.data.name} của bạn đã được chấp nhận. Bạn có thể bắt đầu bán hàng ngay từ bây giờ!`
+            },
+            url: `${process.env.SITE_ROOT_URL}/`
+          }
+        });
+
+
+        done();
+      }).catch(done);
+    });
   });
 
   describe('.createNotificationForSeller', () => {
