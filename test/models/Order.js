@@ -4,7 +4,6 @@ const helper = require('../helper');
 const Item = require('../../models').Item;
 const Order = require('../../models').Order;
 const UserNotification = require('../../models').UserNotification;
-const sinon = require('sinon');
 
 describe('Order models', () => {
   describe('factory', () => {

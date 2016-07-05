@@ -27,7 +27,7 @@ gulp.task('mocha', ['set-test-node-env'],function() {
 });
 
 gulp.task('lint-n-fix', function() {
-  return gulp.src(['**/*.js', '*.js', '!node_modules/**'], {base: './'})
+  return gulp.src(['**/*.js', '*.js', '!node_modules/**', '!coverage/**', '!bin/**'], {base: './'})
     .pipe(eslint({
       fix: true
     }))
@@ -36,7 +36,7 @@ gulp.task('lint-n-fix', function() {
 });
 
 gulp.task('lint', function() {
-  return gulp.src(['**/*.js', '*.js', '!node_modules/**'])
+  return gulp.src(['**/*.js', '*.js', '!node_modules/**', '!coverage/**', '!bin/**'])
     .pipe(eslint({}))
     .pipe(eslint.format());
 });

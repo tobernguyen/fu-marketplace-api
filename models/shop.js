@@ -3,7 +3,6 @@
 const imageUploader = require('../libs/image-uploader');
 const _ = require('lodash');
 const kue = require('../libs/kue');
-var elasticsearch = require('../libs/elasticsearch');
 
 var SHOP_STATUS = {
   PUBLISHED: 1,

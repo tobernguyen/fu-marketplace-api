@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var logger = require('./logger');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: process.env.ELASTIC_SEARCH_HOST,

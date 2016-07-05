@@ -62,6 +62,11 @@ queue.process('send order notification to seller', 5, (job, done) => {
   UserNotification.createNotificationForSeller(data.orderId, data.notificationType).then(() => done(), done);
 });
 
+queue.process('send shop opening request notification', 5, (job, done) => {
+  let data = job.data;
+  UserNotification.createShopRequestNotification(data.shopOpeningRequestId).then(() => done(), done);
+});
+
 queue.process('push one signal notification', 5, (job, done) => {
   let data = job.data;
   OneSignal.pushNotificationToUserId(data.userId, data.pushData).then(() => done(), done);
@@ -116,6 +121,18 @@ var createSendOrderNotificationToSellerJob = (jobData) => {
     .save();
 };
 exports.createSendOrderNotificationToSellerJob = createSendOrderNotificationToSellerJob;
+
+var createSendShopOpeningRequestNotificationJob = (jobData) => {
+  queue.createJob('send shop opening request notification', jobData)
+    .priority('normal')
+    .attempts(3)  // Retry 5 times if failed, after that give up
+    .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
+    .ttl(10000) // Kill the job if it take more than 10s
+    .removeOnComplete(true)
+    .save();
+};
+exports.createSendShopOpeningRequestNotificationJob = createSendShopOpeningRequestNotificationJob;
+
 
 var createPushOneSignalNotification = (jobData) => {
   queue.createJob('push one signal notification', jobData)

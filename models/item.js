@@ -2,7 +2,6 @@
 
 const imageUploader = require('../libs/image-uploader');
 const _ = require('lodash');
-const elasticsearch = require('../libs/elasticsearch');
 const kue = require('../libs/kue');
 
 var IGNORE_ATTRIBUTES = [
