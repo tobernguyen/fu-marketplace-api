@@ -15,7 +15,6 @@ var queue = kue.createQueue({
 
 var elasticsearch = require('./elasticsearch');
 var OneSignal = require('./onesignal');
-var UserNotification = require('../models').UserNotification;
 var logger = require('./logger');
 
 ////////////////
@@ -54,16 +53,19 @@ queue.process('delete shop index', 10, (job, done) => {
 
 queue.process('send order notification to user', 5, (job, done) => {
   let data = job.data;
+  let UserNotification = require('../models').UserNotification;
   UserNotification.createOrderChangeNotificationForUser(data.orderId, data.orderStatus).then(() => done(), done);
 });
 
 queue.process('send order notification to seller', 5, (job, done) => {
   let data = job.data;
+  let UserNotification = require('../models').UserNotification;
   UserNotification.createNotificationForSeller(data.orderId, data.notificationType).then(() => done(), done);
 });
 
 queue.process('send shop opening request notification', 5, (job, done) => {
   let data = job.data;
+  let UserNotification = require('../models').UserNotification;
   UserNotification.createShopRequestNotification(data.shopOpeningRequestId).then(() => done(), done);
 });
 
