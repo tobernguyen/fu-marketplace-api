@@ -61,9 +61,9 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
             expect(body.status).to.equal(Order.STATUS.NEW);
             expect(body.orderLines).to.have.lengthOf(2);
             let orderLines = body.orderLines;
-            expect(orderLines[1].quantity).to.equal(2);
-            expect(orderLines[1].note).to.equal('không hành nhiều dứa');
-            let item = orderLines[1].item;
+            expect(orderLines[0].quantity).to.equal(2);
+            expect(orderLines[0].note).to.equal('không hành nhiều dứa');
+            let item = orderLines[0].item;
             expect(item.id).to.equal(item1.id);
             expect(item.name).to.equal(item1.name);
             expect(item.description).to.equal(item1.description);

@@ -98,5 +98,6 @@ router.post('/api/v1/seller/orders/:orderId/reject', mustBe.authorized('seller')
 router.post('/api/v1/seller/orders/:orderId/ship', mustBe.authorized('seller'), sellerOrder.shipOrder);
 router.post('/api/v1/seller/orders/:orderId/complete', mustBe.authorized('seller'), sellerOrder.completeOrder);
 router.post('/api/v1/seller/orders/:orderId/abort', mustBe.authorized('seller'), sellerOrder.abortOrder);
+router.post('/api/v1/seller/shopOpeningRequest', mustBe.authorized('seller'), sellerShop.postRequestOpenShop);
 
 module.exports = router;

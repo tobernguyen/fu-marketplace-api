@@ -95,7 +95,6 @@ exports.postUploadCurrentUserAvatar = (req, res) => {
   });
 };
 
-
 exports.postRequestOpenShopFirstTime = (req, res) => {
   req.checkBody(REQUEST_OPEN_SHOP_BODY_SCHEMA);
 
