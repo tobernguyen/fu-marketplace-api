@@ -20,7 +20,7 @@ exports.getUserNotifications = (req, res) => {
     },
     limit: perPage,
     offset: offset,
-    attributes: ['type', 'data', 'createdAt']
+    attributes: ['type', 'data', 'createdAt', 'read']
   }).then(ns => {
     res.json({
       notifications: _.map(ns, n => n.toJSON())

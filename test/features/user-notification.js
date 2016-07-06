@@ -72,10 +72,12 @@ describe('GET /api/v1/users/me/notifications', () => {
           let firstNotification = actualNotifications[0];
           expect(firstNotification.type).to.equal(models.UserNotification.NOTIFICATION_TYPE.OPEN_SHOP_REQUEST_CHANGE);
           expect(firstNotification.data).to.deep.equal({shopName: 'Bao văn su', oldStatus: ShopOpeningRequest.STATUS.PENDING, newStatus: ShopOpeningRequest.STATUS.ACCEPTED, adminMessage: 'Làm ăn tốt nhé!'});
+          expect(firstNotification.read).to.equal(false);
 
           let secondNotification = actualNotifications[1];
           expect(secondNotification.type).to.equal(models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS);
           expect(secondNotification.data).to.deep.equal({shopId: 2, shopName: 'Alo mình nghe', orderId: 3, oldStatus: Order.STATUS.ACCEPTED, newStatus: Order.STATUS.SHIPPING});
+          expect(secondNotification.read).to.equal(false);
 
           done();
         });
