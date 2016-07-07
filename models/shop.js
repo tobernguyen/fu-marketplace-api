@@ -3,6 +3,7 @@
 const imageUploader = require('../libs/image-uploader');
 const _ = require('lodash');
 const kue = require('../libs/kue');
+const socketio = require('../libs/socket-io');
 
 var SHOP_STATUS = {
   PUBLISHED: 1,
@@ -71,6 +72,17 @@ module.exports = function(sequelize, DataTypes) {
       },
       afterUpdate: function(shop, options) {
         kue.createUpdateShopIndexJob({shopId: shop.id});
+
+        // TODO: add tests
+        // Push real-time notification changes
+        let updatedKeys = [];
+
+        _.keys(shop['_changed']).forEach(k => {
+          if (shop['_changed'][k] === true) updatedKeys[updatedKeys.length] = k;
+        });
+
+        let pushData = _.pick(shop, ['id'].concat(updatedKeys));
+        socketio.pushToPublicChannel(socketio.EVENT.SHOP_FEED_UPDATE, pushData);
       },
       afterDestroy: function(shop, options) {
         kue.createDeleteShopIndexJob({shopId: shop.id});
@@ -175,8 +187,17 @@ module.exports = function(sequelize, DataTypes) {
         let setShipPlacesResult;
         return this.setShipPlaces(shipPlaces).then(s => {
           setShipPlacesResult = s;
-          return this.reindex();
-        }).then(() => {
+
+          // TODO: add test
+          // Push real-time notification changes
+          socketio.pushToPublicChannel(socketio.EVENT.SHOP_FEED_UPDATE, {
+            id: this.id,
+            shipPlaceIds: _.map(shipPlaces, sp => sp.id)
+          });
+
+          // Re-index this shop
+          this.reindex();
+
           return Promise.resolve(setShipPlacesResult);
         });
       },
