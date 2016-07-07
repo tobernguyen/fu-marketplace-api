@@ -66,8 +66,8 @@ ui.setup({
   updateInterval: 5000 // Optional: Fetches new data every 5000 ms
 });
 
-app.use('/kue-api', basicAuth('tobernguyen', 'hl19941994!!!'), kue.app);
-app.use('/kue', basicAuth('tobernguyen', 'hl19941994!!!'), ui.app);
+app.use('/kue-api', basicAuth(process.env.KUE_LOGIN_USER, process.env.KUE_LOGIN_PASSWORD), kue.app);
+app.use('/kue', basicAuth(process.env.KUE_LOGIN_USER, process.env.KUE_LOGIN_PASSWORD), ui.app);
 
 // If no route is matched by now, it must be a 404
 app.use(function(req, res, next) {
