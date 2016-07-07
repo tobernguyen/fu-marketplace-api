@@ -214,7 +214,7 @@ module.exports = function(sequelize, DataTypes) {
       }
 
       kue.createPushOneSignalNotification({
-        userId: fetchedOrder.userId,
+        userId: notification.userId,
         pushData: {
           headings: {
             'en': 'Cập nhật về đơn hàng tại FU Marketplace'

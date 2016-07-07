@@ -139,7 +139,7 @@ describe('UserNotification Model', () => {
           let jobs = helper.queue.testMode.jobs;
           expect(jobs[0].type).to.equal('push one signal notification');
           expect(jobs[0].data).to.eql({
-            userId: order.userId,
+            userId: order.Shop.ownerId,
             pushData: {
               headings: {
                 'en': 'Cập nhật về đơn hàng tại FU Marketplace'
