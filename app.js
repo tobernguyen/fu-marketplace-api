@@ -92,4 +92,12 @@ if (require.main === module) {
   });
 }
 
+//////////////////////////////////////////
+// FOR DEVELOPMENT AND TEST ENVIRONMENT //
+/////////////////////////////////////////
+if (process.env.NODE_ENV !== 'production') {
+  // Start socket-io server when start main app
+  require('./socket-server');
+}
+
 module.exports = app;

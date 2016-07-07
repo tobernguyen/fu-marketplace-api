@@ -1,6 +1,8 @@
 'use strict';
 
 var kue = require('../libs/kue');
+var _ = require('lodash');
+var socketio = require('../libs/socket-io');
 
 var NOTIFICATION_TYPE = {
   SELLER_CHANGE_ORDER_STATUS: 1,
@@ -56,6 +58,11 @@ module.exports = function(sequelize, DataTypes) {
           status: sor.status
         }
       }).then(notification => {
+        // TODO: add test
+        // Push real-time notification via socket.io
+        pushRealTimeNotificationToUser(notification);
+
+        // Push notification via OneSignal
         let message;
 
         switch(notification.data.status) {
@@ -116,6 +123,11 @@ module.exports = function(sequelize, DataTypes) {
         }
       });
     }).then((notification) => {
+      // TODO: add test
+      // Push real-time notification via socket.io
+      pushRealTimeNotificationToUser(notification);
+
+      // Push notification via OneSignal
       let message;
 
       switch(newStatus) {
@@ -185,6 +197,11 @@ module.exports = function(sequelize, DataTypes) {
         }
       });
     }).then((notification) => {
+      // TODO: add test
+      // Push real-time notification via socket.io
+      pushRealTimeNotificationToUser(notification);
+
+      // Push notification via OneSignal
       let message;
 
       switch (notificationType) {
@@ -216,4 +233,12 @@ module.exports = function(sequelize, DataTypes) {
   UserNotification.NOTIFICATION_TYPE = NOTIFICATION_TYPE;
 
   return UserNotification;
+};
+
+var pushRealTimeNotificationToUser = (userNotification) => {
+  socketio.pushToPrivateChannel(
+    userNotification.userId,
+    socketio.EVENT.NEW_NOTIFICATION,
+    _.pick(userNotification, ['type', 'data', 'read'])
+  );
 };
