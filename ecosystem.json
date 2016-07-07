@@ -9,6 +9,16 @@
       env_staging: {
         NODE_ENV: "production"
       }
+    },
+    {
+      name    : "FUM - Socket IO",
+      script  : "socket-server.js",
+      env_production : {
+        NODE_ENV: "production"
+      },
+      env_staging: {
+        NODE_ENV: "production"
+      }
     }
   ],
 
