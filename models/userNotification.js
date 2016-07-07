@@ -166,8 +166,6 @@ module.exports = function(sequelize, DataTypes) {
   };
 
   UserNotification.createNotificationForSeller = (orderId, notificationType) => {
-    let fetchedOrder;
-
     return sequelize.model('Order').findOne({
       where: {
         id: orderId
@@ -183,8 +181,6 @@ module.exports = function(sequelize, DataTypes) {
         }
       ]
     }).then(order => {
-      fetchedOrder = order;
-
       return UserNotification.create({
         userId: order.Shop.ownerId,
         type: notificationType,

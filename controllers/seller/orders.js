@@ -24,7 +24,10 @@ exports.getOrderByShop = (req, res) => {
       shopId: shopId
     },
     include: [
-      OrderLine,
+      {
+        model: OrderLine,
+        attributes: ['item', 'note', 'quantity']
+      },
       {
         model: Shop,
         attributes: ['ownerId'],
