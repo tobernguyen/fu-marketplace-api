@@ -235,6 +235,6 @@ var pushRealTimeNotificationToUser = (userNotification) => {
   socketio.pushToPrivateChannel(
     userNotification.userId,
     socketio.EVENT.NEW_NOTIFICATION,
-    _.pick(userNotification, ['type', 'data', 'read', 'createdAt'])
+    _.pick(userNotification, ['id', 'type', 'data', 'read', 'createdAt'])
   );
 };
