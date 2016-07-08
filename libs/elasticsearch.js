@@ -86,7 +86,7 @@ var searchShop = (query) => {
   let models = require('../models');
   let esq = new ESQ();
 
-  if (_.isString(query.keyword)) {
+  if (_.isString(query.keyword) && query.keyword.trim().length > 0) {
     esq.query('bool', ['must'], {
       multi_match: {
         type: 'best_fields',
