@@ -17,6 +17,7 @@ exports._kue = kue;
 
 var elasticsearch = require('./elasticsearch');
 var OneSignal = require('./onesignal');
+var emailer = require('./emailer');
 var logger = require('./logger');
 
 ////////////////
@@ -76,6 +77,71 @@ queue.process('push one signal notification', 5, (job, done) => {
   OneSignal.pushNotificationToUserId(data.userId, data.pushData).then(() => done(), done);
 });
 
+queue.process('email', 2, (job, done) => {
+  let getEmailOptionsPromise;
+
+  switch(job.data.template) {
+    case emailer.EMAIL_TEMPLATE.NEW_SHOP_OPENING_REQUEST: {
+      getEmailOptionsPromise = getEmailOptionForNewShopOpeningRequest(job.data.data.shopOpeningRequestId);
+      break;
+    }
+    case emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST: {
+      getEmailOptionsPromise = getEmailOptionForResponseShopOpeningRequest(job.data.data.shopOpeningRequestId);
+      break;
+    }
+  }
+
+  getEmailOptionsPromise.then(options => {
+    return emailer.sendEmail(options);
+  }).then(() => done(), done);
+});
+
+// TODO: add test
+var getEmailOptionForNewShopOpeningRequest = (id) => {
+  let ShopOpeningRequest = require('../models').ShopOpeningRequest;
+  return ShopOpeningRequest.findOne({
+    where: {
+      id: id
+    },
+    include: require('../models').User
+  }).then(sor => {
+    let options = {
+      template: emailer.EMAIL_TEMPLATE.NEW_SHOP_OPENING_REQUEST,
+      from: emailer.EMAIL_ADDRESSES.NO_REPLY,
+      to: emailer.EMAIL_ADDRESSES.SHOP_REQUEST_REVIEWER,
+      subject: `${sor.User.fullName} yêu cầu mở shop mới với tên: ${sor.name}`,
+      data: sor.toJSON()
+    };
+
+    return Promise.resolve(options);
+  });
+};
+
+// TODO: add test
+var getEmailOptionForResponseShopOpeningRequest = (id) => {
+  let ShopOpeningRequest = require('../models').ShopOpeningRequest;
+  return ShopOpeningRequest.findOne({
+    where: {
+      id: id
+    },
+    include: require('../models').User
+  }).then(sor => {
+    let isAccepted = sor.status === ShopOpeningRequest.STATUS.ACCEPTED;
+    let data = sor.toJSON();
+    data[isAccepted] = isAccepted;
+
+    let options = {
+      template: emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST,
+      from: emailer.EMAIL_ADDRESSES.NO_REPLY,
+      to: sor.User.email,
+      subject: `Yêu cầu mở shop "${sor.name}" đã ${isAccepted ? 'được chấp nhận' : 'bị từ chối'}`,
+      data: data
+    };
+
+    return Promise.resolve(options);
+  });
+};
+
 exports.queue = queue;
 
 ///////////////////////////
@@ -107,7 +173,7 @@ exports.createDeleteShopIndexJob = createDeleteShopIndexJob;
 var createSendOrderNotificationToUserJob = (jobData) => {
   queue.createJob('send order notification to user', jobData)
     .priority('normal')
-    .attempts(3)  // Retry 5 times if failed, after that give up
+    .attempts(3)  // Retry 3 times if failed, after that give up
     .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
     .ttl(10000) // Kill the job if it take more than 10s
     .removeOnComplete(true)
@@ -129,7 +195,7 @@ exports.createSendOrderNotificationToSellerJob = createSendOrderNotificationToSe
 var createSendShopOpeningRequestNotificationJob = (jobData) => {
   queue.createJob('send shop opening request notification', jobData)
     .priority('normal')
-    .attempts(3)  // Retry 5 times if failed, after that give up
+    .attempts(3)  // Retry 3 times if failed, after that give up
     .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
     .ttl(10000) // Kill the job if it take more than 10s
     .removeOnComplete(true)
@@ -141,10 +207,21 @@ exports.createSendShopOpeningRequestNotificationJob = createSendShopOpeningReque
 var createPushOneSignalNotification = (jobData) => {
   queue.createJob('push one signal notification', jobData)
     .priority('normal')
-    .attempts(3)  // Retry 5 times if failed, after that give up
+    .attempts(3)  // Retry 3 times if failed, after that give up
     .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
     .ttl(10000) // Kill the job if it take more than 10s
     .removeOnComplete(true)
     .save();
 };
 exports.createPushOneSignalNotification = createPushOneSignalNotification;
+
+var createEmailJob = (jobData) => {
+  queue.createJob('email', jobData)
+    .priority('high')
+    .attempts(5)  // Retry 5 times if failed, after that give up
+    .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
+    .ttl(30000) // Kill the job if it take more than 10s
+    .removeOnComplete(true)
+    .save();
+};
+exports.createEmailJob = createEmailJob;

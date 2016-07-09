@@ -7,6 +7,7 @@ const ShopOpeningRequest = require('../../models').ShopOpeningRequest;
 const Shop = require('../../models').Shop;
 const User = require('../../models').User;
 const _ = require('lodash');
+const emailer = require('../../libs/emailer');
 
 describe('GET /api/v1/admin/shopOpeningRequests', () => {
   let pendingRequest, acceptedRequest, rejectedRequest, adminToken;
@@ -105,9 +106,16 @@ describe('POST /api/v1/admin/shopOpeningRequests/:id/accept', () => {
 
             // Check for sending notification to user
             let jobs = helper.queue.testMode.jobs;
-            expect(jobs).to.have.lengthOf(2);
+            expect(jobs).to.have.lengthOf(3);
             expect(jobs[1].type).to.equal('send shop opening request notification');
             expect(jobs[1].data).to.eql({shopOpeningRequestId: pendingRequest.id});
+
+            // Check for sending email to user
+            expect(jobs[2].type).to.equal('email');
+            expect(jobs[2].data).to.eql({
+              template: emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST,
+              data: { shopOpeningRequestId: pendingRequest.id }
+            });
 
             done();
           });
@@ -181,10 +189,16 @@ describe('POST /api/v1/admin/shopOpeningRequests/:id/reject', () => {
 
             // Check for sending notification to user
             let jobs = helper.queue.testMode.jobs;
-            expect(jobs).to.have.lengthOf(1);
+            expect(jobs).to.have.lengthOf(2);
             expect(jobs[0].type).to.equal('send shop opening request notification');
             expect(jobs[0].data).to.eql({shopOpeningRequestId: pendingRequest.id});
 
+            // Check for sending email to user
+            expect(jobs[1].type).to.equal('email');
+            expect(jobs[1].data).to.eql({
+              template: emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST,
+              data: { shopOpeningRequestId: pendingRequest.id }
+            });
             done();
           });
         };

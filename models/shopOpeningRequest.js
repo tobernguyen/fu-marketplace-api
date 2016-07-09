@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const kue = require('../libs/kue');
+const emailer = require('../libs/emailer');
 
 const IGNORE_ATTRIBUTES = [
   'updatedAt',
@@ -50,6 +51,15 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TEXT
     }
   }, {
+    hooks: {
+      afterCreate: function(sor, options) {
+        // Send email to shop request reviewer
+        kue.createEmailJob({
+          template: emailer.EMAIL_TEMPLATE.NEW_SHOP_OPENING_REQUEST,
+          data: { shopOpeningRequestId: sor.id }
+        });
+      }
+    },
     scopes: {
       pending: {
         where: {
@@ -116,6 +126,12 @@ module.exports = function(sequelize, DataTypes) {
         }).then(() => {
           // Create and send notification to user
           kue.createSendShopOpeningRequestNotificationJob({shopOpeningRequestId: this.id});
+
+          // Send email to requester
+          kue.createEmailJob({
+            template: emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST,
+            data: { shopOpeningRequestId: this.id }
+          });
           return Promise.resolve();
         });
       },
@@ -126,6 +142,12 @@ module.exports = function(sequelize, DataTypes) {
         }).then(() => {
           // Create and send notification to user
           kue.createSendShopOpeningRequestNotificationJob({shopOpeningRequestId: this.id});
+
+          // Send email to requester
+          kue.createEmailJob({
+            template: emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST,
+            data: { shopOpeningRequestId: this.id }
+          });
           return Promise.resolve();
         });
       }

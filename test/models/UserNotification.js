@@ -4,8 +4,24 @@ const helper = require('../helper');
 const models = require('../../models');
 const Order = require('../../models').Order;
 const UserNotification = require('../../models').UserNotification;
+const emailer = require('../../libs/emailer');
 
 describe('UserNotification Model', () => {
+  describe('hooks', () => {
+    describe('afterCreate', () => {
+      it('should enqueue new job named "email"', done => {
+        helper.queue.testMode.clear();
+        helper.factory.createShopOpeningRequest({}).then(sor => {
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('email');
+          expect(jobs[0].data).to.eql({template: emailer.EMAIL_TEMPLATE.NEW_SHOP_OPENING_REQUEST, data: {shopOpeningRequestId: sor.id}});
+          done();
+        });
+      });
+    });
+  });
+
   describe('.createOrderChangeNotificationForUser', () => {
     let order;
 

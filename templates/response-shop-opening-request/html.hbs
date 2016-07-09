@@ -1,0 +1,10 @@
+<html>
+<body>
+<h1>Xin chào {{ User.fullName }},</h1>
+<h3>Yêu cầu mở gian hàng của bạn đã
+{{#if isAccepted}}được chấp nhận</h3>
+<p>Bạn có thể bắt đầu bán hàng ngay bằng cách click vào <a href="#">đường dẫn này</a></p>
+{{else}}bị từ chối</h3>
+{{/if}}
+</body>
+</html>
