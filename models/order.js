@@ -246,14 +246,14 @@ module.exports = function(sequelize, DataTypes) {
   var changeStatusAndUpdateQuantityItem = function(updateData, resolve, reject) {
     let action = 'decrement';
     switch(updateData.status) {
-    case ORDER_STATUS.ACCEPTED:
-      action = 'decrement';
-      break;
-    case ORDER_STATUS.REJECTED:
-    case ORDER_STATUS.CANCELED:
-    case ORDER_STATUS.ABORTED:
-      action = 'increment';
-      break;
+      case ORDER_STATUS.ACCEPTED:
+        action = 'decrement';
+        break;
+      case ORDER_STATUS.REJECTED:
+      case ORDER_STATUS.CANCELED:
+      case ORDER_STATUS.ABORTED:
+        action = 'increment';
+        break;
     }
     let order;
     return sequelize.transaction(t => {

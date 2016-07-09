@@ -158,77 +158,77 @@ var responseError = (res, code, errors) => {
 var verifyFields = (name, value, errors, req) => {
   // Verify all field for item
   switch(name) {
-  case 'name':
-    if (_.inRange(value.length, 1, 50)){
-      req.form.name = value;
-    } else {
-      errors['name'] = {
-        message: 'Length of name must be in [1, 50]',
-        message_code: 'error.form.validation_len_failed'
-      };
-    }
-    break;
-  case 'description':
-    if (_.inRange(value.length, 1, 125)) {
-      req.form.description = value;
-    } else {
-      errors['description'] = {
-        message: 'Length of name must be in [1, 125]',
-        message_code: 'error.form.validation_len_failed'
-      };
-    }
-    break; 
-  case 'sort':
-    if (value == parseInt(value, 10)) {
-      req.form.sort = value;
-    } else {
-      errors['sort'] = {
-        message: 'Sort must be integer',
-        message_code: 'error.form.validation_data_type_failed'
-      };
-    }
-    break;
-  case 'price':
-    if (value == parseInt(value, 10)) {
-      req.form.price = value;
-    } else {
-      errors['price'] = {
-        message: 'Price must be integer',
-        message_code: 'error.form.validation_data_type_failed'
-      };
-    }
-    break;
-  case 'status':
-    if (_.values(Item.STATUS).indexOf(parseInt(value, 10)) < 0) {
-      errors['status'] = {
-        message: 'Provided status is not valid',
-        message_code: 'error.form.validation_data_failed'
-      };
-    } else {
-      req.form.status = value;
-    }
-    break;
-  case 'quantity':
-    if (value == parseInt(value, 10)) {
-      req.form.quantity = value;
-    } else {
-      errors['quantity'] = {
-        message: 'Quantity must be integer',
-        message_code: 'error.form.validation_data_type_failed'
-      };
-    }
-    break;
-  case 'categoryId':
-    if (value == parseInt(value, 10)) {
-      req.form.categoryId = value;
-    } else {
-      errors['categoryId'] = {
-        message: 'Category Id must be integer',
-        message_code: 'error.form.validation_data_type_failed'
-      };
-    }
-    break;
-  default:
-    break;
+    case 'name':
+      if (_.inRange(value.length, 1, 50)){
+        req.form.name = value;
+      } else {
+        errors['name'] = {
+          message: 'Length of name must be in [1, 50]',
+          message_code: 'error.form.validation_len_failed'
+        };
+      }
+      break;
+    case 'description':
+      if (_.inRange(value.length, 1, 125)) {
+        req.form.description = value;
+      } else {
+        errors['description'] = {
+          message: 'Length of name must be in [1, 125]',
+          message_code: 'error.form.validation_len_failed'
+        };
+      }
+      break; 
+    case 'sort':
+      if (value == parseInt(value, 10)) {
+        req.form.sort = value;
+      } else {
+        errors['sort'] = {
+          message: 'Sort must be integer',
+          message_code: 'error.form.validation_data_type_failed'
+        };
+      }
+      break;
+    case 'price':
+      if (value == parseInt(value, 10)) {
+        req.form.price = value;
+      } else {
+        errors['price'] = {
+          message: 'Price must be integer',
+          message_code: 'error.form.validation_data_type_failed'
+        };
+      }
+      break;
+    case 'status':
+      if (_.values(Item.STATUS).indexOf(parseInt(value, 10)) < 0) {
+        errors['status'] = {
+          message: 'Provided status is not valid',
+          message_code: 'error.form.validation_data_failed'
+        };
+      } else {
+        req.form.status = value;
+      }
+      break;
+    case 'quantity':
+      if (value == parseInt(value, 10)) {
+        req.form.quantity = value;
+      } else {
+        errors['quantity'] = {
+          message: 'Quantity must be integer',
+          message_code: 'error.form.validation_data_type_failed'
+        };
+      }
+      break;
+    case 'categoryId':
+      if (value == parseInt(value, 10)) {
+        req.form.categoryId = value;
+      } else {
+        errors['categoryId'] = {
+          message: 'Category Id must be integer',
+          message_code: 'error.form.validation_data_type_failed'
+        };
+      }
+      break;
+    default:
+      break;
   }
 };
