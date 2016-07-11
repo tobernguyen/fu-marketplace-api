@@ -99,16 +99,24 @@ queue.process('email', 2, (job, done) => {
 // TODO: add test
 var getEmailOptionForNewShopOpeningRequest = (id) => {
   let ShopOpeningRequest = require('../models').ShopOpeningRequest;
-  return ShopOpeningRequest.findOne({
-    where: {
-      id: id
-    },
-    include: require('../models').User
+  let Configuration = require('../models').Configuration;
+
+  let emailTo;
+
+  return Configuration.get(Configuration.KEYS.SHOP_REQUEST_MAILING_LIST).then(emailAddresses => {
+    emailTo = emailAddresses;
+
+    return ShopOpeningRequest.findOne({
+      where: {
+        id: id
+      },
+      include: require('../models').User
+    });
   }).then(sor => {
     let options = {
       template: emailer.EMAIL_TEMPLATE.NEW_SHOP_OPENING_REQUEST,
       from: emailer.EMAIL_ADDRESSES.NO_REPLY,
-      to: emailer.EMAIL_ADDRESSES.SHOP_REQUEST_REVIEWER,
+      to: emailTo,
       subject: `${sor.User.fullName} yêu cầu mở shop mới với tên: ${sor.name}`,
       data: sor.toJSON()
     };

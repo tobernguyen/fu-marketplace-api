@@ -14,6 +14,7 @@ const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequest
 const shopFeed = require('../controllers/feed/shops');
 const application = require('../controllers/application');
 const userNotifications = require('../controllers/userNotifications');
+const adminConfigurations = require('../controllers/admin/configurations');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -76,6 +77,9 @@ router.post('/api/v1/admin/shops/:id/uploadCover', mustBe.authorized('admin'), a
 router.get('/api/v1/admin/shopOpeningRequests', mustBe.authorized('admin'), adminShopOpeningRequest.getShopOpeningRequests);
 router.post('/api/v1/admin/shopOpeningRequests/:id/accept', mustBe.authorized('admin'), adminShopOpeningRequest.postAcceptShopOpeningRequest);
 router.post('/api/v1/admin/shopOpeningRequests/:id/reject', mustBe.authorized('admin'), adminShopOpeningRequest.postRejectShopOpeningRequest);
+
+router.get('/api/v1/admin/shopRequestMailingList', mustBe.authorized('admin'), adminConfigurations.getShopRequestMailingList);
+router.post('/api/v1/admin/shopRequestMailingList', mustBe.authorized('admin'), adminConfigurations.postShopRequestMailingList);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users who has role 'seller'

@@ -22,7 +22,8 @@
     "setup:elasticsearch": "node bin/setup-elasticsearch.js",
     "setup:elasticsearch:force": "FORCE_UPDATE=true node bin/setup-elasticsearch.js",
     "elasticsearch:index:all": "node bin/index-all-documents.js",
-    "utils:seeder:shop": "node bin/shop-seeder.js"
+    "utils:seeder:shop": "node bin/shop-seeder.js",
+    "console": "node repl.js"
   },
   "dependencies": {
     "aws-sdk": "^2.3.18",
@@ -64,6 +65,7 @@
     "socket.io-redis": "^1.0.0",
     "supertest-as-promised": "^3.1.0",
     "umzug": "^1.11.0",
+    "validator": "^5.4.0",
     "winston": "^2.2.0"
   },
   "devDependencies": {
