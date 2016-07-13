@@ -328,6 +328,70 @@ var createOrder = (attrs) => {
   });
 };
 
+var createReview = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  let createShopPromise, createUserPromise;
+  let shop;
+
+  let Review = models.Review;
+  let Shop = models.Shop;
+
+  if (!attrs.shopId) {
+    createShopPromise = createShop();
+  } else {
+    createShopPromise = Shop.findById(attrs.shopId);
+  }
+
+  if (!attrs.userId) {
+    createUserPromise = createUser();
+  } else {
+    createUserPromise = Promise.resolve();
+  }
+
+  return createShopPromise.then(s => {
+    shop = s;
+    return createUserPromise;
+  }).then(u => {
+    return Review.create({
+      userId: attrs.userId || u.id,
+      shopId: shop.id,
+      rate: attrs.rate || faker.random.number({min:1, max:5}),
+      comment: attrs.shipAddress || faker.lorem.sentence()
+    });
+  }).then(r => {
+    return Promise.resolve(r);
+  });
+};
+
+var createReviews = (quantity, shopId) => {
+
+  let createShopPromise;
+
+  let Shop = models.Shop;
+
+  if(!quantity) {
+    quantity = 10; // default value is 10
+  }
+
+  if (!shopId) {
+    createShopPromise = createShop();
+  } else {
+    createShopPromise = Shop.findById(shopId);
+  }
+
+  return createShopPromise.then(s => {
+    let promises = [];
+    let i;
+    for (i = 0; i < quantity; i++) {
+      promises[i] = createReview({shopId: s.id});
+    }
+    return Promise.all(promises);
+  }).then(reviews => {
+    return Promise.resolve(reviews);
+  });
+};
+
 var getQuantityAndNoteOfItems = (items, id) => {
   if (!items) {
     return {
@@ -353,7 +417,9 @@ exports.factory = {
   createShipPlace: createShipPlace,
   createShopOpeningRequest: createShopOpeningRequest,
   createItem: createItem,
-  createOrder: createOrder
+  createOrder: createOrder,
+  createReviews: createReviews,
+  createReview: createReview
 };
 exports.queue = kue.queue;
 

@@ -161,7 +161,7 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
   });
 
   describe('with invalid shop route', () => {
-    it('should return 200 with orderInfo', done => {
+    it('should return 404', done => {
       request(app)
         .post('/api/v1/shops/0/orders')
         .set('X-Access-Token', userToken)
