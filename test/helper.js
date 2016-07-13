@@ -22,6 +22,7 @@ var _ = require('lodash');
 var elasticsearchHelper = require('./utils/elasticsearch-helper');
 var redisHelper= require('./utils/redis-helper');
 var kue = require('../libs/kue');
+var moment = require('moment');
 
 before(function(done) {
   this.timeout(5000);
@@ -341,6 +342,37 @@ var getQuantityAndNoteOfItems = (items, id) => {
   }
 };
 
+var createShopPromotionCampaign = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  let createShopPromise, createUserPromise;
+
+  if (attrs.shopId) {
+    createShopPromise = Promise.resolve(attrs.shopId);
+  } else {
+    createShopPromise = createShop({}).then(s => Promise.resolve(s.id));
+  }
+
+  if (attrs.ownerId) {
+    createUserPromise = Promise.resolve(attrs.ownerId);
+  } else {
+    createUserPromise = createUser().then(u => Promise.resolve(u.id));
+  }
+
+
+
+  return Promise.all([createUserPromise, createShopPromise]).then(result => {
+    return createModel('ShopPromotionCampaign', {
+      ownerId: result[0],
+      shopId: result[1],
+      type: attrs.type || 1,
+      startDate: attrs.startDate || moment().subtract(1, 'day').toDate(),
+      endDate: attrs.endDate || new Date(),
+      active: attrs.active
+    });
+  });
+};
+
 exports.createAccessTokenForUserId = createAccessTokenForUserId;
 exports.dbUtils = dbUtils;
 exports.factory = {
@@ -353,7 +385,8 @@ exports.factory = {
   createShipPlace: createShipPlace,
   createShopOpeningRequest: createShopOpeningRequest,
   createItem: createItem,
-  createOrder: createOrder
+  createOrder: createOrder,
+  createShopPromotionCampaign: createShopPromotionCampaign
 };
 exports.queue = kue.queue;
 

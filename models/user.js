@@ -140,6 +140,10 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'userId',
           constraints: false
         });
+        User.hasMany(models.ShopPromotionCampaign, {
+          foreignKey: 'ownerId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {

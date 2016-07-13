@@ -1,6 +1,6 @@
 'use strict';
 
-const helper = require('../helper');
+require('../helper');
 const Configuration = require('../../models').Configuration;
 
 describe('Configuration Model', () => {

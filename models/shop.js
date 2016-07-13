@@ -122,6 +122,10 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'shopId',
           constraints: false
         });
+        Shop.hasMany(models.ShopPromotionCampaign, {
+          foreignKey: 'shopId',
+          constraints: false
+        });
       }
     },
     instanceMethods: {

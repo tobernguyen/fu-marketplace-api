@@ -39,7 +39,7 @@ module.exports = {
       },
       type: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.INTEGER
       },
       active: {
         allowNull: false,
@@ -62,7 +62,7 @@ module.exports = {
                   ON public."ShopPromotionCampaigns"
                   USING btree
                   ("shopId");
-                  CREATE INDEX "ShopIdIndex"
+                  CREATE INDEX "OwnerIdIndex"
                   ON public."ShopPromotionCampaigns"
                   USING btree
                   ("ownerId");
