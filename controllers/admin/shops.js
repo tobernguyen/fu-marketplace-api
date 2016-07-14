@@ -53,9 +53,9 @@ exports.putShop = (req, res) => {
   var shopId = req.params.id;
     
   Shop.findById(shopId).then(shop => {
-    if (!shop){
+    if (!shop) {
       errorHandlers.responseError(404, 'Shop does not exist', 'model', res);
-    } else{
+    } else {
       sanitizeUpdateRequest(req, true);
       shop.update(getUpdateParams(req, true))
         .then(shop => responseShopById(shop.id, res))

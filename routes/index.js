@@ -16,6 +16,8 @@ const application = require('../controllers/application');
 const userNotifications = require('../controllers/userNotifications');
 const adminConfigurations = require('../controllers/admin/configurations');
 const userReviews = require('../controllers/shop-reviews');
+const adminShopPromotionCampaigns = require('../controllers/admin/shopPromotionCampaigns');
+const shopPromotionCampaigns = require('../controllers/shopPromotionCampaigns');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -29,7 +31,7 @@ router.post('/login', auth.login);
 router.get('/auth/google/callback', auth.loginWithGoogle);
 
 /*
- * Routes that can be accessed only by autheticated users
+ * Routes that can be accessed only by authenticated users
  */
 router.get('/api/v1/users/me', users.getCurrentUser);
 router.put('/api/v1/users/me', users.putCurrentUser);
@@ -59,6 +61,8 @@ router.post('/api/v1/orders/:orderId/rate', orders.rateOrder);
 
 router.post('/api/v1/feed/shops', shopFeed.searchShop);
 
+router.get('/api/v1/shopPromotions/topFeedSlideShow', shopPromotionCampaigns.getTopFeedSlideShow);
+
 /*
  * Routes that can be accessed only by authenticated & authorized users
  */
@@ -82,6 +86,10 @@ router.post('/api/v1/admin/shopOpeningRequests/:id/reject', mustBe.authorized('a
 
 router.get('/api/v1/admin/shopRequestMailingList', mustBe.authorized('admin'), adminConfigurations.getShopRequestMailingList);
 router.post('/api/v1/admin/shopRequestMailingList', mustBe.authorized('admin'), adminConfigurations.postShopRequestMailingList);
+
+router.get('/api/v1/admin/shopPromotionCampaigns', mustBe.authorized('admin'), adminShopPromotionCampaigns.getShopPromotionCampaigns);
+router.post('/api/v1/admin/shopPromotionCampaigns', mustBe.authorized('admin'), adminShopPromotionCampaigns.postShopPromotionCampaigns);
+router.put('/api/v1/admin/shopPromotionCampaigns/:id', mustBe.authorized('admin'), adminShopPromotionCampaigns.putShopPromotionCampaigns);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users who has role 'seller'
