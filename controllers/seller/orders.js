@@ -54,16 +54,9 @@ exports.getOrderByShop = (req, res) => {
       let order = o.toJSON();
       let orderLines = _.map(order.OrderLines, r => _.pick(r, ['item', 'note', 'quantity']));
       order.orderLines = orderLines;
-
-      let shop = {};
-      shop.ownerId = order.Shop.ownerId;
-      shop.id = order.shopId;
-      order.shop = shop;
-
       order.user = order.User;
       delete order.User;
       delete order.Shop;
-      delete order.shopId;
       delete order.userId;
       delete order.OrderLines;
       return order;
@@ -159,15 +152,9 @@ var responseOrder = (order, res) => {
     let orderLines = _.map(ols, r => _.pick(r, ['item', 'note', 'quantity']));
     result['orderLines'] = orderLines;
 
-    let shop = {};
-    shop.ownerId = result.Shop.ownerId;
-    shop.id = result.shopId;
-    result.shop = shop;
-
     result.user = result.User;
     delete result.User;
     delete result.Shop;
-    delete result.shopId;
     delete result.userId;
 
     res.json(result);
