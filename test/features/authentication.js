@@ -47,6 +47,28 @@ describe('POST /login', () => {
         .expect(401, done);
     });
   });
+
+  describe('with banned credential', () => {
+    let bannedUser;
+  
+    beforeEach(done => {
+      helper.factory.createUser({banned: true}).then(u => {
+        bannedUser = u;
+        done();
+      });
+    });
+
+    it('should return 401 Temporary banned', done => {
+      request(app)
+        .post('/login')
+        .send({
+          email: bannedUser.email,
+          password: bannedUser.__test__.password
+        })
+        .set('Content-Type', 'application/json')
+        .expect(401, done);
+    });
+  });
 });
 
 describe('GET /auth/google/callback', () => {

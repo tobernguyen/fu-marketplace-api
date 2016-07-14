@@ -82,6 +82,7 @@ const createModel = (modelName, attrs) => {
 var createUser = (attrs) => {
   if (attrs == undefined) attrs = {};
 
+
   let password = attrs.password || faker.internet.password();
   return createModel('User', {
     fullName: attrs.fullname || faker.name.findName(),
@@ -91,7 +92,8 @@ var createUser = (attrs) => {
     avatar: attrs.avatar,
     avatarFile: attrs.avatarFile,
     identityNumber: attrs.identityNumber,
-    identityPhotoFile: attrs.identityPhotoFile
+    identityPhotoFile: attrs.identityPhotoFile,
+    banned: attrs.banned
   }).then(u => {
     u['__test__'] = {password: password}; // inject testing data into user object
     return Promise.resolve(u);
