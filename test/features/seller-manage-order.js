@@ -44,6 +44,7 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
             expect(sortedBodyOrders[value].id).to.equal(sortedOrder[value].id);
             expect(sortedBodyOrders[value].note).to.equal(sortedOrder[value].note);
             expect(sortedBodyOrders[value].shipAddress).to.equal(sortedOrder[value].shipAddress);
+            expect(sortedBodyOrders[value].user.id).to.equal(sortedOrder[value].userId);
 
             orders[value].getOrderLines(ols => {
               expect(sortedBodyOrders[value].orderLines[0].note).to.equal(ols[0].note);
@@ -168,6 +169,8 @@ describe('POST /api/v1/seller/orders/:id/accept', () => {
           let body = res.body;
           expect(body.id).to.equal(order.id);
           expect(body.status).to.equal(Order.STATUS.ACCEPTED);
+
+          expect(body.user.id).to.equal(order.userId);
           return Item.findById(item.id);
         }).then(i => {
           expect(i.name).to.equal(item.name);

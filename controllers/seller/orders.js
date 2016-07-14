@@ -5,6 +5,7 @@ var models = require('../../models');
 var errorHandlers = require('../helpers/errorHandlers');
 var Order = models.Order;
 var Shop = models.Shop;
+var User = models.User;
 var OrderLine = models.OrderLine;
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -34,6 +35,10 @@ exports.getOrderByShop = (req, res) => {
         where: {
           ownerId: seller.id
         }
+      },
+      {
+        model: User,
+        attributes: ['id', 'fullName', 'avatar']
       }
     ],
     limit: perPage,
@@ -44,12 +49,15 @@ exports.getOrderByShop = (req, res) => {
     orderFindOption.where.status = Order.STATUS[status];
   }
 
-  
   Order.findAll(orderFindOption).then(os => {
     let result = _.map(os, o => {
       let order = o.toJSON();
       let orderLines = _.map(order.OrderLines, r => _.pick(r, ['item', 'note', 'quantity']));
       order.orderLines = orderLines;
+      order.user = order.User;
+      delete order.User;
+      delete order.Shop;
+      delete order.userId;
       delete order.OrderLines;
       return order;
     });
@@ -85,7 +93,6 @@ var tryToChangeOrderStatus = (req, res, action) => {
   let seller = req.user;
   let orderId = req.params.orderId;
 
-
   Order.findOne({
     where: {
       id: orderId
@@ -97,6 +104,10 @@ var tryToChangeOrderStatus = (req, res, action) => {
         where: {
           ownerId: seller.id
         }
+      },
+      {
+        model: User,
+        attributes: ['id', 'fullName', 'avatar']
       }
     ]
   }).then(o => {
@@ -140,6 +151,12 @@ var responseOrder = (order, res) => {
   }).then(ols => {
     let orderLines = _.map(ols, r => _.pick(r, ['item', 'note', 'quantity']));
     result['orderLines'] = orderLines;
+
+    result.user = result.User;
+    delete result.User;
+    delete result.Shop;
+    delete result.userId;
+
     res.json(result);
   });
 };
