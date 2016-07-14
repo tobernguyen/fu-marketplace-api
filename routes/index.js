@@ -15,6 +15,7 @@ const shopFeed = require('../controllers/feed/shops');
 const application = require('../controllers/application');
 const userNotifications = require('../controllers/userNotifications');
 const adminConfigurations = require('../controllers/admin/configurations');
+const userReviews = require('../controllers/shop-reviews');
 
 const _mustBe = require('mustbe');
 _mustBe.configure(require('../config/mustbe-config'));
@@ -49,6 +50,7 @@ router.get('/api/v1/metadata', application.getMetadata);
 router.get('/api/v1/shops/:shopId', users.getShop);
 router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
 router.post('/api/v1/shops/:shopId/review', users.reviewShop);
+router.get('/api/v1/shops/:shopId/reviews', userReviews.getReviews);
 
 router.get('/api/v1/orders', orders.getOrders);
 router.put('/api/v1/orders/:orderId', orders.putUpdateOrder);
