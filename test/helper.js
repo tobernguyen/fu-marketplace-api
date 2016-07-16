@@ -384,14 +384,16 @@ var createReviews = (quantity, shopId) => {
   }
 
   return createShopPromise.then(s => {
-    let promises = [];
-    let i;
-    for (i = 0; i < quantity; i++) {
-      promises[i] = createReview({shopId: s.id});
-    }
-    return Promise.all(promises);
-  }).then(reviews => {
-    return Promise.resolve(reviews);
+    let reviews = [];
+    // This way is slower than Promise.all but will be helpful
+    // for time-sensitive tests because createdAt and
+    // updatedAt won't be messed up
+    return Promise.each(Array(quantity).fill(0), () => {
+      return createReview({shopId: s.id}).then(r => {
+        reviews.push(r);
+        return Promise.resolve();
+      });
+    }).then(() => Promise.resolve(reviews));
   });
 };
 
