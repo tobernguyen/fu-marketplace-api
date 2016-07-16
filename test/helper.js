@@ -28,9 +28,9 @@ before(function(done) {
   this.timeout(5000);
   kue.queue.testMode.enter();
   dbUtils.clearDatabase()
-    .then(dbUtils.runMigrations)
     .then(elasticsearchHelper.deleteAll)
     .then(elasticsearchHelper.createIndexWithConfig)
+    .then(dbUtils.runMigrations)
     .then(redisHelper.flushAll)
     .then(() => done(), done);
 });

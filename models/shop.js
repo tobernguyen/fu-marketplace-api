@@ -64,6 +64,9 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0 // UNPUBLISHED
+    },
+    averageRating: {
+      type: DataTypes.FLOAT(2)
     }
   }, {
     hooks: {
@@ -235,7 +238,7 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          return sequelize.transaction(t => {
+          sequelize.transaction(t => {
             return sequelize.model('Order').findOne({
               where: {
                 shopId: this.id,
@@ -245,30 +248,45 @@ module.exports = function(sequelize, DataTypes) {
             }).then(order => {
               if (!order) {
                 let error = 'You must order at this shop at least one time';
-                reject({
+                return Promise.reject({
                   status: 404,
                   message: error,
                   type: 'review'
                 });
               } else {
-                sequelize.model('Review').findOrCreate({
+                return sequelize.model('Review').findOrBuild({
                   where: {
                     shopId: this.id,
                     userId: userId
                   },
                   transaction: t
                 }).spread(review => {
-                  rawInfo.transaction = t;
-                  review.update(rawInfo).then(resolve, reject);
+                  review.set('rate', rawInfo.rate);
+                  review.set('comment', rawInfo.comment);
+                  return review.save({transaction: t});
                 });
               }
-            }).catch(err =>  {
-              reject(err);
             });
           }).then(review => {
-            return Promise.resolve(review);
-          }).catch(err =>  {
-            return Promise.reject(err);
+            // Create background job to update average rating
+            // of current shop then re-index the shop to elasticsearch
+            kue.createUpdateShopReviewAvgJob({shopId: this.id});
+
+            resolve(review);
+          }).catch(reject);
+        });
+      },
+      updateAverageRating: function() {
+        return sequelize.query(
+          `SELECT avg("Reviews"."rate")::float4 AS average_rating FROM public."Reviews" WHERE "Reviews"."shopId" = ${this.id};`,
+          { type: sequelize.QueryTypes.SELECT}
+        ).then(result => {
+          let averageRating = result[0]['average_rating'];
+
+          if (!averageRating) return Promise.resolve(this); // Short circuit if there is no review
+
+          return this.update({
+            averageRating: averageRating
           });
         });
       }

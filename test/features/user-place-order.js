@@ -74,7 +74,6 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
             expect(jobs).to.have.lengthOf(1);
             expect(jobs[0].type).to.equal('send order notification to seller');
             expect(jobs[0].data).to.eql({orderId: body.id, notificationType: UserNotification.NOTIFICATION_TYPE.USER_PLACE_ORDER});
-            done();
           })
           .expect(200, done);
       });

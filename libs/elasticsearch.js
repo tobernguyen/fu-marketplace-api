@@ -16,7 +16,7 @@ var buildShopDocument = (shopId) => {
   let models = require('../models');
 
   return models.Shop.findOne({
-    attributes: ['name', 'description', 'opening', 'status', 'avatar', 'cover', 'banned'],
+    attributes: ['name', 'description', 'opening', 'status', 'avatar', 'cover', 'banned', 'averageRating'],
     where: {
       id: shopId
     },
@@ -36,7 +36,7 @@ var buildShopDocument = (shopId) => {
     }]
   }).then(shop => {
     if (!shop) return Promise.reject('Shop not found, skip indexing.');
-    let shopDocument = _.pick(shop, ['name', 'description', 'opening', 'status', 'avatar', 'cover', 'banned']);
+    let shopDocument = _.pick(shop, ['name', 'description', 'opening', 'status', 'avatar', 'cover', 'banned', 'averageRating']);
     shopDocument['seller'] = _.pick(shop.User, ['id', 'fullName']);
     shopDocument['items'] = _.map(shop.Items, i => {
       return {

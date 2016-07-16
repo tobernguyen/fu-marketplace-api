@@ -15,7 +15,7 @@ const shopFeed = require('../controllers/feed/shops');
 const application = require('../controllers/application');
 const userNotifications = require('../controllers/userNotifications');
 const adminConfigurations = require('../controllers/admin/configurations');
-const userReviews = require('../controllers/shop-reviews');
+const userReviews = require('../controllers/shopReviews');
 const adminShopPromotionCampaigns = require('../controllers/admin/shopPromotionCampaigns');
 const shopPromotionCampaigns = require('../controllers/shopPromotionCampaigns');
 
@@ -51,7 +51,7 @@ router.get('/api/v1/categories', category.getCategories);
 router.get('/api/v1/metadata', application.getMetadata);
 router.get('/api/v1/shops/:shopId', users.getShop);
 router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
-router.post('/api/v1/shops/:shopId/review', users.reviewShop);
+router.post('/api/v1/shops/:shopId/review', users.postReviewShop);
 router.get('/api/v1/shops/:shopId/reviews', userReviews.getReviews);
 
 router.get('/api/v1/orders', orders.getOrders);

@@ -89,6 +89,51 @@ describe('Shop Model', () => {
       });
     });
 
+    describe('#updateAverageRating', () => {
+      describe('shop does not have any review', () => {
+        let shop;
+
+        before(done => {
+          helper.factory.createShop().then(s => {
+            shop = s;
+            done();
+          });
+        });
+
+        it('should not update averageRating', done => {
+          shop.updateAverageRating().then(shop => {
+            expect(shop.averageRating).to.not.ok;
+            done();
+          });
+        });
+      });
+
+      describe('shop have some reviews', () => {
+        let shop, expectedAvg;
+
+        before(done => {
+          helper.factory.createShop().then(s => {
+            shop = s;
+
+            return helper.factory.createReviews(5, shop.id);
+          }).then(reviews => {
+            expectedAvg = _.reduce(reviews, (sum, n) => {
+              return sum + n.rate;
+            }, 0) / reviews.length;
+
+            done();
+          });
+        });
+
+        it('should calculate average rating and update to averageRating field of shop', done => {
+          shop.updateAverageRating().then(shop => {
+            expect(shop.averageRating).to.equal(expectedAvg);
+            done();
+          });
+        });
+      });
+    });
+
     describe('with user ordered before', () => {
       let shop, order;
       beforeEach(done => {
@@ -99,13 +144,16 @@ describe('Shop Model', () => {
         }).then(o => {
           order = o;
           expect(o.shopId).to.equal(shop.id);
+
+          helper.queue.testMode.clear();
+
           done();
         });
       });
       
       describe('provide userId attribute', () => {
         describe('provide rate and comment', () => {
-          it('should return lastest review', done => {
+          it('should return latest review', done => {
             let review;
             shop.review({
               userId: order.userId,
@@ -117,6 +165,12 @@ describe('Shop Model', () => {
               expect(r.shopId).to.equal(shop.id);
               expect(r.rate).to.equal(3);
               expect(r.comment).to.equal('xxx');
+
+              let jobs = helper.queue.testMode.jobs;
+              expect(jobs).to.have.lengthOf(1);
+              expect(jobs[0].type).to.equal('update shop average rating');
+              expect(jobs[0].data).to.eql({shopId: shop.id});
+
               return shop.review({
                 userId: order.userId,
                 rate: 1,

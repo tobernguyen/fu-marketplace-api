@@ -150,6 +150,22 @@ var getEmailOptionForResponseShopOpeningRequest = (id) => {
   });
 };
 
+queue.process('update shop average rating', (job, done) => {
+  let Shop = require('../models').Shop;
+  return Shop.findOne({
+    where: {
+      id: job.data.shopId
+    },
+    attributes: ['id']
+  }).then(shop => {
+    if (!shop) {
+      logger.error('Called update shop review average with shop id not found: ' + job.data.shopId);
+      return Promise.resolve(); // Short circuit if no shop available
+    }
+    return shop.updateAverageRating();
+  }).then(() => done(), done);
+});
+
 exports.queue = queue;
 
 ///////////////////////////
@@ -228,8 +244,19 @@ var createEmailJob = (jobData) => {
     .priority('high')
     .attempts(5)  // Retry 5 times if failed, after that give up
     .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
-    .ttl(30000) // Kill the job if it take more than 10s
+    .ttl(30000) // Kill the job if it take more than 30s
     .removeOnComplete(true)
     .save();
 };
 exports.createEmailJob = createEmailJob;
+
+var createUpdateShopAvgRatingJob = (jobData) => {
+  queue.createJob('update shop average rating', jobData)
+    .priority('low')
+    .attempts(3)  // Retry 3 times if failed, after that give up
+    .backoff({ delay: 3 * 60 * 1000, type: 'fixed' }) // Wait for 3m before retrying
+    .ttl(15000) // Kill the job if it take more than 30s
+    .removeOnComplete(true)
+    .save();
+};
+exports.createUpdateShopReviewAvgJob = createUpdateShopAvgRatingJob;

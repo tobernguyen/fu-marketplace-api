@@ -231,7 +231,7 @@ exports.getShop = (req, res) => {
   responseShopById(shopId, res);
 };
 
-exports.reviewShop = (req, res) => {
+exports.postReviewShop = (req, res) => {
   let shopId = req.params.shopId;
   let user = req.user;
 
