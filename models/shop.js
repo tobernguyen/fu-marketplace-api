@@ -67,6 +67,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     averageRating: {
       type: DataTypes.FLOAT(2)
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     hooks: {

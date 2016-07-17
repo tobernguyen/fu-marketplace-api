@@ -67,6 +67,7 @@ describe('GET /api/v1/seller/shops/:id', () => {
           expect(res.body.avatar).to.equal(shop.avatar);
           expect(res.body.cover).to.equal(shop.cover);
           expect(res.body.shipPlaces.length).to.equal(1);
+          expect(res.body.phone).to.equal(shop.phone);
         })
         .expect(200, done);  
     });
@@ -137,7 +138,8 @@ describe('GET /api/v1/seller/shops/', () => {
           expect(s.description).to.equal(shop.description);
           expect(s.avatar).to.equal(shop.avatar);
           expect(s.cover).to.equal(shop.cover);
-          expect(s.shipPlaces.length).to.equal(1);   
+          expect(s.shipPlaces.length).to.equal(1);  
+          expect(s.phone).to.equal(shop.phone);    
         })
         .expect(200, done);  
     });
@@ -230,7 +232,8 @@ describe('PUT /api/v1/seller/shops/:id', () => {
               banned: 'true',
               invalidattribute: 'invalid',
               opening: 'true',
-              status: Shop.STATUS.UNPUBLISHED
+              status: Shop.STATUS.UNPUBLISHED,
+              phone: '0123456789'
             })
             .set('Content-Type', 'application/json')
             .expect(res => {
@@ -244,6 +247,7 @@ describe('PUT /api/v1/seller/shops/:id', () => {
               expect(res.body.opening).to.equal(true);
               expect(res.body.status).to.equal(Shop.STATUS.UNPUBLISHED);
               expect(res.body.invalidattribute).to.be.undefined;
+              expect(res.body.phone).to.equal('0123456789');
             })
             .expect(200, done);  
         });

@@ -34,6 +34,7 @@ describe('GET /api/v1/shops/:shopId', () => {
           expect(res.body.shipPlaces.length).to.equal(1);
           expect(res.body.items.length).to.equal(1);
           expect(res.body.seller.id).to.equal(shop.ownerId);
+          expect(res.body.phone).to.equal('0987654321');
         })
         .expect(200, done);  
     });

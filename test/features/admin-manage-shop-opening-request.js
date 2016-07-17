@@ -11,7 +11,7 @@ const emailer = require('../../libs/emailer');
 
 describe('GET /api/v1/admin/shopOpeningRequests', () => {
   let pendingRequest, acceptedRequest, rejectedRequest, adminToken;
-  
+
   before(done => {
     helper.factory.createUserWithRole({},'admin').then(u => {
       adminToken = helper.createAccessTokenForUserId(u.id);
@@ -38,7 +38,7 @@ describe('GET /api/v1/admin/shopOpeningRequests', () => {
           let requests = res.body.shopOpeningRequests;
           expect(res.body.shopOpeningRequests).to.have.lengthOf(1);
 
-          expect(requests[0]).to.have.all.keys(['id', 'name', 'description', 'note', 'adminMessage', 'ownerId', 'address', 'status', 'seller']);
+          expect(requests[0]).to.have.all.keys(['id', 'name', 'description', 'note', 'adminMessage', 'ownerId', 'phone', 'address', 'status', 'seller']);
           expect(requests[0].id).to.equal(pendingRequest.id);
           expect(requests[0].name).to.equal(pendingRequest.name);
 

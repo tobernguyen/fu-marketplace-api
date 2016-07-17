@@ -68,19 +68,20 @@ describe('POST /api/v1/seller/shopOpeningRequest', () => {
             shopInfo: {
               name: 'Banh My',
               description: 'banh my XXX',
-              address: 'C203'
+              address: 'C203',
+              phone: '0123456789'
             },
             note: 'Em muon thanh ti phu'
           })
           .expect(res => {
             let sellerInfo = res.body.sellerInfo;
             let shopInfo = res.body.shopInfo;
-            expect(sellerInfo.phone).to.equal(seller.phone);
             expect(sellerInfo.identityNumber).to.equal(seller.identityNumber);
             expect(sellerInfo.identityPhoto).to.have.string(`users/${seller.id}/identity`);
             expect(shopInfo.name).to.equal('Banh My');
             expect(shopInfo.description).to.equal('banh my XXX');
             expect(shopInfo.address).to.equal('C203');
+            expect(shopInfo.phone).to.equal('0123456789');
             expect(res.body.note).to.equal('Em muon thanh ti phu');
           })
           .expect(200, done);
