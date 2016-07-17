@@ -3,9 +3,13 @@
 const helper = require('../helper');
 const Shop = require('../../models').Shop;
 const Review = require('../../models').Review;
+const Order = require('../../models').Order;
 const rewire = require('rewire');
 const _ = require('lodash');
 const fs = require('fs-extra');
+const moment = require('moment');
+const tk = require('timekeeper');
+const Promise = require('bluebird');
 
 describe('Shop Model', () => {
   describe('factory', () => {
@@ -229,6 +233,59 @@ describe('Shop Model', () => {
             expect(err.type).to.equal('review');
             done();
           }, done);
+        });
+      });
+    });
+  });
+
+  describe('#getSalesStatistic', () => {
+    let shop, orders = [];
+
+    before(done => {
+      helper.factory.createShop().then(s => {
+        shop = s;
+
+        let orderDates = _.map(_.rangeRight(8), dayAgo => moment().subtract(dayAgo, 'days').toDate());
+
+        return Promise.each(orderDates, orderDate => {
+          tk.freeze(orderDate);
+
+          return helper.factory.createOrder({shopId: shop.id, status: Order.STATUS.COMPLETED}).then(order => {
+            orders.push(order);
+            return Promise.resolve();
+          });
+        }).then(() => {
+          tk.reset();
+          done();
+        }).catch(err => {
+          tk.reset();
+          return Promise.reject(err);
+        });
+      }).catch(done);
+    });
+
+    it('should return sales statistic for most recent 7 days of the shop', done => {
+      shop.getSalesStatistic().then(result => {
+        expect(result).to.have.lengthOf(7); // There should be most recent 7 days only
+
+        expect(result[0].year).to.equal(orders[1].createdAt.getFullYear());
+        expect(result[0].month).to.equal(orders[1].createdAt.getMonth() + 1);
+        expect(result[0].day).to.equal(orders[1].createdAt.getDate());
+
+        expect(result[6].year).to.equal(orders[7].createdAt.getFullYear());
+        expect(result[6].month).to.equal(orders[7].createdAt.getMonth() + 1);
+        expect(result[6].day).to.equal(orders[7].createdAt.getDate());
+
+        orders[1].getOrderLines().then(orderLines => {
+          let expectedTotalSales = _.reduce(orderLines, (sum, ol) => sum + ol.item.price * ol.quantity, 0);
+          expect(result[0].totalSales).to.equal(expectedTotalSales);
+
+          return orders[7].getOrderLines();
+        }).then(orderLines => {
+          let expectedTotalSales = _.reduce(orderLines, (sum, ol) => sum + ol.item.price * ol.quantity, 0);
+          expect(result[6].totalSales).to.equal(expectedTotalSales);
+
+          done();
         });
       });
     });

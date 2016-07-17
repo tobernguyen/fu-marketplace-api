@@ -401,7 +401,7 @@ var createReviews = (quantity, shopId) => {
 var getQuantityAndNoteOfItems = (items, id) => {
   if (!items) {
     return {
-      quantity: faker.random.number(),
+      quantity: faker.random.number({min: 1, max: 50}),
       note: faker.lorem.sentence()
     };
   } else {

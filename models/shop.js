@@ -289,6 +289,25 @@ module.exports = function(sequelize, DataTypes) {
             averageRating: averageRating
           });
         });
+      },
+      getSalesStatistic: function() {
+        let sql = `SET TIME ZONE 'Asia/Bangkok';
+                  SELECT 
+                    date_part('year', "Orders"."createdAt") as "year",
+                    date_part('month', "Orders"."createdAt") as "month",
+                    date_part('day', "Orders"."createdAt") as "day",
+                    sum(jsonb_extract_path_text("OrderLines"."item", 'price')::integer * "OrderLines"."quantity")::integer as "totalSales"
+                  FROM 
+                    public."Orders", 
+                    public."OrderLines"
+                  WHERE 
+                    "OrderLines"."orderId" = "Orders".id AND
+                    "Orders"."shopId" = ${this.id} AND 
+                    "Orders".status = ${sequelize.model('Order').STATUS.COMPLETED} AND
+                    "Orders"."createdAt" > current_date - interval '6 days'
+                  GROUP BY "year", "month", "day"
+                  ORDER BY "year", "month", "day";`;
+        return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT });
       }
     }
   });

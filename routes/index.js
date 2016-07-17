@@ -64,7 +64,7 @@ router.post('/api/v1/feed/shops', shopFeed.searchShop);
 router.get('/api/v1/shopPromotions/topFeedSlideShow', shopPromotionCampaigns.getTopFeedSlideShow);
 
 /*
- * Routes that can be accessed only by authenticated & authorized users
+ * Routes that can be accessed only by authenticated & authorized users who has role 'admin'
  */
 router.get('/api/v1/admin/users', mustBe.authorized('admin'), adminUser.getUsers);
 router.get('/api/v1/admin/users/:id', mustBe.authorized('admin'), adminUser.getUser);
@@ -113,5 +113,7 @@ router.post('/api/v1/seller/orders/:orderId/ship', mustBe.authorized('seller'), 
 router.post('/api/v1/seller/orders/:orderId/complete', mustBe.authorized('seller'), sellerOrder.completeOrder);
 router.post('/api/v1/seller/orders/:orderId/abort', mustBe.authorized('seller'), sellerOrder.abortOrder);
 router.post('/api/v1/seller/shopOpeningRequest', mustBe.authorized('seller'), sellerShop.postRequestOpenShop);
+
+router.get('/api/v1/seller/shops/:id/salesStatistic', mustBe.authorized('seller'), sellerShop.getSalesStatistic);
 
 module.exports = router;
