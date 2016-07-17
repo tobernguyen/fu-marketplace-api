@@ -154,7 +154,7 @@ var searchShop = (query) => {
         }
       }
     },
-    _source: [ 'id', 'name', 'description', 'categoryIds', 'avatar', 'cover', 'shipPlaceIds', 'seller', 'items.image', 'opening'],
+    _source: [ 'id', 'name', 'description', 'categoryIds', 'avatar', 'cover', 'shipPlaceIds', 'seller', 'items.image', 'opening', 'averageRating'],
     size: perPage,
     from: perPage * (page - 1)
   });

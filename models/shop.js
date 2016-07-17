@@ -214,7 +214,7 @@ module.exports = function(sequelize, DataTypes) {
       review: function (rateInfo) {
         return new Promise((resolve, reject) => {
           let userId = rateInfo.userId;
-          let rawInfo = _.pick(rateInfo, ['rate', 'comment']);
+          let reviewInfo = _.pick(rateInfo, ['rate', 'comment']);
 
           if (!userId && userId!==0) {
             let error = 'Must provide userId when review shop';
@@ -225,11 +225,11 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
 
-          if (!rawInfo.comment) {
-            rawInfo.comment = '';
+          if (!reviewInfo.comment) {
+            reviewInfo.comment = '';
           }
 
-          if (!rawInfo.rate) {
+          if (!reviewInfo.rate) {
             let error = 'Must provide rate when review shop';
             reject({
               status: 404,
@@ -261,8 +261,8 @@ module.exports = function(sequelize, DataTypes) {
                   },
                   transaction: t
                 }).spread(review => {
-                  review.set('rate', rawInfo.rate);
-                  review.set('comment', rawInfo.comment);
+                  review.set('rate', reviewInfo.rate);
+                  review.set('comment', reviewInfo.comment);
                   return review.save({transaction: t});
                 });
               }

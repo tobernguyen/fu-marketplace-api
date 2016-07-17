@@ -12,12 +12,12 @@ var elasticsearchHelper = require('../utils/elasticsearch-helper');
 
 describe('libs/elasticsearch', () => {
   describe('#buildShopDocument', () => {
-    let seller, shop, item;
+    let seller, shop, item, expectedAverageRating = 3.5;
 
     before(done => {
       helper.factory.createUserWithRole({}, 'seller').then(u => {
         seller = u;
-        return helper.factory.createShopWithShipPlace({ownerId: u.id}, 'Dom A');
+        return helper.factory.createShopWithShipPlace({ownerId: u.id, averageRating: expectedAverageRating}, 'Dom A');
       }).then(s => {
         shop = s;
         return Category.findOne({});
@@ -25,7 +25,7 @@ describe('libs/elasticsearch', () => {
         return helper.factory.createItem({shopId: shop.id, categoryId: category.id, status: Item.STATUS.FOR_SELL});
       }).then(i => {
         item = i;
-        done();                
+        done();
       });
     });
 
@@ -49,6 +49,7 @@ describe('libs/elasticsearch', () => {
           expect(shopDocument.categoryIds).to.include(item.categoryId);
           expect(shopDocument.shipPlaceIds).to.be.an('array');
           expect(shopDocument.shipPlaceIds).to.have.lengthOf(1);
+          expect(shopDocument.averageRating).to.equal(expectedAverageRating);
           done();
         }, done);
       });
@@ -71,7 +72,8 @@ describe('libs/elasticsearch', () => {
           name: 'Alo mình nghe',
           description: 'Hôm nay mình có bán xúc xích luộc, trứng luộc, nước chanh, mong các bạn ủng hộ.',
           opening: true,
-          status: Shop.STATUS.PUBLISHED
+          status: Shop.STATUS.PUBLISHED,
+          averageRating: 3.6
         });
         promises[promises.length] = helper.factory.createShop({
           name: 'ORIOLE SHOP',
@@ -156,7 +158,7 @@ describe('libs/elasticsearch', () => {
       }).catch(done);
     });
 
-    describe('with one empty agruments', done => {
+    describe('with one empty arguments', done => {
       it('should return search result contains published shops and from opening shops to closing shops', done => {
         elasticsearch.searchShop().then(resp => {
           expect(resp.hits.total).to.equal(4);
@@ -169,6 +171,7 @@ describe('libs/elasticsearch', () => {
           expect(actualFirstShopData.name).to.equal(expectedFirstShop.name);
           expect(actualFirstShopData.description).to.equal(expectedFirstShop.description);
           expect(actualFirstShopData.opening).to.equal(expectedFirstShop.opening);
+          expect(actualFirstShopData.averageRating).to.equal(expectedFirstShop.averageRating);
 
           let lastShop = resp.hits.hits[3];
           let actualLastShopData = lastShop['_source'];

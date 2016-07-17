@@ -30,7 +30,8 @@ var logger = require('../../libs/logger');
  *        description: String,
  *        avatar: String,
  *        cover: String,
- *        status: Number
+ *        status: Number,
+ *        averageRating: Number,
  *        seller: Object {id, name}
  *        categoryIds: String[], 
  *        shipPlaceIds: String[], 
@@ -49,7 +50,7 @@ exports.searchShop = (req, res) => {
     response['total'] = result.hits.total;
     response['shops'] = _.map(result.hits.hits, hit => {
       let shopData = hit['_source'];
-      let shop = _.pick(shopData, ['name', 'description', 'categoryIds', 'shipPlaceIds', 'avatar', 'cover', 'opening', 'seller']);
+      let shop = _.pick(shopData, ['name', 'description', 'categoryIds', 'shipPlaceIds', 'avatar', 'cover', 'opening', 'seller', 'averageRating']);
       shop['itemImages'] = _.map(shopData.items, i => i.image);
       shop['id'] = _.toNumber(hit['_id']);
       return shop;

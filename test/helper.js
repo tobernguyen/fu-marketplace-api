@@ -164,7 +164,8 @@ var createShop = (attrs) => {
       banned: attrs.banned,
       ownerId: attrs.ownerId || user.id,
       opening: attrs.opening || false,
-      status: attrs.status || models.Shop.STATUS.UNPUBLISHED
+      status: attrs.status || models.Shop.STATUS.UNPUBLISHED,
+      averageRating: attrs.averageRating
     });
   });
 };
@@ -285,7 +286,7 @@ var createOrder = (attrs) => {
   let OrderLine = models.OrderLine;
 
   if (!attrs.items) {
-    createItemPromise = createItem({ shopId: attrs.shopId}).then(item => {
+    createItemPromise = createItem({shopId: attrs.shopId}).then(item => {
       return Promise.resolve([item]);
     });
   } else {
