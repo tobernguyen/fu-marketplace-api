@@ -302,12 +302,52 @@ module.exports = function(sequelize, DataTypes) {
                     public."OrderLines"
                   WHERE 
                     "OrderLines"."orderId" = "Orders".id AND
-                    "Orders"."shopId" = ${this.id} AND 
-                    "Orders".status = ${sequelize.model('Order').STATUS.COMPLETED} AND
+                    "Orders"."shopId" = :shopId AND 
+                    "Orders".status = :status AND
                     "Orders"."createdAt" > current_date - interval '6 days'
                   GROUP BY "year", "month", "day"
                   ORDER BY "year", "month", "day";`;
-        return sequelize.query(sql, { type: sequelize.QueryTypes.SELECT });
+        return sequelize.query(sql, {
+          replacements: {
+            shopId: this.id,
+            status: sequelize.model('Order').STATUS.COMPLETED
+          },
+          type: sequelize.QueryTypes.SELECT
+        });
+      },
+      getOrdersStatistic: function() {
+        let sql = `SET TIME ZONE 'Asia/Bangkok';
+                  WITH tmp_tbl AS (SELECT 
+                      "createdAt",
+                      CASE WHEN status=:status THEN 1
+                     ELSE 0
+                      END as "CompletedOrders",
+                      CASE WHEN status!=:status THEN 1
+                     ELSE 0
+                      END as "InCompletedOrders"
+                    FROM 
+                      public."Orders"
+                    WHERE 
+                      "shopId" = :shopId AND
+                      "createdAt" > current_date - interval '6 days'
+                    ORDER BY "createdAt")
+                  
+                    SELECT 
+                    date_part('year', "createdAt") as "year",
+                    date_part('month', "createdAt") as "month",
+                    date_part('day', "createdAt") as "day",
+                    sum("CompletedOrders")::integer as "completedOrders",
+                    sum("InCompletedOrders")::integer as "incompleteOrders"
+                    FROM tmp_tbl
+                    GROUP BY "year", "month", "day"
+                    ORDER BY "year", "month", "day";`;
+        return sequelize.query(sql, {
+          replacements: {
+            shopId: this.id,
+            status: sequelize.model('Order').STATUS.COMPLETED
+          },
+          type: sequelize.QueryTypes.SELECT
+        });
       }
     }
   });

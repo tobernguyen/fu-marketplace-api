@@ -332,3 +332,27 @@ exports.getSalesStatistic = (req, res) => {
     });
   });
 };
+
+exports.getOrdersStatistic = (req, res) => {
+  let seller = req.user;
+  let shopId = req.params.id;
+
+  seller.getShops({
+    where: {
+      id: shopId
+    }
+  }).then(shops => {
+    if (shops.length !== 1) return errorHandlers.responseError(404, 'Shop does not exist', 'model', res);
+
+    shops[0].getOrdersStatistic().then(ordersStatistic => {
+      res.json({
+        ordersStatistic: {
+          updatedAt: new Date(),
+          data: ordersStatistic
+        }
+      });
+
+      return null;
+    });
+  });
+};

@@ -291,6 +291,63 @@ describe('Shop Model', () => {
     });
   });
 
+  describe('#getOrdersStatistic', () => {
+    let shop, ordersByDays = [];
+
+    before(done => {
+      helper.factory.createShop().then(s => {
+        shop = s;
+
+        let orderDates = _.map(_.rangeRight(8), dayAgo => moment().subtract(dayAgo, 'days').toDate());
+
+        return Promise.each(orderDates, orderDate => {
+          tk.freeze(orderDate);
+
+          let promises = [];
+
+          _.times(_.random(2, 5), () => {
+            promises[promises.length] = helper.factory.createOrder({shopId: shop.id, status: _.random(1,5)});
+          });
+
+          return Promise.all(promises).then(orders => {
+            ordersByDays.push(orders);
+            return Promise.resolve();
+          });
+        }).then(() => {
+          tk.reset();
+          done();
+        }).catch(err => {
+          tk.reset();
+          return Promise.reject(err);
+        });
+      }).catch(done);
+    });
+
+    it('should return orders statistic for most recent 7 days of the shop', done => {
+      shop.getOrdersStatistic().then(result => {
+        expect(result).to.have.lengthOf(7); // There should be most recent 7 days only
+
+        let firstDayOrders = ordersByDays[1];
+        let firstDayOrderCount = _.countBy(firstDayOrders, o => o.status === Order.STATUS.COMPLETED ? 'completed' : 'incomplete');
+        expect(result[0].year).to.equal(firstDayOrders[0].createdAt.getFullYear());
+        expect(result[0].month).to.equal(firstDayOrders[0].createdAt.getMonth() + 1);
+        expect(result[0].day).to.equal(firstDayOrders[0].createdAt.getDate());
+        expect(result[0].completedOrders).to.equal(firstDayOrderCount.completed || 0);
+        expect(result[0].incompleteOrders).to.equal(firstDayOrderCount.incomplete || 0);
+
+        let lastDayOrders = ordersByDays[7];
+        let lastDayOrderCount = _.countBy(lastDayOrders, o => o.status === Order.STATUS.COMPLETED ? 'completed' : 'incomplete');
+        expect(result[6].year).to.equal(lastDayOrders[0].createdAt.getFullYear());
+        expect(result[6].month).to.equal(lastDayOrders[0].createdAt.getMonth() + 1);
+        expect(result[6].day).to.equal(lastDayOrders[0].createdAt.getDate());
+        expect(result[6].completedOrders).to.equal(lastDayOrderCount.completed || 0);
+        expect(result[6].incompleteOrders).to.equal(lastDayOrderCount.incomplete || 0);
+
+        done();
+      });
+    });
+  });
+
   describe('hooks', () => {
     describe('afterCreate', () => {
       let shop;
