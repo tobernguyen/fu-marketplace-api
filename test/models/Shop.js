@@ -348,6 +348,79 @@ describe('Shop Model', () => {
     });
   });
 
+  describe('#getItemSoldStatistic', () => {
+    let shop, ordersByDays = [];
+
+    before(done => {
+      helper.factory.createShop().then(s => {
+        shop = s;
+
+        let orderDates = _.map(_.rangeRight(8), dayAgo => moment().subtract(dayAgo, 'days').toDate());
+
+        return Promise.each(orderDates, orderDate => {
+          tk.freeze(orderDate);
+
+          let promises = [];
+
+          _.times(_.random(2, 5), () => {
+            promises[promises.length] = helper.factory.createOrder({shopId: shop.id, status: Order.STATUS.COMPLETED});
+          });
+
+          return Promise.all(promises).then(orders => {
+            ordersByDays.push(orders);
+            return Promise.resolve();
+          });
+        }).then(() => {
+          tk.reset();
+          done();
+        }).catch(err => {
+          tk.reset();
+          return Promise.reject(err);
+        });
+      }).catch(done);
+    });
+
+    it('should return item sold statistic for most recent 7 days of the shop', done => {
+      shop.getItemSoldStatistic().then(result => {
+        expect(result).to.have.lengthOf(7); // There should be most recent 7 days only
+
+        let firstDayOrders = ordersByDays[1];
+        let firstDayItemSoldStat = {};
+        _.each(firstDayOrders, o => {
+          _.each(o['__test__']['orderLines'], ol => {
+            if (firstDayItemSoldStat[ol.item.categoryId] === undefined) {
+              firstDayItemSoldStat[ol.item.categoryId] = 1;
+            } else {
+              firstDayItemSoldStat[ol.item.categoryId] += 1;
+            }
+          });
+        });
+        expect(result[0].year).to.equal(firstDayOrders[0].createdAt.getFullYear());
+        expect(result[0].month).to.equal(firstDayOrders[0].createdAt.getMonth() + 1);
+        expect(result[0].day).to.equal(firstDayOrders[0].createdAt.getDate());
+        expect(result[0].itemSold).to.eql(firstDayItemSoldStat);
+
+        let lastDayOrders = ordersByDays[7];
+        let lastDayItemSoldStat = {};
+        _.each(lastDayOrders, o => {
+          _.each(o['__test__']['orderLines'], ol => {
+            if (lastDayItemSoldStat[ol.item.categoryId] === undefined) {
+              lastDayItemSoldStat[ol.item.categoryId] = 1;
+            } else {
+              lastDayItemSoldStat[ol.item.categoryId] += 1;
+            }
+          });
+        });
+        expect(result[6].year).to.equal(lastDayOrders[0].createdAt.getFullYear());
+        expect(result[6].month).to.equal(lastDayOrders[0].createdAt.getMonth() + 1);
+        expect(result[6].day).to.equal(lastDayOrders[0].createdAt.getDate());
+        expect(result[6].itemSold).to.eql(lastDayItemSoldStat);
+
+        done();
+      });
+    });
+  });
+
   describe('hooks', () => {
     describe('afterCreate', () => {
       let shop;

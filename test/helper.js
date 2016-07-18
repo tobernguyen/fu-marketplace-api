@@ -250,7 +250,7 @@ var createItem = (attrs) => {
 
   if (!attrs.categoryId) {
     findCategoryPromise = Category.findAll().then(categories => {
-      return Promise.resolve(categories[0]);
+      return Promise.resolve(_.sample(categories));
     });
   } else {
     findCategoryPromise = Promise.resolve();
@@ -322,12 +322,15 @@ var createOrder = (attrs) => {
     order = o;
     let orderLineData = _.map(items, i => {
       let orderLine = getQuantityAndNoteOfItems(attrs.items, i.id);
-      orderLine.item = _.pick(i, ['id', 'name', 'description', 'price']);
+      orderLine.item = _.pick(i, ['id', 'name', 'description', 'price', 'categoryId']);
       orderLine.orderId = order.id;
       return orderLine;
     });
     return OrderLine.bulkCreate(orderLineData);
-  }).then(() => {
+  }).then(orderLines => {
+    order['__test__'] = {
+      orderLines: orderLines
+    };
     return Promise.resolve(order);
   });
 };

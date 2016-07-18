@@ -68,6 +68,7 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
             expect(item.name).to.equal(item1.name);
             expect(item.description).to.equal(item1.description);
             expect(item.price).to.equal(item1.price);
+            expect(item.categoryId).to.equal(item1.categoryId);
 
             // Expect the system to create the job to create notification
             let jobs = helper.queue.testMode.jobs;

@@ -53,7 +53,7 @@ describe('GET /api/v1/seller/shops/:id/salesStatistic', () => {
 });
 
 describe('GET /api/v1/seller/shops/:id/ordersStatistic', () => {
-  let  sellerToken, seller, shop, completedOrder, incompleteOrder;
+  let  sellerToken, seller, shop, completedOrder;
 
   before(done => {
     helper.factory.createUserWithRole({}, 'seller').then(u => {
@@ -67,7 +67,6 @@ describe('GET /api/v1/seller/shops/:id/ordersStatistic', () => {
       completedOrder = o;
       return helper.factory.createOrder({shopId: shop.id, status: Order.STATUS.NEW});
     }).then(o => {
-      incompleteOrder = o;
       done();
     });
   });
@@ -91,6 +90,56 @@ describe('GET /api/v1/seller/shops/:id/ordersStatistic', () => {
           expect(firstStat.day).to.equal(completedOrder.createdAt.getDate());
           expect(firstStat.completedOrders).to.equal(1);
           expect(firstStat.incompleteOrders).to.equal(1);
+
+          done();
+        }).catch(done);
+    });
+  });
+});
+
+describe('GET /api/v1/seller/shops/:id/itemSoldStatistic', () => {
+  let  sellerToken, seller, shop, firstOrder, secondOrder;
+
+  before(done => {
+    helper.factory.createUserWithRole({}, 'seller').then(u => {
+      seller = u;
+      sellerToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createShop({ownerId: seller.id});
+    }).then(s => {
+      shop = s;
+      return helper.factory.createOrder({shopId: shop.id, status: Order.STATUS.COMPLETED});
+    }).then(o => {
+      firstOrder = o;
+      return helper.factory.createOrder({shopId: shop.id, status: Order.STATUS.COMPLETED});
+    }).then(o => {
+      secondOrder = o;
+      done();
+    });
+  });
+
+  describe('with seller access token', () => {
+    it('should return 200 and return sales statistic', done => {
+      request(app)
+        .get(`/api/v1/seller/shops/${shop.id}/itemSoldStatistic`)
+        .set('X-Access-Token', sellerToken)
+        .set('Content-Type', 'application/json')
+        .expect(200)
+        .then(res => {
+          let itemSoldStatistic = res.body.itemSoldStatistic;
+          expect(itemSoldStatistic).to.be.ok;
+          expect(itemSoldStatistic.data).to.be.an('array');
+          expect(itemSoldStatistic.data).to.have.lengthOf(1);
+
+          let firstStat = itemSoldStatistic.data[0];
+          expect(firstStat.year).to.equal(firstOrder.createdAt.getFullYear());
+          expect(firstStat.month).to.equal(firstOrder.createdAt.getMonth() + 1);
+          expect(firstStat.day).to.equal(firstOrder.createdAt.getDate());
+
+          let expectedItemSold = {};
+          expectedItemSold[firstOrder['__test__'].orderLines[0].item.categoryId] = 1;
+          expectedItemSold[secondOrder['__test__'].orderLines[0].item.categoryId] = 1;
+
+          expect(firstStat.itemSold).to.eql(expectedItemSold);
 
           done();
         }).catch(done);

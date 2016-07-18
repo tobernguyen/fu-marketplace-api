@@ -116,5 +116,6 @@ router.post('/api/v1/seller/shopOpeningRequest', mustBe.authorized('seller'), se
 
 router.get('/api/v1/seller/shops/:id/salesStatistic', mustBe.authorized('seller'), sellerShop.getSalesStatistic);
 router.get('/api/v1/seller/shops/:id/ordersStatistic', mustBe.authorized('seller'), sellerShop.getOrdersStatistic);
+router.get('/api/v1/seller/shops/:id/itemSoldStatistic', mustBe.authorized('seller'), sellerShop.getItemSoldStatistic);
 
 module.exports = router;

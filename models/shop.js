@@ -174,7 +174,7 @@ module.exports = function(sequelize, DataTypes) {
             order = o;
             let orderLineData = _.map(items, i => {
               let orderLine = getQuantityAndNoteOfItem(reqBody.items, i.id);
-              orderLine.item = _.pick(i, ['id', 'name', 'description', 'price']);
+              orderLine.item = _.pick(i, ['id', 'name', 'description', 'price', 'categoryId']);
               orderLine.orderId = order.id;
               return orderLine;
             });
@@ -347,6 +347,44 @@ module.exports = function(sequelize, DataTypes) {
             status: sequelize.model('Order').STATUS.COMPLETED
           },
           type: sequelize.QueryTypes.SELECT
+        });
+      },
+      getItemSoldStatistic: function() {
+        let sql = `SET TIME ZONE 'Asia/Bangkok';
+                  SELECT 
+                    date_part('year', "Orders"."createdAt") as "year",
+                    date_part('month', "Orders"."createdAt") as "month",
+                    date_part('day', "Orders"."createdAt") as "day",
+                    jsonb_extract_path_text("OrderLines"."item", 'categoryId')::integer as "categoryId",
+                    count("OrderLines".id)::integer as "itemSold"
+                  FROM 
+                    public."Orders", 
+                    public."OrderLines"
+                  WHERE 
+                    "OrderLines"."orderId" = "Orders".id AND
+                    "Orders"."shopId" = :shopId AND 
+                    "Orders".status = :status AND
+                    "Orders"."createdAt" > current_date - interval '6 days'
+                  GROUP BY "year", "month", "day", "categoryId"
+                  ORDER BY "year", "month", "day";`;
+        return sequelize.query(sql, {
+          replacements: {
+            shopId: this.id,
+            status: sequelize.model('Order').STATUS.COMPLETED
+          },
+          type: sequelize.QueryTypes.SELECT
+        }).then(rawResult => {
+          let result = {};
+
+          _.each(rawResult, r => {
+            if (result[`${r.year}${r.month}${r.day}`] === undefined) {
+              result[`${r.year}${r.month}${r.day}`] = _.pick(r, ['year', 'month', 'day']);
+              result[`${r.year}${r.month}${r.day}`]['itemSold'] = {};
+            }
+            result[`${r.year}${r.month}${r.day}`]['itemSold'][r.categoryId] = r.itemSold;
+          });
+
+          return Promise.resolve(_.values(result));
         });
       }
     }
