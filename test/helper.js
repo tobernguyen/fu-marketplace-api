@@ -25,7 +25,7 @@ var kue = require('../libs/kue');
 var moment = require('moment');
 
 before(function(done) {
-  this.timeout(5000);
+  this.timeout(10000);
   kue.queue.testMode.enter();
   dbUtils.clearDatabase()
     .then(elasticsearchHelper.deleteAll)
@@ -88,7 +88,7 @@ var createUser = (attrs) => {
     fullName: attrs.fullname || faker.name.findName(),
     email: attrs.email || faker.internet.email(),
     password: password,
-    phone: attrs.phone,
+    phone: attrs.phone || '0123456789',
     avatar: attrs.avatar,
     avatarFile: attrs.avatarFile,
     identityNumber: attrs.identityNumber,
@@ -146,11 +146,12 @@ var createAccessTokenForUserId = (userId) => {
 var createShop = (attrs) => {
   if (attrs == undefined) attrs = {};
   let createUserPromise;
+  let User = models.User;
 
   if (!attrs.ownerId) {
     createUserPromise = createUserWithRole({}, 'seller');
   } else {
-    createUserPromise = Promise.resolve();
+    createUserPromise = User.findById(attrs.ownerId);
   }
 
   return createUserPromise.then(user => {
@@ -165,6 +166,7 @@ var createShop = (attrs) => {
       ownerId: attrs.ownerId || user.id,
       opening: attrs.opening || false,
       status: attrs.status || models.Shop.STATUS.UNPUBLISHED,
+      phone: attrs.phone || user.phone,
       averageRating: attrs.averageRating
     });
   });
@@ -202,7 +204,8 @@ var createShopOpeningRequest = (attrs) => {
   if (attrs == undefined) attrs = {};
 
   let createUserPromise;
-  
+  let User = models.User;
+
   if (!attrs.ownerId) {
     createUserPromise = createUser().then(u => {
       return u.update({
@@ -217,7 +220,7 @@ var createShopOpeningRequest = (attrs) => {
       });
     });
   } else {
-    createUserPromise = Promise.resolve();
+    createUserPromise = User.findById(attrs.ownerId);
   }
 
   return createUserPromise.then(user => {
@@ -228,7 +231,8 @@ var createShopOpeningRequest = (attrs) => {
       ownerId: attrs.ownerId || user.id,
       address: attrs.address || faker.address.streetAddress(),
       status: attrs.status || 0, // Default is PENDING,
-      adminMessage: attrs.adminMessage
+      adminMessage: attrs.adminMessage,
+      phone: attrs.phone || user.phone
     });
   });
 };

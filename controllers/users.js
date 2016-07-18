@@ -141,18 +141,19 @@ exports.postRequestOpenShopFirstTime = (req, res) => {
       phone: sellerInfo.phone,
       identityNumber: sellerInfo.identityNumber
     });
-  }).then(() => {
+  }).then((u) => {
     return ShopOpeningRequest.create({
       name: shopInfo.name,
       description: shopInfo.description,
       address: shopInfo.address,
       ownerId: user.id,
-      note: note
+      note: note,
+      phone: shopInfo.phone
     });
   }).then((shopOpeningRequest) => {
     res.json({
       sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),
-      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note']),
+      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note', 'phone']),
       note: shopOpeningRequest.note || ''
     });
   }).catch(error => {

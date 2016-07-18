@@ -242,12 +242,13 @@ exports.postRequestOpenShop = (req, res) => {
     name: shopInfo.name,
     description: shopInfo.description,
     address: shopInfo.address,
+    phone: shopInfo.phone,
     ownerId: user.id,
     note: note
   }).then((shopOpeningRequest) => {
     res.json({
       sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),
-      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note']),
+      shopInfo: _.pick(shopOpeningRequest.toJSON(), ['name', 'description', 'address', 'note', 'phone']),
       note: shopOpeningRequest.note || ''
     });
   }).catch(error => {
@@ -270,6 +271,7 @@ var responseShopById = (owner, id, res) => {
       let result = shop.toJSON();
       let shipPlace = _.map(shop.ShipPlaces, sp => sp.id);
       result['shipPlaces'] = shipPlace;
+      delete result.ShipPlaces;
       res.json(result);      
     }
   });
@@ -280,6 +282,7 @@ var responseShop = (shop, res) => {
   shop.getShipPlaces().then(shipPlaces => {
     let shipPlace = _.map(shipPlaces, sp => sp.id);
     result['shipPlaces'] = shipPlace;
+    delete result.ShipPlaces;
     res.json(result);
   });
 };
@@ -303,6 +306,11 @@ const REQUEST_OPEN_SHOP_BODY_SCHEMA = {
     }
   },
   'shopInfo.address': {
+    notEmpty: {
+      errorMessage: 'Must not be empty'
+    }
+  },
+  'shopInfo.phone': {
     notEmpty: {
       errorMessage: 'Must not be empty'
     }

@@ -1,8 +1,8 @@
 'use strict';
 
-const SHOP_OWNER_UPDATE_VALID_KEY = ['description', 'opening', 'status', 'address'];
+const SHOP_OWNER_UPDATE_VALID_KEY = ['description', 'opening', 'status', 'address', 'phone'];
 const ADMIN_UPDATE_VALID_KEY = SHOP_OWNER_UPDATE_VALID_KEY.concat(['name', 'banned', 'ownerId']);
-const STRING_KEY = ['description', 'name', 'address'];
+const STRING_KEY = ['description', 'name', 'address', 'phone'];
 const INT_KEY = ['ownerId', 'status'];
 const BOOL_KEY = ['opening', 'banned'];
 

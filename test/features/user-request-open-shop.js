@@ -142,7 +142,8 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
             name: 'An exist shop opening request',
             description: 'with fully description',
             address: 'C203',
-            ownerId: user.id
+            ownerId: user.id,
+            phone: '0123456789'
           }).then(obj => {
             openingShopRequest = obj;
             done();
@@ -166,7 +167,8 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
               shopInfo: {
                 name: 'Banh My',
                 description: 'banh my XXX',
-                address: 'C203'
+                address: 'C203',
+                phone: '0123456789'
               },
               note: 'Em muon thanh ti phu'
             })
@@ -193,7 +195,8 @@ describe('POST /api/v1/requestOpenShopFirstTime', () => {
               shopInfo: {
                 name: 'Banh My',
                 description: 'banh my XXX',
-                address: 'C203'
+                address: 'C203',
+                phone: '0123456789'
               },
               note: 'Em muon thanh ti phu'
             })

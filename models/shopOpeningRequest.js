@@ -49,6 +49,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     adminMessage: {
       type: DataTypes.TEXT
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     hooks: {
@@ -95,7 +99,8 @@ module.exports = function(sequelize, DataTypes) {
             address: this.address,
             status: sequelize.model('Shop').STATUS.UNPUBLISHED,
             avatar: '',
-            cover: ''
+            cover: '',
+            phone: this.phone
           }, {transaction: t}).then(() => {
             // Change status of this request to accepted
             return this.update({
