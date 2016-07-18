@@ -6,6 +6,11 @@ var IGNORE_ATTRIBUTES = [
 ];
 
 module.exports = function(sequelize, DataTypes) {
+  let clearMetadataCache = () => {
+    let cacheManager = require('../libs/cache-manager');
+    return cacheManager.del(cacheManager.CACHE_KEYS.CONTROLLER_GET_METADATA);
+  };
+
   let Category = sequelize.define('Category', {
     name: {
       type: DataTypes.STRING,
@@ -16,6 +21,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     }
   }, {
+    hooks: {
+      afterCreate: clearMetadataCache,
+      afterUpdate: clearMetadataCache,
+      afterDelete: clearMetadataCache
+    },
     classMethods: {
       associate: function(models) {
         Category.hasMany(models.Item, {
