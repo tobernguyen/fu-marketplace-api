@@ -82,7 +82,6 @@ const createModel = (modelName, attrs) => {
 var createUser = (attrs) => {
   if (attrs == undefined) attrs = {};
 
-
   let password = attrs.password || faker.internet.password();
   return createModel('User', {
     fullName: attrs.fullname || faker.name.findName(),
@@ -339,6 +338,33 @@ var createOrder = (attrs) => {
   });
 };
 
+var createTicket = (attrs) => {
+  if (attrs == undefined) attrs = {};
+
+  let createOrderPromise;
+  let Order = models.Order;
+  let Ticket = models.Ticket;
+
+  if (!attrs.orderId) {
+    createOrderPromise = createOrder().then(order => {
+      return Promise.resolve(order);
+    });
+  } else {
+    createOrderPromise = Order.findById(attrs.orderId);
+  }
+
+  return createOrderPromise.then(o => {
+    return Ticket.create({
+      orderId: o.id,
+      userNote: attrs.userNote || faker.lorem.sentence(),
+      status: attrs.status,
+      adminComment: attrs.adminComment || faker.lorem.sentence()
+    }).then(t => {
+      return Promise.resolve(t);
+    });
+  });
+};
+
 var createReview = (attrs) => {
   if (attrs == undefined) attrs = {};
 
@@ -464,7 +490,8 @@ exports.factory = {
   createOrder: createOrder,
   createReviews: createReviews,
   createReview: createReview,
-  createShopPromotionCampaign: createShopPromotionCampaign
+  createShopPromotionCampaign: createShopPromotionCampaign,
+  createTicket: createTicket
 };
 exports.queue = kue.queue;
 

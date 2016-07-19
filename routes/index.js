@@ -10,7 +10,9 @@ const sellerItem = require('../controllers/seller/items');
 const sellerOrder = require('../controllers/seller/orders');
 const shipPlace = require('../controllers/shipPlaces');
 const category = require('../controllers/categories');
+const tickets = require('../controllers/tickets');
 const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
+const adminTicket = require('../controllers/admin/tickets');
 const shopFeed = require('../controllers/feed/shops');
 const application = require('../controllers/application');
 const userNotifications = require('../controllers/userNotifications');
@@ -58,6 +60,12 @@ router.get('/api/v1/orders', orders.getOrders);
 router.put('/api/v1/orders/:orderId', orders.putUpdateOrder);
 router.post('/api/v1/orders/:orderId/cancel', orders.cancelOrder);
 router.post('/api/v1/orders/:orderId/rate', orders.rateOrder);
+router.post('/api/v1/orders/:orderId/openTicket', orders.postOpenTicket);
+
+router.get('/api/v1/tickets/:ticketId', tickets.getTicket);
+router.put('/api/v1/tickets/:ticketId', tickets.putTicket);
+router.post('/api/v1/tickets/:ticketId/close', tickets.postCloseTicket);
+router.post('/api/v1/tickets/:ticketId/reopen', tickets.postReopenTicket);
 
 router.post('/api/v1/feed/shops', shopFeed.searchShop);
 
@@ -90,6 +98,11 @@ router.post('/api/v1/admin/shopRequestMailingList', mustBe.authorized('admin'), 
 router.get('/api/v1/admin/shopPromotionCampaigns', mustBe.authorized('admin'), adminShopPromotionCampaigns.getShopPromotionCampaigns);
 router.post('/api/v1/admin/shopPromotionCampaigns', mustBe.authorized('admin'), adminShopPromotionCampaigns.postShopPromotionCampaigns);
 router.put('/api/v1/admin/shopPromotionCampaigns/:id', mustBe.authorized('admin'), adminShopPromotionCampaigns.putShopPromotionCampaigns);
+
+router.get('/api/v1/admin/tickets',  mustBe.authorized('admin'), adminTicket.getTickets);
+router.get('/api/v1/admin/tickets/:ticketId',  mustBe.authorized('admin'), adminTicket.getTicket);
+router.post('/api/v1/admin/tickets/:ticketId/investigate', mustBe.authorized('admin'), adminTicket.postInvestigateTicket);
+router.post('/api/v1/admin/tickets/:ticketId/close', mustBe.authorized('admin'), adminTicket.postCloseTicket);
 
 /*
  * Routes that can be accessed only by authenticated & authorized users who has role 'seller'

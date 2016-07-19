@@ -4,6 +4,7 @@ const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
 const Order = require('../../models').Order;
+const Ticket = require('../../models').Ticket;
 const UserNotification = require('../../models').UserNotification;
 
 var _ = require('lodash');
@@ -383,7 +384,6 @@ describe('POST /api/v1/orders/:orderId/cancel', () => {
         shippingOrder = o;
         done();
       });
-      
     });
 
     it('should return 403', done => {
@@ -617,6 +617,55 @@ describe('GET /api/v1/orders/', () => {
         .expect(res => {
           let bodyOrders = res.body.orders;
           expect(bodyOrders).to.have.lengthOf(0);
+        })
+        .expect(200, done);
+    });
+  });
+});
+
+describe('POST /api/v1/orders/:orderId/openTicket', () => {
+  let order, userToken;
+
+  before(done => {
+    helper.factory.createUser().then(u => {
+      userToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createOrder({ userId: u.id});
+    }).then(o => {
+      order = o;
+      done();
+    });
+  });
+
+  describe('with empty userNote', () => {
+    it('should return 422', done => {
+      request(app)
+        .post(`/api/v1/orders/${order.id}/openTicket`)
+        .set('X-Access-Token', userToken)
+        .set('Content-Type', 'application/json')
+        .send({
+          userNote: ''
+        })
+        .expect(res => {
+          expect(res.body.status).to.equal(422);
+          expect(res.body.errors.userNote.message).to.equal('Validation len failed');
+        })
+        .expect(422, done);
+    });
+  });
+
+  describe('with not empty userNote', () => {
+    it('should return 200', done => {
+      request(app)
+        .post(`/api/v1/orders/${order.id}/openTicket`)
+        .set('X-Access-Token', userToken)
+        .set('Content-Type', 'application/json')
+        .send({
+          userNote: 'da accept 2 tieng nhung khong ship'
+        })
+        .expect(res => {
+          let ticket = res.body;
+          expect(ticket.orderId).to.equal(order.id);
+          expect(ticket.status).to.equal(Ticket.STATUS.OPENING);
         })
         .expect(200, done);
     });

@@ -8,6 +8,7 @@ var Shop = models.Shop;
 var ShipPlace = models.ShipPlace;
 var Order = models.Order;
 var OrderLine = models.OrderLine;
+var Ticket = models.Ticket;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -127,6 +128,50 @@ exports.getOrders = (req, res) => {
     });
   }).catch(err => {
     errorHandlers.handleModelError(err, res);
+  });
+};
+
+exports.postOpenTicket = (req, res) => {
+  let user = req.user;
+  let orderId = req.params.orderId;
+  let order;
+
+  Order.findOne({
+    where: {
+      id: orderId,
+      userId: user.id
+    }
+  }).then(o => {
+    order = o;
+    if (!o) {
+      let error = 'Order does not exits';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    } else {
+      return Ticket.findOne({
+        where: {
+          orderId: o.id,
+          status: {
+            $in: [Ticket.STATUS.OPENING, Ticket.STATUS.CLOSED]
+          }
+        }
+      });
+    }
+  }).then(t => {
+    if (!t) {
+      let ticketInfo = _.pick(req.body, ['userNote']);
+      return order.createTicket(ticketInfo);
+    } else {
+      let error = 'Already have a opening or investigating ticket';
+      return Promise.reject({status: 403, message: error, type: 'ticket'});
+    }
+  }).then(t => {
+    res.json(t.toJSON());
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
   });
 };
 

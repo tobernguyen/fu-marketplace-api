@@ -69,6 +69,10 @@ module.exports = function(sequelize, DataTypes) {
         Order.belongsTo(models.User, {
           foreignKey: 'userId'
         });
+        Order.hasMany(models.Ticket, {
+          foreignKey: 'orderId',
+          constraints: false
+        });
         Order.hasMany(models.OrderLine, {
           foreignKey: 'orderId',
           constraints: false
@@ -238,6 +242,20 @@ module.exports = function(sequelize, DataTypes) {
               type: 'order'
             });
           }
+        });
+      },
+      createTicket: function (ticketInfo) {
+        return new Promise((resolve, reject) => {
+          let rawInfo = _.pick(ticketInfo, ['userNote']);
+
+          if (!rawInfo.userNote) {
+            rawInfo.userNote = '';
+          }
+
+          sequelize.model('Ticket').create({
+            orderId: this.id,
+            userNote: rawInfo.userNote
+          }).then(resolve, reject);
         });
       }
     }
