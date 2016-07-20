@@ -4,6 +4,7 @@ const helper = require('../helper');
 const Item = require('../../models').Item;
 const Order = require('../../models').Order;
 const UserNotification = require('../../models').UserNotification;
+const Ticket = require('../../models').Ticket;
 
 describe('Order models', () => {
   describe('factory', () => {
@@ -763,6 +764,45 @@ describe('Order models', () => {
         }).then(orderFromDb => {
           expect(orderFromDb.id).to.equal(order.id);
           expect(orderFromDb.status).to.equal(Order.STATUS.SHIPPING);
+          done();
+        }, done);
+      });
+    });
+  });
+
+  describe('#createTicket', () => {
+    let order;
+
+    beforeEach(done => {
+      helper.factory.createOrder().then(o => {
+        order = o;
+        done();
+      });
+    });
+
+    describe('with not empty userNote', () => {
+      it('should be return new report ticket', done => {
+        order.createTicket({
+          userNote: 'don hang nay chua ship den nhung da duoc finished'
+        }).then(t => {
+          expect(t.orderId).to.equal(order.id);
+          expect(t.userNote).to.equal('don hang nay chua ship den nhung da duoc finished');
+          expect(t.adminComment).not.to.be.ok;
+          expect(t.status).to.be.equal(Ticket.STATUS.OPENING);
+          done();
+        }, done);
+      });
+    });
+
+    describe('with empty userNote', () => {
+      it('should be return new report ticket', done => {
+        order.createTicket({
+          userNote: ''
+        }).catch(err => {
+          let error = err.errors[0];
+          expect(error.message).to.equal('Validation len failed');
+          expect(error.path).to.equal('userNote');
+          expect(error.type).to.equal('Validation error');
           done();
         }, done);
       });
