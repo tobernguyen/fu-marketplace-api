@@ -1,6 +1,7 @@
-var winston = require('winston');
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({
+  name: process.env.LOGGER_NAME,
+  project_namespace: 'FUM'
+});
 
-winston.handleExceptions(new (winston.transports.Console)());
-winston.level = process.env.LOG_LEVEL || 'info';
-
-module.exports = winston;
+module.exports = log;

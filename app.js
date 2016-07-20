@@ -1,19 +1,26 @@
 /**
+ * Load environment variables from .env file, where API keys and passwords are configured.
+ */
+const dotenv = require('dotenv');
+dotenv.load({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+
+/**
  * Module dependencies.
  */
 const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
-const morgan = require('morgan');
 const errorHandler = require('errorhandler');
+const _ = require('lodash');
 const logger = require('./libs/logger');
-const dotenv = require('dotenv');
 
 /**
- * Load environment variables from .env file, where API keys and passwords are configured.
+ * Handle global uncaughtException
  */
-dotenv.load({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+process.on('uncaughtException', function(err) {
+  logger.fatal(err);
+});
 
 /**
  * Create Express server.
@@ -25,7 +32,43 @@ const app = express();
  */
 app.set('port', process.env.PORT || 3000);
 app.use(compression());
-app.use(morgan('dev'));
+if (process.env.NODE_ENV !== 'test') {
+  app.use(require('express-bunyan-logger')({
+    name: process.env.LOGGER_NAME,
+    format: ':method :url :status-code :res-headers[content-length] - :response-time ms',
+    parseUA: false,
+    levelFn: function(status, err, meta) {
+      meta['route'] = `${meta['method']} ${_.get(meta, 'req.route.path')}`;
+
+      if (meta['status-code'] >= 500 || meta['response-time'] > 1000) {
+        meta['debug-data'] = {
+          req: _.pick(meta['req'], ['headers', 'params', 'query', 'body', 'user'])
+        };
+        return 'fatal';
+      } else if (meta['response-time'] > 500) {
+        meta['debug-data'] = {
+          req: _.pick(meta['req'], ['headers', 'params', 'query', 'body', 'user'])
+        };
+        return 'warn';
+      } else {
+        return 'info';
+      }
+    },
+    excludes: [
+      'remote-address', 
+      'pid', 'req_id',
+      'ip', 'referer', 
+      'user-agent', 
+      'short-body', 
+      'body', 'response-hrtime',
+      'http-version',
+      'req-headers',
+      'res-headers',
+      'req', 'res',
+      'incoming'
+    ]
+  }));
+}
 app.use(bodyParser.json());
 app.use(expressValidator());
 app.all('/*', function(req, res, next) {
@@ -81,6 +124,10 @@ app.use(function(req, res, next) {
  */
 if (process.env.NODE_ENV === 'development' || process.env.SHOW_ERROR_TO_CLIENT === 'true') {
   app.use(errorHandler());
+} else {
+  app.use(function(err, req, res, next) {
+    res.status(err.status).end();
+  });
 }
 
 /**

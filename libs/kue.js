@@ -27,7 +27,7 @@ var logger = require('./logger');
 // Graceful shutdown, wait 30s for job to be completed before kill them
 var graceful = () => {
   queue.shutdown(30000, err => {
-    logger.log('Kue shutdown: ', err || 'OK');
+    logger.info('Kue shutdown: ', err || 'OK');
     process.exit(0);
   });
 };

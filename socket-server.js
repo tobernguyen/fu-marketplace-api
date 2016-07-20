@@ -9,6 +9,8 @@ var io = require('socket.io')(process.env.SOCKET_IO_PORT);
 var redis = require('socket.io-redis');
 io.adapter(redis(process.env.REDIS_URI.replace('redis://', ''), {key: process.env.SOCKET_IO_REDIS_PREFIX || 'socket.io'}));
 
+// Assign another name for logger if this server is run on other process
+process.env.LOGGER_NAME = process.env.SOCKET_IO_LOGGER_NAME;
 var logger = require('./libs/logger');
 var validateSocketIOToken = require('./middlewares/validateSocketIOToken');
 

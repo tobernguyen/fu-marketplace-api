@@ -3,6 +3,7 @@
     {
       name      : "FUM - API",
       script    : "app.js",
+      combine_logs: true,
       env_production : {
         NODE_ENV: "production"
       },
