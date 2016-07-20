@@ -106,38 +106,37 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
       });
     });
 
-    describe('with and valid sellerToken', () => {
+    describe('with sellerToken', () => {
 
       let sellerToken;
 
-      before(done => {
-        Shop.findById(item1.id).then(s => {
+      beforeEach(done => {
+        Shop.findById(item1.shopId).then(s => {
           sellerToken = helper.createAccessTokenForUserId(s.ownerId);
           done();
         });
-      })
+      });
 
       it('should return 403', done => {
         request(app)
-            .post(`/api/v1/shops/${item1.shopId}/orders`)
-            .set('X-Access-Token', sellerToken)
-            .set('Content-Type', 'application/json')
-            .send({
-              items: [
-                {
-                  id: 0,
-                  quantity: 2,
-                  note: 'không hành nhiều dứa'
-                }
-              ],
-              note: 'ship truoc 12h',
-              shipAddress: 'D201'
-            })
-            .expect(res => {
-              expect(res.body.status).to.equal(403);
-              expect(res.body.message_code).to.equal('error.order.you_cannot_order_on_your_own_shop');
-            })
-            .expect(403, done);
+          .post(`/api/v1/shops/${item1.shopId}/orders`)
+          .set('X-Access-Token', sellerToken)
+          .set('Content-Type', 'application/json')
+          .send({
+            items: [
+              {
+                id: item1.id,
+                note: 'không hành nhiều dứa'
+              }
+            ],
+            note: 'ship truoc 12h',
+            shipAddress: 'D201'
+          })
+          .expect(res => {
+            expect(res.body.status).to.equal(403);
+            expect(res.body.message_code).to.equal('error.order.you_cannot_order_on_your_own_shop');
+          })
+          .expect(403, done);
       });
     });
 
