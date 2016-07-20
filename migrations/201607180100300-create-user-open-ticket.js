@@ -43,10 +43,10 @@ module.exports = {
         type: Sequelize.DATE
       }
     }).then(() => {
-      let sql = `CREATE INDEX "TicketIdOrderIdIndexOnTickets"
+      let sql = `CREATE INDEX "TicketOrderIdIndexOnTickets"
                   ON public."Tickets"
                   USING btree
-                  ("id", "orderId");
+                  ("orderId");
                 `;
       return queryInterface.sequelize.query(sql, {raw: true});
     });

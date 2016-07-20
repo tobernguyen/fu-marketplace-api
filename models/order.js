@@ -245,17 +245,15 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
       createTicket: function (ticketInfo) {
-        return new Promise((resolve, reject) => {
-          let rawInfo = _.pick(ticketInfo, ['userNote']);
+        let rawInfo = _.pick(ticketInfo, ['userNote']);
 
-          if (!rawInfo.userNote) {
-            rawInfo.userNote = '';
-          }
+        if (!rawInfo.userNote) {
+          rawInfo.userNote = '';
+        }
 
-          sequelize.model('Ticket').create({
-            orderId: this.id,
-            userNote: rawInfo.userNote
-          }).then(resolve, reject);
+        return sequelize.model('Ticket').create({
+          orderId: this.id,
+          userNote: rawInfo.userNote
         });
       }
     }

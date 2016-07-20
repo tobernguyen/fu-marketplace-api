@@ -79,7 +79,7 @@ describe('GET /api/v1/admin/tickets/', () => {
     describe('with status filter and size/page', () => {
       it('should return 200 OK and return an array which contain ticket', done => {
         request(app)
-          .get('/api/v1/admin/tickets/?page=3&size=1&status=0')
+          .get('/api/v1/admin/tickets/?page=3&size=1&status=OPENING')
           .set('X-Access-Token', adminToken)
           .expect(res => {
             expect(res.body.tickets).to.be.ok;
@@ -87,6 +87,19 @@ describe('GET /api/v1/admin/tickets/', () => {
             expect(tickets.length).to.equal(0);
           })
           .expect(200, done);
+      });
+    });
+
+    describe('with invalid status filter', () => {
+      it('should return 403', done => {
+        request(app)
+          .get('/api/v1/admin/tickets/?status=INVALID')
+          .set('X-Access-Token', adminToken)
+          .expect(res => {
+            expect(res.body.status).to.equal(404);
+            expect(res.body.message).to.equal('Invalid status query');
+          })
+          .expect(404, done);
       });
     });
   });

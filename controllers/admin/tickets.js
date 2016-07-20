@@ -29,9 +29,15 @@ exports.getTickets = (req, res) => {
   };
 
   if (status){
-    ticketFindOption.where = {
-      status: Ticket.STATUS[status]
-    };
+    if (!_.isNumber(Ticket.STATUS[status])) {
+      let error = 'Invalid status query';
+      errorHandlers.responseError(404, error, 'query', res);
+      return;
+    } else {
+      ticketFindOption.where = {
+        status: Ticket.STATUS[status]
+      };
+    }
   }
 
   Ticket.findAll(ticketFindOption).then(tickets => {
