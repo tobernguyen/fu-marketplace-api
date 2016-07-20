@@ -33,10 +33,15 @@ exports.postPlaceOrder = (req, res) => {
       let error = 'Shop does not exist';
       return Promise.reject({status: 404, message: error, type: 'model'});
     } else {
-      return s.placeOrder({
-        user: user,
-        reqBody: reqBody
-      });
+      if (s.ownerId === user.id) {
+        let error = 'You cannot order on your own shop';
+        return Promise.reject({status: 403, message: error, type: 'order'});
+      } else {
+        return s.placeOrder({
+          user: user,
+          reqBody: reqBody
+        });
+      }
     }
   }).then((order) => {
     responseOrder(order, res);

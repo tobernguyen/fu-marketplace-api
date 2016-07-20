@@ -4,6 +4,7 @@ const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
 const Order = require('../../models').Order;
+const Shop = require('../../models').Shop;
 const UserNotification = require('../../models').UserNotification;
 
 var _ = require('lodash');
@@ -100,6 +101,41 @@ describe('POST /api/v1/shops/:shopId/orders', () => {
             .expect(res => {
               expect(res.body.status).to.equal(403);
               expect(res.body.message_code).to.equal('error.order.item_not_found');
+            })
+            .expect(403, done);
+      });
+    });
+
+    describe('with and valid sellerToken', () => {
+
+      let sellerToken;
+
+      before(done => {
+        Shop.findById(item1.id).then(s => {
+          sellerToken = helper.createAccessTokenForUserId(s.ownerId);
+          done();
+        });
+      })
+
+      it('should return 403', done => {
+        request(app)
+            .post(`/api/v1/shops/${item1.shopId}/orders`)
+            .set('X-Access-Token', sellerToken)
+            .set('Content-Type', 'application/json')
+            .send({
+              items: [
+                {
+                  id: 0,
+                  quantity: 2,
+                  note: 'không hành nhiều dứa'
+                }
+              ],
+              note: 'ship truoc 12h',
+              shipAddress: 'D201'
+            })
+            .expect(res => {
+              expect(res.body.status).to.equal(403);
+              expect(res.body.message_code).to.equal('error.order.you_cannot_order_on_your_own_shop');
             })
             .expect(403, done);
       });
