@@ -3,9 +3,11 @@
 const helper = require('../helper');
 const request = require('supertest');
 const app = require('../../app.js');
+const models = require('../../models');
+const User = models.User;
 
 describe('GET /api/v1/shops/:shopId', () => {
-  let shop, accessToken;
+  let shop, accessToken, seller;
   
   before(done => {
     helper.factory.createUser().then(u => {
@@ -15,6 +17,9 @@ describe('GET /api/v1/shops/:shopId', () => {
       shop = s;
       return helper.factory.createItem({ shopId: s.id});
     }).then(() => {
+      return User.findById(shop.ownerId);
+    }).then(s => {
+      seller = s;
       done();
     });
   });
@@ -33,7 +38,9 @@ describe('GET /api/v1/shops/:shopId', () => {
           expect(res.body.cover).to.equal(shop.cover);
           expect(res.body.shipPlaces.length).to.equal(1);
           expect(res.body.items.length).to.equal(1);
-          expect(res.body.seller.id).to.equal(shop.ownerId);
+          expect(res.body.seller.fullName).to.equal(seller.fullName);
+          expect(res.body.seller.phone).to.equal(seller.phone);
+          expect(res.body.seller.avatar).to.equal(seller.avatar);
           expect(res.body.phone).to.equal('0987654321');
         })
         .expect(200, done);  

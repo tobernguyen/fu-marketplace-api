@@ -297,12 +297,15 @@ var responseShopById = (shopId, res) => {
     },
     include: [
       ShipPlace,
-      User,
+      {
+        model: User,
+        attributes: ['fullName', 'phone', 'avatar']
+      },
       {
         model: Item,
         where: { status: Item.STATUS.FOR_SELL },
         required: false
-      } 
+      },
     ],
     order: [
       'sort',
@@ -320,7 +323,7 @@ var responseShopById = (shopId, res) => {
         delete item['imageFile'];
         return item;
       });
-      let sellerInfo = shop.User.getBasicSellerInfo();
+      let sellerInfo = shop.User;
       result['shipPlaces'] = shipPlace;
       result['seller'] = sellerInfo;
       result['items'] = items;

@@ -285,7 +285,7 @@ var createOrder = (attrs) => {
   let items, order;
 
   let Item = models.Item;
-  let Order = models.Order; 
+  let Order = models.Order;
   let OrderLine = models.OrderLine;
 
   if (!attrs.items) {
@@ -346,7 +346,8 @@ var createTicket = (attrs) => {
   let Ticket = models.Ticket;
 
   if (!attrs.orderId) {
-    createOrderPromise = createOrder().then(order => {
+    let createOrderOption = _.pick(attrs, ['userId']);
+    createOrderPromise = createOrder(createOrderOption).then(order => {
       return Promise.resolve(order);
     });
   } else {

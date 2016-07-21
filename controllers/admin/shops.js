@@ -32,7 +32,7 @@ exports.getShops = (req, res) => {
       let shop = s.toJSON();
       let shipPlaces = _.map(shop.ShipPlaces, s => s.id);
       shop['shipPlaces'] = shipPlaces;
-      let sellerInfo = s.User.getBasicSellerInfo();
+      let sellerInfo = s.User.getAllSellerInfo();
       delete shop['ShipPlaces'];
       delete shop['User'];
       shop['seller'] = sellerInfo;
@@ -184,7 +184,7 @@ var responseShopById = (id, res) => {
     } else {
       let result = shop.toJSON();
       let shipPlace = _.map(shop.ShipPlaces, sp => sp.id);
-      let sellerInfo = shop.User.getBasicSellerInfo();
+      let sellerInfo = shop.User.getAllSellerInfo();
       result['shipPlaces'] = shipPlace;
       delete result['ShipPlaces'];
       delete result['User'];

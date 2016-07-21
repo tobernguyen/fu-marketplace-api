@@ -29,7 +29,7 @@ exports.getShopOpeningRequests = (req, res) => {
   }).then(shops => {
     let result = _.map(shops, s => {
       let shop = s.toJSON();
-      let sellerInfo = s.User.getBasicSellerInfo();
+      let sellerInfo = s.User.getAllSellerInfo();
       delete shop['User'];
       shop['seller'] = sellerInfo;
       return shop;

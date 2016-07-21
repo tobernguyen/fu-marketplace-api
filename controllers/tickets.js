@@ -11,6 +11,55 @@ var Order = models.Order;
 
 const DEFAULT_PAGE_SIZE = 10;
 
+exports.getTickets = (req, res) => {
+  let user = req.user;
+  let size = _.toNumber(req.query.size);
+  let page = _.toNumber(req.query.page);
+  let status = req.query.status;
+
+  let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
+  let offset = page > 0 ? (page - 1) * perPage : 0;
+
+  let ticketFindOption = {
+    include: [{
+      model: Order,
+      where: { userId: user.id }
+    }],
+    limit: perPage,
+    offset: offset,
+    order: [
+      ['status'],
+      ['updatedAt', 'DESC']
+    ]
+  };
+
+  if (status){
+    if (!_.isNumber(Ticket.STATUS[status])) {
+      let error = 'Invalid status query';
+      errorHandlers.responseError(404, error, 'query', res);
+      return;
+    } else {
+      ticketFindOption.where = {
+        status: Ticket.STATUS[status]
+      };
+    }
+  }
+
+  Ticket.findAll(ticketFindOption).then(tickets => {
+    let result = _.map(tickets, o => {
+      let ticket = o.toJSON();
+      ticket.order = ticket.Order;
+      delete ticket.Order;
+      return ticket;
+    });
+    res.json({
+      tickets: result
+    });
+  }).catch(err => {
+    errorHandlers.handleModelError(err, res);
+  });
+};
+
 exports.putTicket = (req, res) => {
   let user = req.user;
   let ticketId = req.params.ticketId;

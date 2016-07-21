@@ -14,6 +14,10 @@ var ORDER_STATUS = {
   ABORTED: 6 // by seller
 };
 
+var ORDER_TYPE = {
+  ACTIVE: 'ACTIVE'
+};
+
 module.exports = function(sequelize, DataTypes) {
   let Order = sequelize.define('Order', {
     userId: {
@@ -321,6 +325,7 @@ module.exports = function(sequelize, DataTypes) {
   };
     
   Order.STATUS = ORDER_STATUS;
+  Order.TYPE = ORDER_TYPE;
 
   return Order;
 };

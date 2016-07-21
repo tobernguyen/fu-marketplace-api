@@ -62,6 +62,7 @@ router.post('/api/v1/orders/:orderId/cancel', orders.cancelOrder);
 router.post('/api/v1/orders/:orderId/rate', orders.rateOrder);
 router.post('/api/v1/orders/:orderId/openTicket', orders.postOpenTicket);
 
+router.get('/api/v1/tickets/', tickets.getTickets);
 router.get('/api/v1/tickets/:ticketId', tickets.getTicket);
 router.put('/api/v1/tickets/:ticketId', tickets.putTicket);
 router.post('/api/v1/tickets/:ticketId/close', tickets.postCloseTicket);
