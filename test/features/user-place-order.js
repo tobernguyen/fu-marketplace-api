@@ -576,7 +576,7 @@ describe('GET /api/v1/orders/', () => {
           expect(bodyOrders).to.have.lengthOf(2);
           let sortedBody = _.sortBy(bodyOrders, ['id']);
           let sortedOrders = _.sortBy(orders, ['id']);
-          
+
           _([0, 1]).forEach(function(value) {
             expect(sortedBody[value].id).to.equal(sortedOrders[value].id);
             expect(sortedBody[value].note).to.equal(sortedOrders[value].note);
@@ -592,7 +592,7 @@ describe('GET /api/v1/orders/', () => {
         .expect(200, done);
     });
   });
-  
+
   describe('with valid accesToken and get new order', () => {
     it('should return 200 with 1 new orderInfo', done => {
       request(app)
@@ -602,6 +602,32 @@ describe('GET /api/v1/orders/', () => {
         .expect(res => {
           let bodyOrders = res.body.orders;
           let order = _.filter(orders, function(o) { return o.status === Order.STATUS.NEW; })[0];
+          expect(bodyOrders).to.have.lengthOf(1);
+          expect(bodyOrders[0].id).to.equal(order.id);
+          expect(bodyOrders[0].note).to.equal(order.note);
+          expect(bodyOrders[0].shipAddress).to.equal(order.shipAddress);
+
+          order.getOrderLines(ols => {
+            expect(bodyOrders[0].orderLines[0].note).to.equal(ols[0].note);
+            expect(bodyOrders[0].orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(bodyOrders[0].orderLines[0].item).to.equal(ols[0].item);
+          });
+        })
+        .expect(200, done);
+    });
+  });
+
+  describe('with valid accesToken and active order', () => {
+    it('should return 200 with 1 active orderInfo', done => {
+      request(app)
+        .get('/api/v1/orders/?type=ACTIVE')
+        .set('X-Access-Token', userToken)
+        .set('Content-Type', 'application/json')
+        .expect(res => {
+          let bodyOrders = res.body.orders;
+          let order = _.filter(orders, function(o) {
+            return _.indexOf([Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING], o.status) !== -1;
+          })[0];
 
           expect(bodyOrders).to.have.lengthOf(1);
           expect(bodyOrders[0].id).to.equal(order.id);

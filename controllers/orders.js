@@ -100,6 +100,7 @@ exports.rateOrder = (req, res) => {
 exports.getOrders = (req, res) => {
   let user = req.user;
   let status = req.query.status;
+  let type = req.query.type;
 
   let size = _.toNumber(req.query.size);
   let page = _.toNumber(req.query.page);
@@ -113,11 +114,30 @@ exports.getOrders = (req, res) => {
     },
     include: OrderLine,
     limit: perPage,
-    offset: offset
+    offset: offset,
+    order: [
+      ['id', 'DESC']
+    ]
   };
 
-  if (status) {
-    orderFindOption.where.status = Order.STATUS[status];
+  if (type) {
+    if (type === Order.TYPE.ACTIVE){
+      orderFindOption.where.status = {
+        $in: [Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING]
+      };
+    } else {
+      let error = 'Invalid type query';
+      errorHandlers.responseError(404, error, 'query', res);
+      return;
+    }
+  } else if (status){
+    if (!_.isNumber(Order.STATUS[status])) {
+      let error = 'Invalid status query';
+      errorHandlers.responseError(404, error, 'query', res);
+      return;
+    } else {
+      orderFindOption.where.status = Order.STATUS[status];
+    }
   }
   
   Order.findAll(orderFindOption).then(os => {

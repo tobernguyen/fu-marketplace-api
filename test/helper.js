@@ -285,7 +285,7 @@ var createOrder = (attrs) => {
   let items, order;
 
   let Item = models.Item;
-  let Order = models.Order; 
+  let Order = models.Order;
   let OrderLine = models.OrderLine;
 
   if (!attrs.items) {
