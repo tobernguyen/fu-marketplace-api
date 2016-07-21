@@ -469,7 +469,7 @@ var createShopPromotionCampaign = (attrs) => {
       shopId: result[1],
       type: attrs.type || 1,
       startDate: attrs.startDate || moment().subtract(1, 'day').toDate(),
-      endDate: attrs.endDate || new Date(),
+      endDate: attrs.endDate || moment().add(1, 'day').toDate(),
       active: attrs.active
     });
   });

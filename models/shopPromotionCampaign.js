@@ -69,21 +69,23 @@ module.exports = function(sequelize, DataTypes) {
       order: '"id" DESC'
     },
     scopes: {
-      validTopFeedSlideShow: {
-        where: {
-          type: TYPE.TOP_FEED_SLIDE_SHOW,
-          startDate: {
-            $lte: new Date()
+      validTopFeedSlideShow: function() {
+        return {
+          where: {
+            type: TYPE.TOP_FEED_SLIDE_SHOW,
+            startDate: {
+              $lte: new Date()
+            },
+            endDate: {
+              $gt: new Date()
+            },
+            active: true
           },
-          endDate: {
-            $gt: new Date()
-          },
-          active: true
-        },
-        include: {
-          model: sequelize.model('Shop'),
-          attributes: ['id', 'name', 'description', 'cover']
-        }
+          include: {
+            model: sequelize.model('Shop'),
+            attributes: ['id', 'name', 'description', 'cover']
+          }
+        };
       }
     },
     classMethods: {
