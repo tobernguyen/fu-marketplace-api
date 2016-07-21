@@ -40,6 +40,7 @@ describe('GET /api/v1/shops/:shopId', () => {
           expect(res.body.items.length).to.equal(1);
           expect(res.body.seller.fullName).to.equal(seller.fullName);
           expect(res.body.seller.phone).to.equal(seller.phone);
+          expect(res.body.seller.avatar).to.equal(seller.avatar);
           expect(res.body.phone).to.equal('0987654321');
         })
         .expect(200, done);  

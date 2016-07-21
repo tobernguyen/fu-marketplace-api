@@ -299,7 +299,7 @@ var responseShopById = (shopId, res) => {
       ShipPlace,
       {
         model: User,
-        attributes: ['fullName', 'phone']
+        attributes: ['fullName', 'phone', 'avatar']
       },
       {
         model: Item,
