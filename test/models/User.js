@@ -127,7 +127,7 @@ describe('User Model', () => {
     });
   });
 
-  describe('#getBasicSellerInfo', () => {
+  describe('#getAllSellerInfo', () => {
     let seller;
 
     before(done => {
@@ -138,8 +138,8 @@ describe('User Model', () => {
     });
 
     it('should return seller information of current user', done => {
-      let BASIC_SELLER_INFO_FIELD = rewire('../../models/user').__get__('BASIC_SELLER_INFO_FIELD');
-      let actualJSON = seller.getBasicSellerInfo();
+      let BASIC_SELLER_INFO_FIELD = rewire('../../models/user').__get__('ALL_SELLER_INFO_FIELD');
+      let actualJSON = seller.getAllSellerInfo();
       expect(actualJSON).to.contain.all.keys(BASIC_SELLER_INFO_FIELD.concat('identityPhoto'));
       done();
     });

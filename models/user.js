@@ -20,7 +20,7 @@ var IGNORE_ATTRIBUTES = [
   'identityPhotoFile'
 ];
 
-var BASIC_SELLER_INFO_FIELD = [
+var ALL_SELLER_INFO_FIELD = [
   'id',
   'fullName',
   'phone',
@@ -156,10 +156,10 @@ module.exports = function(sequelize, DataTypes) {
         
         return values;
       },
-      getBasicSellerInfo: function() {
+      getAllSellerInfo: function() {
         var result = {};
 
-        _.each(BASIC_SELLER_INFO_FIELD, fieldName => {
+        _.each(ALL_SELLER_INFO_FIELD, fieldName => {
           result[fieldName] = this[fieldName];
         });
 
