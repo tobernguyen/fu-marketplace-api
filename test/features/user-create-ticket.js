@@ -81,6 +81,131 @@ describe('POST /api/v1/orders/:orderId/openTicket', () => {
   });
 });
 
+describe('GET /api/v1/tickets/', () => {
+  let ticket1, ticket3, userToken, user;
+
+  before(done => {
+    helper.factory.createUser().then(u => {
+      user = u;
+      userToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createTicket({userId: u.id});
+    }).then(t => {
+      ticket1 = t;
+      return helper.factory.createTicket({status: Ticket.STATUS.CLOSED, userId: user.id});
+    }).then(t => {
+      return helper.factory.createTicket({status: Ticket.STATUS.INVESTIGATING, userId: user.id});
+    }).then(t => {
+      ticket3 = t;
+      done();
+    });
+  });
+
+  describe('with access token of user, who have ticket, ', () => {
+    describe('without size/page and status filter', () => {
+      it('should return 200 OK and return an array which contain ticket', done => {
+        request(app)
+            .get('/api/v1/tickets/')
+            .set('X-Access-Token', userToken)
+            .expect(res => {
+              expect(res.body.tickets).to.be.ok;
+              let tickets = res.body.tickets;
+              expect(tickets.length).to.equal(3);
+              let ticket = tickets[0];
+              expect(ticket.orderId).to.equal(ticket1.orderId);
+              expect(ticket.id).to.equal(ticket1.id);
+            })
+            .expect(200, done);
+      });
+    });
+
+    describe('without size/page and with status filter', () => {
+      it('should return 200 OK and return an array which contain ticket', done => {
+        request(app)
+            .get('/api/v1/tickets/?status=OPENING')
+            .set('X-Access-Token', userToken)
+            .expect(res => {
+              expect(res.body.tickets).to.be.ok;
+              let tickets = res.body.tickets;
+              expect(tickets.length).to.equal(1);
+              let ticket = tickets[0];
+              expect(ticket.orderId).to.equal(ticket1.orderId);
+              expect(ticket.id).to.equal(ticket1.id);
+            })
+            .expect(200, done);
+      });
+    });
+
+    describe('without status filter and with size/page', () => {
+      it('should return 200 OK and return an array which contain ticket', done => {
+        request(app)
+            .get('/api/v1/tickets/?page=2&size=1')
+            .set('X-Access-Token', userToken)
+            .expect(res => {
+              expect(res.body.tickets).to.be.ok;
+              let tickets = res.body.tickets;
+              expect(tickets.length).to.equal(1);
+              let ticket = tickets[0];
+              expect(ticket.orderId).to.equal(ticket3.orderId);
+              expect(ticket.id).to.equal(ticket3.id);
+            })
+            .expect(200, done);
+      });
+    });
+
+    describe('with status filter and size/page', () => {
+      it('should return 200 OK and return an array which contain ticket', done => {
+        request(app)
+            .get('/api/v1/tickets/?page=3&size=1&status=OPENING')
+            .set('X-Access-Token', userToken)
+            .expect(res => {
+              expect(res.body.tickets).to.be.ok;
+              let tickets = res.body.tickets;
+              expect(tickets.length).to.equal(0);
+            })
+            .expect(200, done);
+      });
+    });
+
+    describe('with invalid status filter', () => {
+      it('should return 403', done => {
+        request(app)
+            .get('/api/v1/tickets/?status=INVALID')
+            .set('X-Access-Token', userToken)
+            .expect(res => {
+              expect(res.body.status).to.equal(404);
+              expect(res.body.message).to.equal('Invalid status query');
+            })
+            .expect(404, done);
+      });
+    });
+  });
+
+  describe('with access token of user, who have ticket', () => {
+
+    let anotherToken;
+
+    before(done => {
+      helper.factory.createUser().then(u => {
+        anotherToken = helper.createAccessTokenForUserId(u.id);
+        done();
+      });
+    });
+
+
+    it('should return 200 OK and empty tickets', done => {
+      request(app)
+          .get('/api/v1/tickets/')
+          .set('X-Access-Token', anotherToken)
+          .expect(res => {
+            expect(res.body.tickets).to.be.ok;
+            let tickets = res.body.tickets;
+            expect(tickets.length).to.equal(0);
+          })
+          .expect(200, done);
+    });
+  });
+});
+
 describe('PUT /api/v1/tickets/:ticketId', () => {
   let userToken, order, ticket;
 
