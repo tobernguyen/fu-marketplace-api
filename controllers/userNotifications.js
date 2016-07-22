@@ -14,16 +14,28 @@ exports.getUserNotifications = (req, res) => {
   let perPage = size > 0 ? size : DEFAULT_PAGE_SIZE;
   let offset = page > 0 ? (page - 1) * perPage : 0;
 
-  UserNotification.findAll({
+  let promises = [];
+
+  promises[promises.length] = UserNotification.findAll({
     where: {
       userId: user.id
     },
     limit: perPage,
     offset: offset,
     attributes: ['id', 'type', 'data', 'createdAt', 'read']
-  }).then(ns => {
+  });
+
+  promises[promises.length] = UserNotification.count({
+    where: {
+      userId: user.id,
+      read: false
+    }
+  });
+
+  Promise.all(promises).then(data => {
     res.json({
-      notifications: _.map(ns, n => n.toJSON())
+      notifications: _.map(data[0], n => n.toJSON()),
+      unreadCount: data[1]
     });
   }).catch(err => {
     errorHandlers.responseError(500, err, 'internal', res);

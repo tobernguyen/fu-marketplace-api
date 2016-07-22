@@ -23,7 +23,8 @@ describe('GET /api/v1/users/me/notifications', () => {
         promises[promises.length] = models.UserNotification.create({
           userId: u.id,
           type: models.UserNotification.NOTIFICATION_TYPE.SELLER_CHANGE_ORDER_STATUS,
-          data: {shopId: i, shopName: faker.name.findName(), orderId: i + 1, oldStatus: Order.STATUS.NEW, newStatus: Order.STATUS.ACCEPTED}
+          data: {shopId: i, shopName: faker.name.findName(), orderId: i + 1, oldStatus: Order.STATUS.NEW, newStatus: Order.STATUS.ACCEPTED},
+          read: true
         });
       });
 
@@ -65,6 +66,8 @@ describe('GET /api/v1/users/me/notifications', () => {
         .set('X-Access-Token', accessToken)
         .expect(200)
         .then(res => {
+          expect(res.body.unreadCount).to.equal(3); // We have 3 unread notifications only
+
           let actualNotifications = res.body.notifications;
           expect(actualNotifications).to.be.an('array');
           expect(actualNotifications).to.have.lengthOf(10);
