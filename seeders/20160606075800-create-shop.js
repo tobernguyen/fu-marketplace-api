@@ -9,7 +9,8 @@ module.exports = {
     return models.User.create({
       email: 'sonht@gmail.com',
       password: '12345678',
-      fullName: 'Son Hoang'
+      fullName: 'Son Hoang',
+      phone: '0989283987'
     }).then(function(u) {
       user = u;
       return models.Role.findOne({
@@ -25,7 +26,8 @@ module.exports = {
         description: 'Bánh mì dân tổ',
         avatar: '',
         cover: '',
-        ownerId: user.id
+        ownerId: user.id,
+        phone: '0989283987'
       });
     }).then(function(s) {
       shop = s;
