@@ -1,6 +1,6 @@
 'use strict';
 
-require('../helper');
+const helper = require('../helper');
 const rewire = require('rewire');
 const httpMocks = require('node-mocks-http');
 const jwt = require('jsonwebtoken');
@@ -71,30 +71,60 @@ describe('validateToken middleware', () => {
   });
   
   describe('when request contain valid access token', () => {
-    it('should pass request to next middleware', done => {
-      var spyNext = sinon.spy(() => {
-        expect(stubValidateUser.calledOnce).to.be.true;
-        expect(spyNext.calledOnce).to.be.true;
-        expect(request.user).to.equal(fakeUser);
-        done();
+    describe('access token is from valid user', () => {
+      it('should pass request to next middleware', done => {
+        var spyNext = sinon.spy(() => {
+          expect(stubValidateUser.calledOnce).to.be.true;
+          expect(spyNext.calledOnce).to.be.true;
+          expect(request.user).to.equal(fakeUser);
+          done();
+        });
+        var stubValidateUser = sinon.stub();
+        var fakeUser = {id: 1};
+        var tokenPayload = {id: 1};
+
+        stubValidateUser.returns(fakeUser);
+
+        var request  = httpMocks.createRequest({
+          headers: {
+            'x-access-token': jwt.sign(tokenPayload, process.env.TOKEN_SECRET, {
+              expiresIn: '2 days'
+            })
+          }
+        });
+        var response = httpMocks.createResponse();
+
+        validateTokenMW.__set__('validateUser', stubValidateUser);
+        validateTokenMW(request, response, spyNext);
       });
-      var stubValidateUser = sinon.stub();
-      var fakeUser = {id: 1};
-      var tokenPayload = {id: 1};
-      
-      stubValidateUser.returns(fakeUser);
-      
-      var request  = httpMocks.createRequest({
-        headers: {
-          'x-access-token': jwt.sign(tokenPayload, process.env.TOKEN_SECRET, {
-            expiresIn: '2 days'
-          })
-        }
+    });
+
+    describe('access token is from banned user', () => {
+      it('should reject the request with code 403', done => {
+        var stubValidateUser = sinon.stub();
+        var fakeUser = {id: 1, banned: true};
+        var tokenPayload = {id: 1};
+
+        stubValidateUser.returns(fakeUser);
+
+        var request  = httpMocks.createRequest({
+          headers: {
+            'x-access-token': jwt.sign(tokenPayload, process.env.TOKEN_SECRET, {
+              expiresIn: '2 days'
+            })
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: require('events').EventEmitter
+        });
+
+        validateTokenMW.__set__('validateUser', stubValidateUser);
+        validateTokenMW(request, response);
+        response.on('end', () => {
+          expect(response.statusCode).to.equal(403);
+          done();
+        });
       });
-      var response = httpMocks.createResponse();
-      
-      validateTokenMW.__set__('validateUser', stubValidateUser);
-      validateTokenMW(request, response, spyNext);
     });
   });
 });

@@ -66,8 +66,7 @@ describe('PUT /api/v1/admin/users/:id', () => {
             gender: 'male',
             identityNumber: '123456789',
             password: '12345678',
-            email: 'email@email',
-            banned: 'true'
+            email: 'email@email'
           })
           .set('Content-Type', 'application/json')
           .expect(res => {
@@ -78,7 +77,6 @@ describe('PUT /api/v1/admin/users/:id', () => {
             expect(res.body.phone).to.equal('123123123123');
             expect(res.body.gender).to.equal('male');
             expect(res.body.identityNumber).to.equal('123456789');
-            expect(res.body.banned).to.equal(true);
             expect(res.body.password).to.be.undefined;
             expect(res.body.roles.length).to.equal(0);
           })

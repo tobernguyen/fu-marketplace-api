@@ -13,12 +13,6 @@ const authErrorResponse = {
   'message_code': 'error.authentication.invalid_credentials'
 };
 
-const bannedUserResponse = {
-  'status': 401,
-  'message': 'You have been temporarily banned from FUM',
-  'message_code': 'error.authentication.temporarily_banned'
-};
-
 var auth = {
   login: (req, res) => {
     let email = req.body.email || '';
@@ -32,12 +26,7 @@ var auth = {
 
     // Fire a query to your DB and check if the credentials are valid
     return auth.validate(email, password).then(user => {
-      if (user.banned) {
-        res.status(401);
-        res.json(bannedUserResponse);
-      } else {
-        res.json(genToken(user));
-      }
+      res.json(genToken(user));
     }, () => {
       res.status(401);
       res.json(authErrorResponse);

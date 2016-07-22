@@ -13,8 +13,18 @@ module.exports = function(req, res, next) {
     }).then(user => {
       // Authenticate user and pass it to next middleware
       if (user) {
-        req.user = user;
-        next();
+        if (user.banned) {
+          // User has been banned
+          res.status(403);
+          res.json({
+            'status': 403,
+            'message': 'You have been temporarily banned from FUM',
+            'message_code': 'error.authentication.temporarily_banned'
+          });
+        } else {
+          req.user = user;
+          next();
+        }
       } else {
         // No user with this name exists, respond back with a 401
         res.status(401);

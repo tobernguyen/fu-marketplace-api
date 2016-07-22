@@ -38,7 +38,11 @@ module.exports = function(socket) {
         return validateUser(decoded);
       }).then(user => {
         if (user) {
-          onSuccess(user);
+          if (user.banned) {
+            onError('User has been banned');
+          } else {
+            onSuccess(user);
+          }
         } else {
           onError('Unauthorized');
         }
