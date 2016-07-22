@@ -1,7 +1,7 @@
 'use strict';
 
 const helper = require('../helper');
-const request = require('supertest');
+const request = require('supertest-as-promised');
 const app = require('../../app.js');
 const Order = require('../../models').Order;
 const Shop = require('../../models').Shop;
@@ -571,7 +571,8 @@ describe('GET /api/v1/orders/', () => {
         .get('/api/v1/orders/')
         .set('X-Access-Token', userToken)
         .set('Content-Type', 'application/json')
-        .expect(res => {
+        .expect(200)
+        .then(res => {
           let bodyOrders = res.body.orders;
           expect(bodyOrders).to.have.lengthOf(2);
           let sortedBody = _.sortBy(bodyOrders, ['id']);
@@ -581,15 +582,19 @@ describe('GET /api/v1/orders/', () => {
             expect(sortedBody[value].id).to.equal(sortedOrders[value].id);
             expect(sortedBody[value].note).to.equal(sortedOrders[value].note);
             expect(sortedBody[value].shipAddress).to.equal(sortedOrders[value].shipAddress);
-
-            sortedOrders[value].getOrderLines(ols => {
-              expect(sortedBody[value].orderLines[0].note).to.equal(ols[0].note);
-              expect(sortedBody[value].orderLines[0].quantity).to.equal(ols[0].quantity);
-              expect(sortedBody[value].orderLines[0].item).to.equal(ols[0].item);
-            });
           });
-        })
-        .expect(200, done);
+
+          return sortedOrders[0].getOrderLines().then(ols => {
+            expect(sortedBody[0].orderLines[0].note).to.equal(ols[0].note);
+            expect(sortedBody[0].orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(sortedBody[0].orderLines[0].item).to.eql(ols[0].item);
+
+            return sortedOrders[0].getShop();
+          }).then(shop => {
+            expect(sortedBody[0].shopName).to.equal(shop.name);
+            done();
+          }).catch(done);
+        });
     });
   });
 
@@ -606,12 +611,6 @@ describe('GET /api/v1/orders/', () => {
           expect(bodyOrders[0].id).to.equal(order.id);
           expect(bodyOrders[0].note).to.equal(order.note);
           expect(bodyOrders[0].shipAddress).to.equal(order.shipAddress);
-
-          order.getOrderLines(ols => {
-            expect(bodyOrders[0].orderLines[0].note).to.equal(ols[0].note);
-            expect(bodyOrders[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-            expect(bodyOrders[0].orderLines[0].item).to.equal(ols[0].item);
-          });
         })
         .expect(200, done);
     });
@@ -633,12 +632,6 @@ describe('GET /api/v1/orders/', () => {
           expect(bodyOrders[0].id).to.equal(order.id);
           expect(bodyOrders[0].note).to.equal(order.note);
           expect(bodyOrders[0].shipAddress).to.equal(order.shipAddress);
-
-          order.getOrderLines(ols => {
-            expect(bodyOrders[0].orderLines[0].note).to.equal(ols[0].note);
-            expect(bodyOrders[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-            expect(bodyOrders[0].orderLines[0].item).to.equal(ols[0].item);
-          });
         })
         .expect(200, done);
     });
@@ -658,12 +651,6 @@ describe('GET /api/v1/orders/', () => {
           expect(bodyOrders[0].id).to.equal(order.id);
           expect(bodyOrders[0].note).to.equal(order.note);
           expect(bodyOrders[0].shipAddress).to.equal(order.shipAddress);
-
-          order.getOrderLines(ols => {
-            expect(bodyOrders[0].orderLines[0].note).to.equal(ols[0].note);
-            expect(bodyOrders[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-            expect(bodyOrders[0].orderLines[0].item).to.equal(ols[0].item);
-          });
         })
         .expect(200, done);
     });

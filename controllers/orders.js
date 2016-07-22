@@ -112,7 +112,16 @@ exports.getOrders = (req, res) => {
     where: {
       userId: user.id
     },
-    include: OrderLine,
+    include: [
+      {
+        model: OrderLine,
+        attributes: ['item', 'note', 'quantity']
+      },
+      {
+        model: Shop,
+        attributes: ['name']
+      }
+    ],
     limit: perPage,
     offset: offset,
     order: [
@@ -143,9 +152,11 @@ exports.getOrders = (req, res) => {
   Order.findAll(orderFindOption).then(os => {
     let result = _.map(os, o => {
       let order = o.toJSON();
-      let orderLines = _.map(order.OrderLines, r => _.pick(r, ['item', 'note', 'quantity']));
+      let orderLines = _.map(order.OrderLines, r => r.get());
       order.orderLines = orderLines;
+      order.shopName = o.Shop.name;
       delete order.OrderLines;
+      delete order.Shop;
       return order;
     });
     res.json({

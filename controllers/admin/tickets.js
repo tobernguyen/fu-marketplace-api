@@ -153,4 +153,3 @@ exports.postCloseTicket = (req, res) => {
     });
   }
 };
-
