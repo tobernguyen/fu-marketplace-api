@@ -80,7 +80,7 @@ exports.postUploadCurrentUserAvatar = (req, res) => {
     ]
   })(req, res, data => {
     req.user.update({
-      avatar: data[0].Location, // Save the url of first image version to avatar field
+      avatar: `${data[0].Location}?${new Date().getTime()}`, // Save the url of first image version to avatar field, add timestamp to avoid caching
       avatarFile: {
         versions: _.map(data, image => {
           return {

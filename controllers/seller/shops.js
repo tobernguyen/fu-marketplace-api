@@ -99,7 +99,7 @@ exports.postShopUploadAvatar = (req, res) => {
           ]
         })(req, res, data => {
           shop.update({
-            avatar: data[0].Location, // Save the url of first image version to avatar field
+            avatar: `${data[0].Location}?${new Date().getTime()}`, // Save the url of first image version to avatar field, add timestamp to avoid caching
             avatarFile: {
               versions: _.map(data, image => {
                 return {
@@ -148,7 +148,7 @@ exports.postShopUploadCover = (req, res) => {
           ]
         })(req, res, data => {
           shop.update({
-            cover: data[0].Location, // Save the url of first image version to avatar field
+            cover: `${data[0].Location}?${new Date().getTime()}`, // Save the url of first image version to avatar field, add timestamp to avoid caching
             coverFile: {
               versions: _.map(data, image => {
                 return {

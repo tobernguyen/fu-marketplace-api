@@ -93,7 +93,7 @@ exports.postItems = (req, res) => {
       }
 
       let newItemData = _.cloneDeep(validatedData);
-      newItemData.image = validatedData.image[0].Location;
+      newItemData.image = `${validatedData.image[0].Location}?${new Date().getTime()}`;
       newItemData.imageFile = {
         versions: _.map(validatedData.image, image => {
           return {
