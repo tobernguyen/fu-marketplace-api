@@ -1,9 +1,10 @@
 'use strict';
 
 const helper = require('../helper');
-const request = require('supertest');
+const request = require('supertest-as-promised');
 const app = require('../../app.js');
-const Ticket = require('../../models').Ticket;
+const models = require('../../models');
+const Ticket = models.Ticket;
 var _ = require('lodash');
 
 describe('GET /api/v1/admin/tickets/', () => {
@@ -30,15 +31,35 @@ describe('GET /api/v1/admin/tickets/', () => {
         request(app)
           .get('/api/v1/admin/tickets/')
           .set('X-Access-Token', adminToken)
-          .expect(res => {
+          .expect(200)
+          .then(res => {
             expect(res.body.tickets).to.be.ok;
             let tickets = res.body.tickets;
             expect(tickets.length).to.equal(3);
             let ticket = tickets[0];
             expect(ticket.orderId).to.equal(ticket1.orderId);
             expect(ticket.id).to.equal(ticket1.id);
-          })
-          .expect(200, done);
+
+            Ticket.findOne({
+              where: {id: ticket1.id},
+              include: {
+                model: models.Order,
+                include: [{
+                  model: models.User,
+                  attributes: ['id', 'fullName']
+                }, {
+                  model: models.Shop,
+                  attributes: ['id', 'name']
+                }]
+              }
+            }).then(t => {
+              expect(ticket.shop.id).to.equal(t.Order.Shop.id);
+              expect(ticket.shop.name).to.equal(t.Order.Shop.name);
+              expect(ticket.user.id).to.equal(t.Order.User.id);
+              expect(ticket.user.fullName).to.equal(t.Order.User.fullName);
+              done();
+            });
+          });
       });
     });
 
@@ -129,13 +150,31 @@ describe('GET /api/v1/admin/tickets/:ticketId', () => {
       request(app)
         .get(`/api/v1/admin/tickets/${ticket.id}`)
         .set('X-Access-Token', adminToken)
-        .expect(res => {
+        .expect(200)
+        .then(res => {
           let body = res.body;
           expect(body.status).to.equal(Ticket.STATUS.CLOSED);
           expect(body.id).to.equal(ticket.id);
           expect(body.userNote).to.equal(ticket.userNote);
-        })
-        .expect(200, done);
+          expect(body.orderId).to.equal(ticket.orderId);
+
+          Ticket.findOne({
+            where: {id: ticket.id},
+            include: {
+              model: models.Order,
+              include: {
+                model: models.OrderLine,
+                attributes: ['item', 'note', 'quantity']
+              }
+            }
+          }).then(t => {
+            ['note', 'status', 'shipAddress', 'sellerMessage'].forEach(k => {
+              expect(body.order[k]).to.equal(t.Order[k]);
+            });
+            expect(body.order.orderLines).to.eql(_.map(t.Order.OrderLines, ol => ol.get()));
+            done();
+          });
+        });
     });
   });
 

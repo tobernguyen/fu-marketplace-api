@@ -4,7 +4,10 @@ var _ = require('lodash');
 var errorHandlers = require('../helpers/errorHandlers');
 var models = require('../../models');
 var Order = models.Order;
+var Shop = models.Shop;
+var User = models.User;
 var Ticket = models.Ticket;
+var OrderLine = models.OrderLine;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -17,9 +20,16 @@ exports.getTickets = (req, res) => {
   let offset = page > 0 ? (page - 1) * perPage : 0;
 
   let ticketFindOption = {
-    include: [
-      Order
-    ],
+    include: {
+      model: Order,
+      include: [{
+        model: User,
+        attributes: ['id', 'fullName']
+      }, {
+        model: Shop,
+        attributes: ['id', 'name']
+      }]
+    },
     limit: perPage,
     offset: offset,
     order: [
@@ -43,8 +53,13 @@ exports.getTickets = (req, res) => {
   Ticket.findAll(ticketFindOption).then(tickets => {
     let result = _.map(tickets, o => {
       let ticket = o.toJSON();
-      ticket.order = ticket.Order;
+
+      ticket['shop'] = ticket.Order.Shop.get();
+      delete ticket.Shop;
+
+      ticket['user'] = ticket.Order.User.get();
       delete ticket.Order;
+
       return ticket;
     });
     res.json({
@@ -62,9 +77,13 @@ exports.getTicket = (req, res) => {
     where: {
       id: ticketId
     },
-    include: [
-      Order
-    ]
+    include: {
+      model: Order,
+      include: {
+        model: OrderLine,
+        attributes: ['item', 'note', 'quantity']
+      }
+    }
   }).then(t => {
     if (!t) {
       let error = 'Ticket does not exist';
@@ -74,8 +93,11 @@ exports.getTicket = (req, res) => {
     }
   }).then(t => {
     let result = t.toJSON();
-    result.order = result.Order;
+
+    result.order = _.pick(t.Order, ['note', 'status', 'shipAddress', 'sellerMessage', 'createdAt', 'updatedAt']);
+    result.order['orderLines'] = _.map(t.Order.OrderLines, ol => ol.get());
     delete result.Order;
+
     res.json(result);
   }).catch((err) => {
     if (err.status) {
