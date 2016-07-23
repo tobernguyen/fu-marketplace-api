@@ -59,7 +59,7 @@ describe('UserNotification Model', () => {
               contents: {
                 'en': `Đơn hàng #${order.id} tại ${shop.name} đã bị từ chối với lý do: Hết hàng rồi`
               },
-              url: `${process.env.SITE_ROOT_URL}/`
+              url: `${process.env.SITE_ROOT_URL}/orders`
             }
           });
           done();
@@ -169,7 +169,7 @@ describe('UserNotification Model', () => {
               contents: {
                 'en': `Bạn có đơn hàng mới tại ${notificationData.shopName} với mã số #${notificationData.orderId} được đặt bởi ${notificationData.buyerName}`
               },
-              url: `${process.env.SITE_ROOT_URL}/`
+              url: `${process.env.SITE_ROOT_URL}/dashboard/shops/${notificationData.shopId}`
             }
           });
           

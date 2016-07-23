@@ -193,7 +193,7 @@ module.exports = function(sequelize, DataTypes) {
       pushRealTimeNotificationToUser(notification);
 
       // Push notification via OneSignal
-      let message;
+      let message, url;
 
       switch(newStatus) {
         case Order.STATUS.ACCEPTED:
@@ -213,6 +213,17 @@ module.exports = function(sequelize, DataTypes) {
           break;
       }
 
+      switch(newStatus) {
+        case Order.STATUS.ACCEPTED:
+        case Order.STATUS.REJECTED:
+        case Order.STATUS.SHIPPING:
+        case Order.STATUS.ABORTED:
+          url = `${process.env.SITE_ROOT_URL}/orders`
+          break;
+        case Order.STATUS.COMPLETED:
+          url = `${process.env.SITE_ROOT_URL}/shops/${fetchedOrder.Shop.id}/reviews`
+      }
+
       kue.createPushOneSignalNotification({
         userId: fetchedOrder.userId,
         pushData: {
@@ -222,7 +233,7 @@ module.exports = function(sequelize, DataTypes) {
           contents: {
             'en': message
           },
-          url: `${process.env.SITE_ROOT_URL}/`
+          url: url
         }
       });
 
@@ -283,7 +294,7 @@ module.exports = function(sequelize, DataTypes) {
           contents: {
             'en': message
           },
-          url: `${process.env.SITE_ROOT_URL}/`
+          url: `${process.env.SITE_ROOT_URL}/dashboard/shops/${notification.data.shopId}`
         }
       });
 
