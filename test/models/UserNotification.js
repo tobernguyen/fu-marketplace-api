@@ -68,6 +68,12 @@ describe('UserNotification Model', () => {
     });
   });
 
+  describe('.createTicketNotification', () => {
+    it.skip('should create notification for user with correct data', done => {
+
+    });
+  });
+
   describe('.createShopRequestNotification', () => {
     let sor;
     let ShopOpeningRequest = models['ShopOpeningRequest'];

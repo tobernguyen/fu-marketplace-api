@@ -8,7 +8,8 @@ var NOTIFICATION_TYPE = {
   SELLER_CHANGE_ORDER_STATUS: 1,
   OPEN_SHOP_REQUEST_CHANGE: 2,
   USER_PLACE_ORDER: 3,
-  USER_CANCEL_ORDER: 4
+  USER_CANCEL_ORDER: 4,
+  USER_TICKET_STATUS_CHANGE: 5
 };
 
 module.exports = function(sequelize, DataTypes) {
@@ -42,6 +43,70 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
+
+  // TODO: add test
+  UserNotification.createTicketNotification = (ticketId, newStatus) => {
+    let Ticket = sequelize.model('Ticket');
+
+    return Ticket.findOne({
+      where: {id : ticketId},
+      include: {
+        model: sequelize.model('Order'),
+        include: [{
+          model: sequelize.model('Shop'),
+          attributes: ['id', 'name']
+        }]
+      }
+    }).then(ticket => {
+      return UserNotification.create({
+        userId: ticket.Order.userId,
+        type: NOTIFICATION_TYPE.USER_TICKET_STATUS_CHANGE,
+        data: {
+          ticketId: ticket.id,
+          shopId: ticket.Order.Shop.id,
+          shopName: ticket.Order.Shop.name,
+          shopAvatar: ticket.Order.Shop.avatar,
+          orderId: ticket.orderId,
+          newStatus: newStatus,
+          adminComment: ticket.adminComment
+        }
+      }).then(notification => {
+        // TODO: add test
+        // Push real-time notification via socket.io
+        pushRealTimeNotificationToUser(notification);
+
+        // Push notification via OneSignal
+        let message;
+
+        switch(notification.data.newStatus) {
+          case Ticket.STATUS.OPENING:
+            message = `Báo cáo của bạn về đơn hàng #${notification.data.orderId} tại cửa hàng ${notification.data.shopName} đã được mở lại.`;
+            break;
+          case Ticket.STATUS.INVESTIGATING:
+            message = `Báo cáo của bạn về đơn hàng #${notification.data.orderId} tại cửa hàng ${notification.data.shopName} bắt đầu được điều tra.`;
+            break;
+          case Ticket.STATUS.CLOSED:
+            message = `Báo cáo của bạn về đơn hàng #${notification.data.orderId} tại cửa hàng ${notification.data.shopName} đã đóng lại. Xin hãy nhấp chuột vào tin nhắn này để xem kết quả.`;
+            break;
+        }
+
+        kue.createPushOneSignalNotification({
+          userId: notification.userId,
+          pushData: {
+            headings: {
+              'en': 'Báo cáo đơn hàng sai phạm'
+            },
+            contents: {
+              'en': message
+            },
+            url: `${process.env.SITE_ROOT_URL}/tickets}`
+          }
+        });
+
+        return Promise.resolve(notification);
+      });
+    });
+  };
   
   UserNotification.createShopRequestNotification = (sorId) => {
     let ShopOpeningRequest = sequelize.model('ShopOpeningRequest');

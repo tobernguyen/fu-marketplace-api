@@ -83,7 +83,7 @@ describe('Ticket models', () => {
           userNote: 'note 2'
         }).catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only opening ticket has able to be edited');
+          expect(error.message).to.equal('Only opening ticket can be edited');
           expect(error.type).to.equal('ticket');
           return Ticket.findById(ticket.id);
         }).then(ticketFromDb => {
@@ -102,12 +102,17 @@ describe('Ticket models', () => {
       beforeEach(done => {
         helper.factory.createTicket().then(t => {
           ticket = t;
+          helper.queue.testMode.clear();
           done();
         });
       });
 
       it('should be ok', done => {
         ticket.investigateTicket().then(t => {
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('send ticket notification');
+          expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.INVESTIGATING});
           expect(t).to.be.ok;
           return Ticket.findById(t.id);
         }).then(ticketFromDb => {
@@ -131,7 +136,7 @@ describe('Ticket models', () => {
       it('should be return error', done => {
         ticket.investigateTicket().catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only opening ticket has able to be started investigating');
+          expect(error.message).to.equal('Only opening ticket can be started investigating');
           expect(error.type).to.equal('ticket');
           return Ticket.findById(ticket.id);
         }).then(ticketFromDb => {
@@ -150,6 +155,7 @@ describe('Ticket models', () => {
       beforeEach(done => {
         helper.factory.createTicket().then(t => {
           ticket = t;
+          helper.queue.testMode.clear();
           done();
         });
       });
@@ -157,6 +163,10 @@ describe('Ticket models', () => {
       describe('without admin comment ticket', () => {
         it('should be ok and do not update admin comment', done => {
           ticket.closeTicket().then(t => {
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(1);
+            expect(jobs[0].type).to.equal('send ticket notification');
+            expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.CLOSED});
             expect(t).to.be.ok;
             return Ticket.findById(t.id);
           }).then(ticketFromDb => {
@@ -197,7 +207,7 @@ describe('Ticket models', () => {
       it('should be return error', done => {
         ticket.closeTicket().catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only opening or investigating ticket has able to be closed');
+          expect(error.message).to.equal('Only opening or investigating ticket can be closed');
           expect(error.type).to.equal('ticket');
           return Ticket.findById(ticket.id);
         }).then(ticketFromDb => {
@@ -216,12 +226,17 @@ describe('Ticket models', () => {
       beforeEach(done => {
         helper.factory.createTicket({status: Ticket.STATUS.CLOSED}).then(t => {
           ticket = t;
+          helper.queue.testMode.clear();
           done();
         });
       });
 
       it('should be ok', done => {
         ticket.reopenTicket().then(t => {
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(1);
+          expect(jobs[0].type).to.equal('send ticket notification');
+          expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.OPENING});
           expect(t).to.be.ok;
           return Ticket.findById(t.id);
         }).then(ticketFromDb => {
@@ -245,7 +260,7 @@ describe('Ticket models', () => {
       it('should be return error', done => {
         ticket.reopenTicket().catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only closed ticket has able to be reopening');
+          expect(error.message).to.equal('Only closed ticket can be reopening');
           expect(error.type).to.equal('ticket');
           return Ticket.findById(ticket.id);
         }).then(ticketFromDb => {

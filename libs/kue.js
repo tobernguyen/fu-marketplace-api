@@ -72,6 +72,12 @@ queue.process('send shop opening request notification', 5, (job, done) => {
   UserNotification.createShopRequestNotification(data.shopOpeningRequestId).then(() => done(), done);
 });
 
+queue.process('send ticket notification', 5, (job, done) => {
+  let data = job.data;
+  let UserNotification = require('../models').UserNotification;
+  UserNotification.createTicketNotification(data.ticketId, data.newStatus).then(() => done(), done);
+});
+
 queue.process('push one signal notification', 5, (job, done) => {
   let data = job.data;
   OneSignal.pushNotificationToUserId(data.userId, data.pushData).then(() => done(), done);
@@ -227,6 +233,16 @@ var createSendShopOpeningRequestNotificationJob = (jobData) => {
 };
 exports.createSendShopOpeningRequestNotificationJob = createSendShopOpeningRequestNotificationJob;
 
+var createSendTicketNotifcationJob = (jobData) => {
+  queue.createJob('send ticket notification', jobData)
+    .priority('normal')
+    .attempts(3)  // Retry 3 times if failed, after that give up
+    .backoff({ delay: 30 * 1000, type: 'fixed' }) // Wait for 30s before retrying
+    .ttl(10000) // Kill the job if it take more than 10s
+    .removeOnComplete(true)
+    .save();
+};
+exports.createSendTicketNotifcationJob = createSendTicketNotifcationJob;
 
 var createPushOneSignalNotification = (jobData) => {
   queue.createJob('push one signal notification', jobData)

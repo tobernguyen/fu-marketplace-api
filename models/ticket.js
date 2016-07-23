@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const kue = require('../libs/kue');
 
 var TICKET_STATUS = {
   OPENING: 0,
@@ -56,7 +57,7 @@ module.exports = function(sequelize, DataTypes) {
               userNote: rawInfo.userNote
             }).then(resolve, reject);
           } else {
-            let error = 'Only opening ticket has able to be edited';
+            let error = 'Only opening ticket can be edited';
             reject({
               status: 403,
               message: error,
@@ -72,13 +73,20 @@ module.exports = function(sequelize, DataTypes) {
               status: TICKET_STATUS.INVESTIGATING
             }).then(resolve, reject);
           } else {
-            let error = 'Only opening ticket has able to be started investigating';
+            let error = 'Only opening ticket can be started investigating';
             reject({
               status: 403,
               message: error,
               type: 'ticket'
             });
           }
+        }).then(result => {
+          kue.createSendTicketNotifcationJob({
+            ticketId: this.id,
+            newStatus: TICKET_STATUS.INVESTIGATING
+          });
+
+          return Promise.resolve(result);
         });
       },
       closeTicket: function (ticketInfo) {
@@ -90,13 +98,20 @@ module.exports = function(sequelize, DataTypes) {
           if (this.status === TICKET_STATUS.INVESTIGATING || this.status === TICKET_STATUS.OPENING) {
             this.update(rawInfo).then(resolve, reject);
           } else {
-            let error = 'Only opening or investigating ticket has able to be closed';
+            let error = 'Only opening or investigating ticket can be closed';
             reject({
               status: 403,
               message: error,
               type: 'ticket'
             });
           }
+        }).then(result => {
+          kue.createSendTicketNotifcationJob({
+            ticketId: this.id,
+            newStatus: TICKET_STATUS.CLOSED
+          });
+
+          return Promise.resolve(result);
         });
       },
       reopenTicket: function () {
@@ -106,13 +121,20 @@ module.exports = function(sequelize, DataTypes) {
               status: TICKET_STATUS.OPENING
             }).then(resolve, reject);
           } else {
-            let error = 'Only closed ticket has able to be reopening';
+            let error = 'Only closed ticket can be reopening';
             reject({
               status: 403,
               message: error,
               type: 'ticket'
             });
           }
+        }).then(result => {
+          kue.createSendTicketNotifcationJob({
+            ticketId: this.id,
+            newStatus: TICKET_STATUS.OPENING
+          });
+
+          return Promise.resolve(result);
         });
       }
     }
