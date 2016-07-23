@@ -1,9 +1,11 @@
 'use strict';
 
 const helper = require('../helper');
-const request = require('supertest');
+const request = require('supertest-as-promised');
 const app = require('../../app.js');
 const Ticket = require('../../models').Ticket;
+const Order = require('../../models').Order;
+const Shop = require('../../models').Shop;
 
 describe('POST /api/v1/orders/:orderId/openTicket', () => {
   let userToken, order;
@@ -106,15 +108,30 @@ describe('GET /api/v1/tickets/', () => {
         request(app)
             .get('/api/v1/tickets/')
             .set('X-Access-Token', userToken)
-            .expect(res => {
+            .expect(200)
+            .then(res => {
               expect(res.body.tickets).to.be.ok;
               let tickets = res.body.tickets;
               expect(tickets.length).to.equal(3);
               let ticket = tickets[0];
               expect(ticket.orderId).to.equal(ticket1.orderId);
               expect(ticket.id).to.equal(ticket1.id);
-            })
-            .expect(200, done);
+
+              Ticket.findOne({
+                where: {id: ticket1.id},
+                include: [{
+                  model: Order,
+                  where: { userId: user.id },
+                  include: {
+                    model: Shop,
+                    attributes: ['id', 'name']
+                  }
+                }]
+              }).then(expectedTicket => {
+                expect(ticket.shop).to.eql(expectedTicket.Order.Shop.get());
+                done();
+              });
+            }).catch(done);
       });
     });
 
@@ -267,7 +284,7 @@ describe('PUT /api/v1/tickets/:ticketId', () => {
         .expect(res => {
           let body = res.body;
           expect(body.status).to.equal(403);
-          expect(body.message).to.equal('Only opening ticket has able to be edited');
+          expect(body.message).to.equal('Only opening ticket can be edited');
         })
         .expect(403, done);
     });
@@ -299,12 +316,27 @@ describe('GET /api/v1/tickets/:ticketId', () => {
       request(app)
         .get(`/api/v1/tickets/${ticket.id}`)
         .set('X-Access-Token', userToken)
-        .expect(res => {
+        .expect(200)
+        .then(res => {
           let body = res.body;
           expect(body.id).to.equal(ticket.id);
           expect(body.orderId).to.equal(order.id);
-        })
-        .expect(200, done);
+
+          Ticket.findOne({
+            where: {id: ticket.id},
+            include: {
+              model: Order,
+              include: {
+                model: Shop,
+                attributes: ['id', 'name']
+              }
+            }
+          }).then(expectedTicket => {
+            expect(body.shop).to.eql(expectedTicket.Order.Shop.get());
+          });
+
+          done();
+        });
     });
   });
 
@@ -381,7 +413,7 @@ describe('POST /api/v1/tickets/:ticketId/close', () => {
         .expect(res => {
           let body = res.body;
           expect(body.status).to.equal(403);
-          expect(body.message).to.equal('Only opening or investigating ticket has able to be closed');
+          expect(body.message).to.equal('Only opening or investigating ticket can be closed');
         })
         .expect(403, done);
     });
@@ -443,7 +475,7 @@ describe('POST /api/v1/tickets/:ticketId/reopen', () => {
           .expect(res => {
             let body = res.body;
             expect(body.status).to.equal(403);
-            expect(body.message).to.equal('Only closed ticket has able to be reopening');
+            expect(body.message).to.equal('Only closed ticket can be reopening');
           })
           .expect(403, done);
     });

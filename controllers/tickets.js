@@ -8,6 +8,7 @@ var errorHandlers = require('./helpers/errorHandlers');
 var models = require('../models');
 var Ticket = models.Ticket;
 var Order = models.Order;
+var Shop = models.Shop;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -21,10 +22,14 @@ exports.getTickets = (req, res) => {
   let offset = page > 0 ? (page - 1) * perPage : 0;
 
   let ticketFindOption = {
-    include: [{
+    include: {
       model: Order,
-      where: { userId: user.id }
-    }],
+      where: { userId: user.id },
+      include: {
+        model: Shop,
+        attributes: ['id', 'name']
+      }
+    },
     limit: perPage,
     offset: offset,
     order: [
@@ -48,8 +53,11 @@ exports.getTickets = (req, res) => {
   Ticket.findAll(ticketFindOption).then(tickets => {
     let result = _.map(tickets, o => {
       let ticket = o.toJSON();
+
       ticket.order = ticket.Order;
+      ticket.shop = ticket.Order.Shop.get();
       delete ticket.Order;
+
       return ticket;
     });
     res.json({
@@ -170,10 +178,14 @@ exports.getTicket = (req, res) => {
     where: {
       id: ticketId
     },
-    include: [{
+    include: {
       model: Order,
-      where: { userId: user.id }
-    }]
+      where: { userId: user.id },
+      include: {
+        model: Shop,
+        attributes: ['id', 'name']
+      }
+    }
   }).then(t => {
     if (!t) {
       let error = 'Ticket does not exist';
@@ -183,8 +195,11 @@ exports.getTicket = (req, res) => {
     }
   }).then(t => {
     let result = t.toJSON();
+
     result.order = result.Order;
+    result.shop = result.Order.Shop.get();
     delete result.Order;
+
     res.json(result);
   }).catch((err) => {
     if (err.status) {

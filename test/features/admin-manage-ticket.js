@@ -220,7 +220,7 @@ describe('POST /api/v1/admin/tickets/:ticketId/investigate', () => {
         .expect(res => {
           let body = res.body;
           expect(body.status).to.equal(403);
-          expect(body.message).to.equal('Only opening ticket has able to be started investigating');
+          expect(body.message).to.equal('Only opening ticket can be started investigating');
         })
         .expect(403, done);
     });
@@ -280,7 +280,7 @@ describe('POST /api/v1/admin/tickets/:ticketId/close', () => {
         .expect(res => {
           let body = res.body;
           expect(body.status).to.equal(403);
-          expect(body.message).to.equal('Only opening or investigating ticket has able to be closed');
+          expect(body.message).to.equal('Only opening or investigating ticket can be closed');
         })
         .expect(403, done);
     });
