@@ -119,12 +119,14 @@ var getEmailOptionForNewShopOpeningRequest = (id) => {
       include: require('../models').User
     });
   }).then(sor => {
+    let templateData = sor.toJSON();
+    templateData['adminLink'] = `${process.env.SITE_ROOT_URL}/admin/requests`;
     let options = {
       template: emailer.EMAIL_TEMPLATE.NEW_SHOP_OPENING_REQUEST,
       from: emailer.EMAIL_ADDRESSES.NO_REPLY,
       to: emailTo,
       subject: `${sor.User.fullName} yêu cầu mở shop mới với tên: ${sor.name}`,
-      data: sor.toJSON()
+      data: templateData
     };
 
     return Promise.resolve(options);
@@ -142,7 +144,8 @@ var getEmailOptionForResponseShopOpeningRequest = (id) => {
   }).then(sor => {
     let isAccepted = sor.status === ShopOpeningRequest.STATUS.ACCEPTED;
     let data = sor.toJSON();
-    data[isAccepted] = isAccepted;
+    data['isAccepted'] = isAccepted;
+    data['rootUrl'] = process.env.SITE_ROOT_URL;
 
     let options = {
       template: emailer.EMAIL_TEMPLATE.RESPONSE_SHOP_OPENING_REQUEST,

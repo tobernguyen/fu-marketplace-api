@@ -1,10 +1,81 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+</head>
 <body>
-<h1>Xin chào {{ User.fullName }},</h1>
-<h3>Yêu cầu mở gian hàng của bạn đã
-{{#if isAccepted}}được chấp nhận</h3>
-<p>Bạn có thể bắt đầu bán hàng ngay bằng cách click vào <a href="#">đường dẫn này</a></p>
-{{else}}bị từ chối</h3>
-{{/if}}
+<table cellspacing="0" cellpadding="0" align="center" style="background-color: #ffffff; font-family: Arial; width: 700px;">
+    <tbody>
+    <tr>
+        <td style="background-color: #c0392b; height: 5px; width: 700px">
+        </td>
+    </tr>
+    <td>
+        <table cellspacing="0" cellpadding="0" align="center" style="border-left: 1px solid #cccccc; border-right: 1px solid #cccccc; padding: 20px; background-color: #ffffff; font-family: Arial; width: 700px;">            <tr  style="width: 100%; text-align: center;">
+            <td>
+                <img src="https://staging.fumarket.net/logo.png" class="logo" height="170" width="171"/>
+            </td>
+        </tr>
+            <tr>
+                <td bgcolor="#ffffff" style="padding: 20px 30px 20px 30px;">
+                    <table cellspacing="0" cellpadding="0" style="background-color: #ffffff" style="">
+                        <tbody>
+                        <tr>
+                            <td>
+                                <p>Chào bạn  {{ User.fullName }},</p>
+                            </td>
+                        </tr>
+                        {{#if isAccepted}}
+                        <tr>
+                            <td>
+                                <p>
+                                    Yêu cầu tạo cửa hàng <span style="font-weight: 600">{{ name }}</span> của bạn đã được chấp nhận. <br>
+                                    Bạn có thể <a href="{{rootUrl}}">đăng nhập vào hệ thống FUM</a> và bắt đầu bán hàng ngay. <br>
+                                    Chúc bạn thành công.<br>
+                                </p>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td>
+                                <p>
+                                    Rất tiếc, yêu cầu tạo cửa hàng <span style="font-weight: 600">{{ name }}</span> của bạn đã bị từ chối với lí do: <br>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 20px 30px 20px 30px;">
+                                <i>{{ adminMessage }}</i>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>
+                                    Xin hãy kiểm tra lại thông tin mà bạn đã cung cấp, và <a href="{{rootUrl}}/shops/request_create">tạo lại một yêu cầu mở cửa hàng mới</a>. <br>
+                                    Chúng tôi xin lỗi nếu như có bất kì sự bất tiện nào.
+                                </p>
+                            </td>
+                        </tr>
+                        {{/if}}
+                        <tr>
+                            <td>
+                                <p>
+                                    Trân trọng, <br>
+                                    FU Marketplace.
+                                </p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </td>
+    <tr>
+        <td style="background-color: #c0392b; height: 5px; width: 700px">
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>

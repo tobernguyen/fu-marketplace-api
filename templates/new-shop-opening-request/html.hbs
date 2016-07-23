@@ -1,8 +1,57 @@
-<html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+</head>
 <body>
-<h1>Có một yêu cầu mở shop mới</h1>
-<p>Shop name: {{ name }}</p>
-<p>User's full name: {{ User.fullName }}</p>
-<p>Phone: {{ User.phone }}</p>
+<table cellspacing="0" cellpadding="0" align="center" style="background-color: #ffffff; font-family: Arial; width: 700px;">
+    <tbody>
+    <tr>
+        <td style="background-color: #c0392b; height: 5px; width: 700px">
+        </td>
+    </tr>
+    <td>
+        <table cellspacing="0" cellpadding="0" align="center" style="border-left: 1px solid #cccccc; border-right: 1px solid #cccccc; padding: 20px; background-color: #ffffff; font-family: Arial; width: 700px;">
+            <tr  style="width: 100%; text-align: center;">
+                <td>
+                    <img src="https://staging.fumarket.net/logo.png" class="logo" height="170" width="171"/>
+                </td>
+            </tr>
+            <tr>
+                <td bgcolor="#ffffff" style="padding: 20px 30px 20px 30px;">
+                    <table cellspacing="0" cellpadding="0" style="background-color: #ffffff" style="">
+                        <tbody>
+                        <tr>
+                            <td>
+                                <p>Xin chào,</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>
+                                    Đã có một yêu cầu mở cửa hàng mới với tên <span style="font-weight: 600">{{ name }}</span> được tạo bởi <span  style="font-weight: 600">{{ User.fullName }}</span>. <br>
+                                    Hãy đăng nhập vào <a href="{{adminLink}}">khu vực dành cho quản trị viên</a> của FUM để trả lời yêu cầu này.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>
+                                    Trân trọng, <br>
+                                    FU Marketplace.
+                                </p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </td>
+    <tr>
+        <td style="background-color: #c0392b; height: 5px; width: 700px">
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
