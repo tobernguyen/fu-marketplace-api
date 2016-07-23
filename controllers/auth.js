@@ -70,11 +70,7 @@ var auth = {
             return Promise.resolve(user);
           }
         }).then(user => {
-          if (user.banned) {
-            res.json(bannedUserResponse);
-          } else {
-            res.json(genToken(user));
-          }
+          res.json(genToken(user));
         });
       } else {
         res.status(401);
