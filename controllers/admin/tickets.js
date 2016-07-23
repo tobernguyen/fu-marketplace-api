@@ -94,7 +94,7 @@ exports.getTicket = (req, res) => {
   }).then(t => {
     let result = t.toJSON();
 
-    result.order = _.pick(t.Order, ['note', 'status', 'shipAddress', 'sellerMessage', 'createdAt', 'updatedAt']);
+    result.order = _.pick(t.Order, ['userId', 'shopId', 'note', 'status', 'shipAddress', 'sellerMessage', 'createdAt', 'updatedAt']);
     result.order['orderLines'] = _.map(t.Order.OrderLines, ol => ol.get());
     delete result.Order;
 

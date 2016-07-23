@@ -168,7 +168,7 @@ describe('GET /api/v1/admin/tickets/:ticketId', () => {
               }
             }
           }).then(t => {
-            ['note', 'status', 'shipAddress', 'sellerMessage'].forEach(k => {
+            ['userId', 'shopId', 'note', 'status', 'shipAddress', 'sellerMessage'].forEach(k => {
               expect(body.order[k]).to.equal(t.Order[k]);
             });
             expect(body.order.orderLines).to.eql(_.map(t.Order.OrderLines, ol => ol.get()));
