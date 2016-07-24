@@ -186,9 +186,7 @@ exports.postOpenTicket = (req, res) => {
       return Ticket.findOne({
         where: {
           orderId: o.id,
-          status: {
-            $in: [Ticket.STATUS.OPENING, Ticket.STATUS.CLOSED]
-          }
+          status: Ticket.STATUS.OPENING
         }
       });
     }
@@ -197,7 +195,7 @@ exports.postOpenTicket = (req, res) => {
       let ticketInfo = _.pick(req.body, ['userNote']);
       return order.createTicket(ticketInfo);
     } else {
-      let error = 'Already have a opening or investigating ticket';
+      let error = 'Already have a opening ticket';
       return Promise.reject({status: 403, message: error, type: 'ticket'});
     }
   }).then(t => {

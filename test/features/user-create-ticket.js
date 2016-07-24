@@ -39,7 +39,7 @@ describe('POST /api/v1/orders/:orderId/openTicket', () => {
   });
 
   describe('with valid order route', () => {
-    describe('with order do not have opening or investigating ticket', () => {
+    describe('with order do not have opening ticket', () => {
       it('should return 200 with new ticket', done => {
         request(app)
           .post(`/api/v1/orders/${order.id}/openTicket`)
@@ -57,7 +57,7 @@ describe('POST /api/v1/orders/:orderId/openTicket', () => {
       });
     });
 
-    describe('with order is already having opening or investigating ticket', () => {
+    describe('with order is already having opening ticket', () => {
       beforeEach(done => {
         helper.factory.createTicket({orderId: order.id}).then(() => {
           done();
@@ -75,7 +75,7 @@ describe('POST /api/v1/orders/:orderId/openTicket', () => {
           .expect(res => {
             let body = res.body;
             expect(body.status).to.equal(403);
-            expect(body.message).to.equal('Already have a opening or investigating ticket');
+            expect(body.message).to.equal('Already have a opening ticket');
           })
           .expect(403, done);
       });
