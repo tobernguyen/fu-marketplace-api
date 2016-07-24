@@ -462,10 +462,8 @@ describe('POST /api/v1/admin/changePassword', () => {
               })
               .set('Content-Type', 'application/json')
               .expect(res => {
-                expect(res.body.user.fullName).to.equal(user.fullName);
-                expect(res.body.user.email).to.equal(user.email);
-                expect(res.body.user.id).to.equal(user.id);
                 expect(res.body.token).to.be.ok;
+                expect(res.body.ttl).to.be.a('number');
               })
               .expect(200, done);
           });

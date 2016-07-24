@@ -132,8 +132,7 @@ function genToken(user) {
 
   return {
     token: token,
-    ttl: ttl,
-    user: user
+    ttl: ttl
   };
 }
 

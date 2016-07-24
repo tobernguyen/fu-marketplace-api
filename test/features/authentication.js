@@ -26,10 +26,8 @@ describe('POST /login', () => {
         })
         .set('Content-Type', 'application/json')
         .expect(res => {
-          expect(res.body.user.fullName).to.equal(user.fullName);
-          expect(res.body.user.email).to.equal(user.email);
-          expect(res.body.user.id).to.equal(user.id);
           expect(res.body.token).to.be.ok;
+          expect(res.body.ttl).to.be.a('number');
         })
         .expect(200, done);
     });
@@ -67,14 +65,8 @@ describe('GET /auth/google/callback', () => {
           .get('/auth/google/callback')
           .query({ code: 'validCode' })
           .expect(res => {
-            let resBody = res.body;
-            let userInfo = resBody.user;
-            expect(resBody.token).to.be.ok;
-            expect(userInfo).to.be.ok;
-            expect(userInfo.id).to.be.ok;
-            expect(userInfo.fullName).to.equal('Nguyen Hoang Long');
-            expect(userInfo.gender).to.equal('male');
-            expect(userInfo.email).to.equal('longlonglong@fpt.edu.vn');
+            expect(res.body.token).to.be.ok;
+            expect(res.body.ttl).to.be.a('number');
             
             getUserProfileStub.restore();
           })
