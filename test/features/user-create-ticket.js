@@ -64,7 +64,7 @@ describe('POST /api/v1/orders/:orderId/openTicket', () => {
         });
       });
 
-      it('should return 403', done => {
+      it('should return 200 ok', done => {
         request(app)
           .post(`/api/v1/orders/${order.id}/openTicket`)
           .set('X-Access-Token', userToken)
@@ -74,10 +74,10 @@ describe('POST /api/v1/orders/:orderId/openTicket', () => {
           })
           .expect(res => {
             let body = res.body;
-            expect(body.status).to.equal(403);
-            expect(body.message).to.equal('Already have a opening ticket');
+            expect(body.orderId).to.equal(order.id);
+            expect(body.userNote).to.equal('bon nay lam an chan qua');
           })
-          .expect(403, done);
+          .expect(200, done);
       });
     });
   });
