@@ -66,7 +66,7 @@ exports.postItems = (req, res) => {
       return;
     }
     
-    let imageFileName = new Date().getTime();
+    let imageFileName = `shops/${shop.id}/items/${new Date().getTime()}`;
 
     processItemFormData({
       maxFileSize: Item.MAX_IMAGE_SIZE,
@@ -76,12 +76,12 @@ exports.postItems = (req, res) => {
           crop: '200x200',
           quality: 90,
           suffix: 'small',
-          fileName: `/shops/${shop.id}/items/${imageFileName}`
+          fileName: imageFileName
         },
         {
           resize: '960x960',
           quality: 90,
-          fileName: `/shops/${shop.id}/items/${imageFileName}`
+          fileName: imageFileName
         }
       ]
     })(req, res, d => {
@@ -175,8 +175,10 @@ exports.putItem = (req, res) => {
     }
 
     let item = shop.Items[0];
-    
-    let imageFileName = new Date().getTime();
+
+    // Get old file name to replace that file
+    let imageFileName = _.get(item, 'imageFile.versions[1].Key') ||
+                        `shops/${shop.id}/items/${new Date().getTime()}`;
 
     processItemFormData({
       maxFileSize: Item.MAX_IMAGE_SIZE,
@@ -186,12 +188,12 @@ exports.putItem = (req, res) => {
           crop: '200x200',
           quality: 90,
           suffix: 'small',
-          fileName: `/shops/${shop.id}/items/${imageFileName}`
+          fileName: imageFileName
         },
         {
           resize: '960x960',
           quality: 90,
-          fileName: `/shops/${shop.id}/items/${imageFileName}`
+          fileName: imageFileName
         }
       ]
     })(req, res, d => {
@@ -199,10 +201,7 @@ exports.putItem = (req, res) => {
       let promises = [];
       let updateData = _.cloneDeep(data);
       if (data.image !== undefined) {
-        if (item.imageFile && _.isArray(item.imageFile.versions)) {
-          promises[promises.length] = imageUploader.deleteImages(item.imageFile.versions).catch(() => Promise.resolve());
-        }
-        updateData.image = data.image[0].Location;
+        updateData.image = `${data.image[0].Location}?${new Date().getTime()}`
         updateData.imageFile = {
           versions: _.map(data.image, image => {
             return {

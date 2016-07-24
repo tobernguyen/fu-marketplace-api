@@ -394,19 +394,10 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
     });
 
     it('should return 200 with new item information', done => {
-      let checkFileExist = () => {
-        fs.accessSync(oldImageFile);        
-      };
- 
-      expect(checkFileExist).to.not.throw(Error);
-
       request(app)
         .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
         .set('X-Access-Token', sellerToken)
         .attach('imageFile', 'test/fixtures/user-avatar.jpg')
-        .expect(res => {
-          expect(checkFileExist).to.throw(Error);
-        })
         .expect(200, done);
     });
   });

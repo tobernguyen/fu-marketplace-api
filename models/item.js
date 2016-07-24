@@ -6,7 +6,8 @@ const kue = require('../libs/kue');
 
 var IGNORE_ATTRIBUTES = [
   'updatedAt',
-  'createdAt'
+  'createdAt',
+  'imageFile'
 ];
 
 var ITEM_STATUS = {
