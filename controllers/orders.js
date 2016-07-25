@@ -183,22 +183,8 @@ exports.postOpenTicket = (req, res) => {
       let error = 'Order does not exits';
       return Promise.reject({status: 404, message: error, type: 'model'});
     } else {
-      return Ticket.findOne({
-        where: {
-          orderId: o.id,
-          status: {
-            $in: [Ticket.STATUS.OPENING, Ticket.STATUS.CLOSED]
-          }
-        }
-      });
-    }
-  }).then(t => {
-    if (!t) {
       let ticketInfo = _.pick(req.body, ['userNote']);
       return order.createTicket(ticketInfo);
-    } else {
-      let error = 'Already have a opening or investigating ticket';
-      return Promise.reject({status: 403, message: error, type: 'ticket'});
     }
   }).then(t => {
     res.json(t.toJSON());
