@@ -104,6 +104,8 @@ module.exports = {
           let streamBuilder = gm(part);
           streamBuilder.autoOrient();
           streamBuilder.noProfile();
+          streamBuilder.background('#FFFFFF');
+          streamBuilder.flatten();
 
           if (version.crop) {
             let sizes = version.resize.split('x');
