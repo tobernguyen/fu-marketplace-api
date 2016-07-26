@@ -8,7 +8,6 @@ var Shop = models.Shop;
 var ShipPlace = models.ShipPlace;
 var Order = models.Order;
 var OrderLine = models.OrderLine;
-var Ticket = models.Ticket;
 
 const DEFAULT_PAGE_SIZE = 10;
 

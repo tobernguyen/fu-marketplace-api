@@ -305,7 +305,7 @@ var responseShopById = (shopId, res) => {
         model: Item,
         where: { status: Item.STATUS.FOR_SELL },
         required: false
-      },
+      }
     ],
     order: [
       'sort',

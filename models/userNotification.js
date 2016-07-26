@@ -218,10 +218,10 @@ module.exports = function(sequelize, DataTypes) {
         case Order.STATUS.REJECTED:
         case Order.STATUS.SHIPPING:
         case Order.STATUS.ABORTED:
-          url = `${process.env.SITE_ROOT_URL}/orders`
+          url = `${process.env.SITE_ROOT_URL}/orders`;
           break;
         case Order.STATUS.COMPLETED:
-          url = `${process.env.SITE_ROOT_URL}/shops/${fetchedOrder.Shop.id}/reviews`
+          url = `${process.env.SITE_ROOT_URL}/shops/${fetchedOrder.Shop.id}/reviews`;
       }
 
       kue.createPushOneSignalNotification({

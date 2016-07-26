@@ -1,6 +1,6 @@
 'use strict';
 
-const helper = require('../helper');
+require('../helper');
 const rewire = require('rewire');
 const httpMocks = require('node-mocks-http');
 const jwt = require('jsonwebtoken');
