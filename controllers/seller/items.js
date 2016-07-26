@@ -6,7 +6,6 @@ var errorHandlers = require('../helpers/errorHandlers');
 var processItemFormData = require('../../middlewares/processItemFormData');
 var Item = models.Item;
 var Shop = models.Shop;
-var imageUploader = require('../../libs/image-uploader');
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -201,7 +200,7 @@ exports.putItem = (req, res) => {
       let promises = [];
       let updateData = _.cloneDeep(data);
       if (data.image !== undefined) {
-        updateData.image = `${data.image[0].Location}?${new Date().getTime()}`
+        updateData.image = `${data.image[0].Location}?${new Date().getTime()}`;
         updateData.imageFile = {
           versions: _.map(data.image, image => {
             return {
@@ -261,6 +260,51 @@ exports.deleteItem = (req, res) => {
     
     item.destroy().then(() => {
       res.sendStatus(200);
+    });
+  });
+};
+
+exports.putSetItemStatus = (req, res) => {
+  let status = req.body.status;
+  let shopId = req.params.shopId;
+  let itemId = req.params.itemId;
+  let seller = req.user;
+
+  if (!_.includes(_.values(Item.STATUS), status) || !shopId || !itemId) {
+    errorHandlers.responseError(400, 'Invalid request', 'request', res);
+    return;
+  }
+
+  Shop.findOne({
+    where: {
+      id: shopId,
+      ownerId: seller.id
+    },
+    include: {
+      model: Item,
+      where: {
+        id: itemId
+      },
+      required: false
+    }
+  }).then(shop => {
+    if (!shop) {
+      let error ='Shop does not exist';
+      errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+    if (shop.Items.length == 0) {
+      let error ='Item does not exist';
+      errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+    let item = shop.Items[0];
+    item.update({
+      status: status
+    }).then(item => {
+      res.json(item);
     });
   });
 };

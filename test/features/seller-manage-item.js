@@ -5,7 +5,6 @@ const request = require('supertest');
 const app = require('../../app.js');
 const Category = require('../../models').Category;
 const Item = require('../../models').Item;
-const fs = require('fs-extra');
 
 var _ = require('lodash');
 
@@ -378,18 +377,13 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
   });
 
   describe('with valid image file', () => {
-    let oldImageFile;
-
     before(done => {
       request(app)
         .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
         .set('X-Access-Token', sellerToken)
         .attach('imageFile', 'test/fixtures/user-avatar.jpg')
         .end(() => {
-          item.reload().then(() => {
-            oldImageFile = item.imageFile.versions[0].Key;
-            done();
-          });
+          item.reload().then(() => done());
         });
     });
 
@@ -473,6 +467,53 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
   });
 });
 
+describe('PUT /api/v1/seller/shops/:shopId/items/:itemId/setStatus', () => {
+  let  shop, sellerToken, item;
+
+  before(done => {
+    helper.factory.createUserWithRole({}, 'seller').then(u => {
+      sellerToken = helper.createAccessTokenForUserId(u.id);
+      return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');
+    }).then(s => {
+      shop = s;
+      return Category.findAll(); //we already have default category when doing migration
+    }).then(cs => {
+      return helper.factory.createItem({
+        shopId: shop.id,
+        categoryId: cs[0].id
+      });
+    }).then(i => {
+      item = i;
+      done();
+    });
+  });
+
+  describe('passed invalid status value', () => {
+    it('should return 400', done => {
+      request(app)
+        .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}/setStatus`)
+        .set('X-Access-Token', sellerToken)
+        .send({status: 999})
+        .expect(400, done);
+    });
+  });
+
+  describe('passed valid status value', () => {
+    it('should change status of that item to new status', done => {
+      request(app)
+        .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}/setStatus`)
+        .set('X-Access-Token', sellerToken)
+        .send({status: Item.STATUS.NOT_FOR_SELL})
+        .expect(res => {
+          let actualItem = res.body;
+          expect(actualItem.id).to.equal(item.id);
+          expect(actualItem.status).to.equal(Item.STATUS.NOT_FOR_SELL);
+        })
+        .expect(200, done);
+    });
+  });
+});
+
 describe('DELETE /api/v1/seller/shops/:shopId/items/:itemId', () => {
   let  shop, sellerToken, item;
 
@@ -494,8 +535,8 @@ describe('DELETE /api/v1/seller/shops/:shopId/items/:itemId', () => {
     });
   });
 
-  describe('with valid item attribute and without image via multipart form', () => {
-    it('should return 200 with new item information', done => {
+  describe('with valid shopId and itemId', () => {
+    it('should return 200', done => {
       request(app)
         .delete(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
         .set('X-Access-Token', sellerToken)
