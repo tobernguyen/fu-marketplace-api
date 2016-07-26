@@ -163,10 +163,6 @@ describe('Ticket models', () => {
       describe('without admin comment ticket', () => {
         it('should be ok and do not update admin comment', done => {
           ticket.closeTicket().then(t => {
-            let jobs = helper.queue.testMode.jobs;
-            expect(jobs).to.have.lengthOf(1);
-            expect(jobs[0].type).to.equal('send ticket notification');
-            expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.CLOSED});
             expect(t).to.be.ok;
             return Ticket.findById(t.id);
           }).then(ticketFromDb => {
@@ -176,14 +172,28 @@ describe('Ticket models', () => {
             done();
           }, done);
         });
+
+        it('should not create "send ticket notification" job', done => {
+          ticket.closeTicket().then(() => {
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(0);
+            done();
+          });
+        });
       });
 
       describe('with admin comment ticket', () => {
-        it('should be ok and update admin comment', done => {
+        it('should be ok and update admin comment and create "send ticket notification" job', done => {
           ticket.closeTicket({
             adminComment: 'xin duoc phep duoc close'
           }).then(t => {
             expect(t).to.be.ok;
+
+            let jobs = helper.queue.testMode.jobs;
+            expect(jobs).to.have.lengthOf(1);
+            expect(jobs[0].type).to.equal('send ticket notification');
+            expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.CLOSED});
+
             return Ticket.findById(t.id);
           }).then(ticketFromDb => {
             expect(ticketFromDb.adminComment).to.equal('xin duoc phep duoc close');
