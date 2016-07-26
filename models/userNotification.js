@@ -99,7 +99,7 @@ module.exports = function(sequelize, DataTypes) {
             contents: {
               'en': message
             },
-            url: `${process.env.SITE_ROOT_URL}/tickets}`
+            url: `${process.env.SITE_ROOT_URL}/tickets`
           }
         });
 
