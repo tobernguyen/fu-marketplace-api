@@ -11,6 +11,7 @@ const sellerOrder = require('../controllers/seller/orders');
 const shipPlace = require('../controllers/shipPlaces');
 const category = require('../controllers/categories');
 const tickets = require('../controllers/tickets');
+const shops = require('../controllers/shops');
 const adminShopOpeningRequest = require('../controllers/admin/shopOpeningRequests');
 const adminTicket = require('../controllers/admin/tickets');
 const shopFeed = require('../controllers/feed/shops');
@@ -51,9 +52,9 @@ router.post('/api/v1/requestOpenShopFirstTime', users.postRequestOpenShopFirstTi
 router.get('/api/v1/shipPlaces', shipPlace.getShipPlaces);
 router.get('/api/v1/categories', category.getCategories);
 router.get('/api/v1/metadata', application.getMetadata);
-router.get('/api/v1/shops/:shopId', users.getShop);
+router.get('/api/v1/shops/:shopId', shops.getShop);
 router.post('/api/v1/shops/:shopId/orders', orders.postPlaceOrder);
-router.post('/api/v1/shops/:shopId/review', users.postReviewShop);
+router.post('/api/v1/shops/:shopId/review', shops.postReviewShop);
 router.get('/api/v1/shops/:shopId/reviews', userReviews.getReviews);
 
 router.get('/api/v1/orders', orders.getOrders);
