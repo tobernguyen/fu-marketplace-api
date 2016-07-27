@@ -438,7 +438,7 @@ describe('POST /api/v1/admin/changePassword', () => {
             request(app)
               .get('/api/v1/users/me')
               .set('X-Access-Token', accessToken)
-              .expect(400, done);
+              .expect(440, done);
           };
           
           request(app)

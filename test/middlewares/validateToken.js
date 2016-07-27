@@ -46,7 +46,7 @@ describe('validateToken middleware', () => {
       tk.reset();
     });
     
-    it('should reject the request with code 400', done => {
+    it('should reject the request with code 440', done => {
       var request  = httpMocks.createRequest({
         headers: {
           'x-access-token': jwt.sign({id: 1}, process.env.TOKEN_SECRET, {
@@ -64,7 +64,7 @@ describe('validateToken middleware', () => {
       validateTokenMW(request, response);
       
       response.on('end', () => {
-        expect(response.statusCode).to.equal(400);
+        expect(response.statusCode).to.equal(440);
         done();
       });
     });

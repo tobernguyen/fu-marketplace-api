@@ -36,9 +36,9 @@ module.exports = function(req, res, next) {
       }
     }, err => {
       if (err.name === 'TokenExpiredError') {
-        res.status(400);
+        res.status(440);
         res.json({
-          'status': 400,
+          'status': 440,
           'message': 'Token Expired',
           'message_code': 'error.authentication.token_expired'
         });

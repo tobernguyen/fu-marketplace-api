@@ -200,12 +200,12 @@ describe('POST /api/v1/users/signOutAll', () => {
       request(app)
         .get('/api/v1/users/me')
         .set('X-Access-Token', accessToken)
-        .expect(400, done);
+        .expect(440, done);
     };
     
     request(app)
       .post('/api/v1/users/signOutAll')
       .set('X-Access-Token', accessToken)
-      .expect(200, checkToken);
+      .expect(440, checkToken);
   });
 });
