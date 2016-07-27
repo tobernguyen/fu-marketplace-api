@@ -10,7 +10,7 @@ var OrderLine = models.OrderLine;
 
 const DEFAULT_PAGE_SIZE = 10;
 
-exports.getOrderByShop = (req, res) => {
+exports.getOrdersByShop = (req, res) => {
   let shopId = req.params.shopId;
   let status = req.query.status;
   let type = req.query.type;
@@ -71,22 +71,53 @@ exports.getOrderByShop = (req, res) => {
   }
 
   Order.findAll(orderFindOption).then(os => {
-    let result = _.map(os, o => {
-      let order = o.toJSON();
-      let orderLines = _.map(order.OrderLines, r => _.pick(r, ['item', 'note', 'quantity']));
-      order.orderLines = orderLines;
-      order.user = order.User;
-      delete order.User;
-      delete order.Shop;
-      delete order.userId;
-      delete order.OrderLines;
-      return order;
-    });
+    let result = _.map(os, o => processOrderData(o));
     res.json({
       orders: result
     });
   }).catch(err => {
     errorHandlers.handleModelError(err, res);
+  });
+};
+
+exports.getOrder = (req, res) => {
+  let orderId = req.params.id;
+  let seller = req.user;
+
+  Order.findOne({
+    where: {
+      id: orderId
+    },
+    include: [
+      {
+        model: Shop,
+        attributes: ['ownerId'],
+        where: {
+          ownerId: seller.id
+        }
+      },
+      {
+        model: User,
+        attributes: ['id', 'fullName', 'avatar']
+      },
+      {
+        model: OrderLine,
+        attributes: ['item', 'note', 'quantity']
+      }
+    ]
+  }).then(o => {
+    if (!o) {
+      let error = 'Order does not exits';
+      return Promise.reject({status: 404, message: error, type: 'model'});
+    }
+
+    res.json(processOrderData(o));
+  }).catch(err => {
+    if (err.status) {
+      errorHandlers.responseError(err.status, err.message, err.type, res);
+    } else {
+      errorHandlers.handleModelError(err, res);
+    }
   });
 };
 
@@ -108,6 +139,18 @@ exports.completeOrder = (req, res) => {
 
 exports.abortOrder = (req, res) => {
   tryToChangeOrderStatus(req, res, 'abort');
+};
+
+var processOrderData = (o) => {
+  let order = o.toJSON();
+  let orderLines = _.map(order.OrderLines, r => _.pick(r, ['item', 'note', 'quantity']));
+  order.orderLines = orderLines;
+  order.user = order.User;
+  delete order.User;
+  delete order.Shop;
+  delete order.userId;
+  delete order.OrderLines;
+  return order;
 };
 
 var tryToChangeOrderStatus = (req, res, action) => {

@@ -121,7 +121,9 @@ router.post('/api/v1/seller/shops/:shopId/items', mustBe.authorized('seller'), s
 router.put('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.putItem);
 router.put('/api/v1/seller/shops/:shopId/items/:itemId/setStatus', mustBe.authorized('seller'), sellerItem.putSetItemStatus);
 router.delete('/api/v1/seller/shops/:shopId/items/:itemId', mustBe.authorized('seller'), sellerItem.deleteItem);
-router.get('/api/v1/seller/shops/:shopId/orders', mustBe.authorized('seller'), sellerOrder.getOrderByShop);
+router.get('/api/v1/seller/shops/:shopId/orders', mustBe.authorized('seller'), sellerOrder.getOrdersByShop);
+
+router.get('/api/v1/seller/orders/:id', mustBe.authorized('seller'), sellerOrder.getOrder);
 router.post('/api/v1/seller/orders/:orderId/accept', mustBe.authorized('seller'), sellerOrder.acceptOrder);
 router.post('/api/v1/seller/orders/:orderId/reject', mustBe.authorized('seller'), sellerOrder.rejectOrder);
 router.post('/api/v1/seller/orders/:orderId/ship', mustBe.authorized('seller'), sellerOrder.shipOrder);

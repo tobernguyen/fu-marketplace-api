@@ -30,13 +30,14 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
     });
   });
 
-  describe('with valid accesToken and get all order', () => {
+  describe('with valid accessToken and get all order', () => {
     it('should return 200 with all orderInfo', done => {
       request(app)
         .get(`/api/v1/seller/shops/${shopId}/orders/`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
-        .expect(res => {
+        .expect(200)
+        .then(res => {
           let bodyOrder = res.body.orders;
           expect(bodyOrder).to.have.lengthOf(4);
           let sortedBodyOrders = _.sortBy(bodyOrder, ['id']);
@@ -47,25 +48,26 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
             expect(sortedBodyOrders[value].note).to.equal(sortedOrder[value].note);
             expect(sortedBodyOrders[value].shipAddress).to.equal(sortedOrder[value].shipAddress);
             expect(sortedBodyOrders[value].user.id).to.equal(sortedOrder[value].userId);
-
-            orders[value].getOrderLines(ols => {
-              expect(sortedBodyOrders[value].orderLines[0].note).to.equal(ols[0].note);
-              expect(sortedBodyOrders[value].orderLines[0].quantity).to.equal(ols[0].quantity);
-              expect(sortedBodyOrders[value].orderLines[0].item).to.equal(ols[0].item);
-            });
           });
-        })
-        .expect(200, done);
+
+          sortedOrder[0].getOrderLines().then(ols => {
+            expect(sortedBodyOrders[0].orderLines[0].note).to.equal(ols[0].note);
+            expect(sortedBodyOrders[0].orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(sortedBodyOrders[0].orderLines[0].item).to.eql(ols[0].item);
+            done();
+          });
+        });
     });
   });
 
-  describe('with valid accesToken and get new order', () => {
+  describe('with valid accessToken and get new order', () => {
     it('should return 200 with 1 new orderInfo', done => {
       request(app)
         .get(`/api/v1/seller/shops/${shopId}/orders/?status=NEW`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
-        .expect(res => {
+        .expect(200)
+        .then(res => {
           let bodyOrder = res.body.orders;
           let order = _.filter(orders, function(o) { return o.status === Order.STATUS.NEW; })[0];
 
@@ -74,23 +76,24 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
           expect(bodyOrder[0].note).to.equal(order.note);
           expect(bodyOrder[0].shipAddress).to.equal(order.shipAddress);
 
-          order.getOrderLines(ols => {
+          order.getOrderLines().then(ols => {
             expect(bodyOrder[0].orderLines[0].note).to.equal(ols[0].note);
             expect(bodyOrder[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-            expect(bodyOrder[0].orderLines[0].item).to.equal(ols[0].item);
+            expect(bodyOrder[0].orderLines[0].item).to.eql(ols[0].item);
+            done();
           });
-        })
-        .expect(200, done);
+        });
     });
   });
 
-  describe('with valid accesToken and get active order', () => {
+  describe('with valid accessToken and get active order', () => {
     it('should return 200 with 1 new orderInfo', done => {
       request(app)
           .get(`/api/v1/seller/shops/${shopId}/orders/?type=ACTIVE`)
           .set('X-Access-Token', sellerToken)
           .set('Content-Type', 'application/json')
-          .expect(res => {
+          .expect(200)
+          .then(res => {
             let bodyOrder = res.body.orders;
             let order = _.filter(orders, function(o) {
               return _.indexOf([Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING], o.status) !== -1;
@@ -101,23 +104,24 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
             expect(bodyOrder[0].note).to.equal(order.note);
             expect(bodyOrder[0].shipAddress).to.equal(order.shipAddress);
 
-            order.getOrderLines(ols => {
+            order.getOrderLines().then(ols => {
               expect(bodyOrder[0].orderLines[0].note).to.equal(ols[0].note);
               expect(bodyOrder[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-              expect(bodyOrder[0].orderLines[0].item).to.equal(ols[0].item);
+              expect(bodyOrder[0].orderLines[0].item).to.eql(ols[0].item);
+              done();
             });
-          })
-          .expect(200, done);
+          });
     });
   });
 
-  describe('with valid accesToken and get cancel order', () => {
+  describe('with valid accessToken and get cancel order', () => {
     it('should return 200 with 1 cancel orderInfo', done => {
       request(app)
         .get(`/api/v1/seller/shops/${shopId}/orders/?status=CANCELED`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
-        .expect(res => {
+        .expect(200)
+        .then(res => {
           let bodyOrder = res.body.orders;
           let canceledOrders = _.filter(orders, function(o) { return o.status === Order.STATUS.CANCELED; });
           let order = _.sortBy(canceledOrders, function(o) { return -o.id; })[0];
@@ -127,17 +131,17 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
           expect(bodyOrder[0].note).to.equal(order.note);
           expect(bodyOrder[0].shipAddress).to.equal(order.shipAddress);
 
-          order.getOrderLines(ols => {
+          order.getOrderLines().then(ols => {
             expect(bodyOrder[0].orderLines[0].note).to.equal(ols[0].note);
             expect(bodyOrder[0].orderLines[0].quantity).to.equal(ols[0].quantity);
-            expect(bodyOrder[0].orderLines[0].item).to.equal(ols[0].item);
+            expect(bodyOrder[0].orderLines[0].item).to.eql(ols[0].item);
+            done();
           });
-        })
-        .expect(200, done);
+        });
     });
   });
 
-  describe('with valid accesToken and get rejected order', () => {
+  describe('with valid accessToken and get rejected order', () => {
     it('should return 200 with empty array', done => {
       request(app)
         .get(`/api/v1/seller/shops/${shopId}/orders/?status=REJECTED`)
@@ -148,6 +152,58 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
           expect(bodyOrder).to.have.lengthOf(0);
         })
         .expect(200, done);
+    });
+  });
+});
+
+describe('GET /api/v1/seller/orders/:id', () => {
+  let sellerToken, orders;
+
+  before(done => {
+    helper.factory.createShop().then(s => {
+      sellerToken = helper.createAccessTokenForUserId(s.ownerId);
+
+      let promises = [];
+
+      promises[promises.length] = helper.factory.createOrder({ shopId: s.id});
+      promises[promises.length] = helper.factory.createOrder({ shopId: s.id, status: Order.STATUS.CANCELED});
+
+      return Promise.all(promises);
+    }).then(o => {
+      orders = o;
+      done();
+    });
+  });
+
+  describe('with valid order id', () => {
+    it('should response information of that order', done => {
+      request(app)
+        .get(`/api/v1/seller/orders/${orders[0].id}`)
+        .set('X-Access-Token', sellerToken)
+        .expect(200)
+        .then(res => {
+          let body = res.body;
+          expect(body.id).to.equal(orders[0].id);
+          expect(body.note).to.equal(orders[0].note);
+          expect(body.shipAddress).to.equal(orders[0].shipAddress);
+          expect(body.user.id).to.equal(orders[0].userId);
+
+          orders[0].getOrderLines().then(ols => {
+            expect(body.orderLines[0].note).to.equal(ols[0].note);
+            expect(body.orderLines[0].quantity).to.equal(ols[0].quantity);
+            expect(body.orderLines[0].item).to.eql(ols[0].item);
+            done();
+          });
+        }).catch(done);
+    });
+  });
+
+  describe('with invalid order id', () => {
+    it('should return 404', done => {
+      request(app)
+        .get(`/api/v1/seller/orders/${9999}`)
+        .set('X-Access-Token', sellerToken)
+        .expect(404, done);
     });
   });
 });
