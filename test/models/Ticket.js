@@ -148,7 +148,7 @@ describe('Ticket models', () => {
     });
   });
 
-  describe('#closeTicket', () => {
+  describe('#closeTicketByUser', () => {
     describe('with opening ticket', () => {
       let ticket;
 
@@ -160,46 +160,23 @@ describe('Ticket models', () => {
         });
       });
 
-      describe('without admin comment ticket', () => {
-        it('should be ok and do not update admin comment', done => {
-          ticket.closeTicket().then(t => {
-            expect(t).to.be.ok;
-            return Ticket.findById(t.id);
-          }).then(ticketFromDb => {
-            expect(ticketFromDb.userNote).to.equal(ticket.userNote);
-            expect(ticketFromDb.adminComment).to.equal(ticket.adminComment);
-            expect(ticketFromDb.status).to.equal(Ticket.STATUS.CLOSED);
-            done();
-          }, done);
-        });
-
-        it('should not create "send ticket notification" job', done => {
-          ticket.closeTicket().then(() => {
-            let jobs = helper.queue.testMode.jobs;
-            expect(jobs).to.have.lengthOf(0);
-            done();
-          });
-        });
+      it('should be ok and do not update admin comment', done => {
+        ticket.closeTicketByUser().then(t => {
+          expect(t).to.be.ok;
+          return Ticket.findById(t.id);
+        }).then(ticketFromDb => {
+          expect(ticketFromDb.userNote).to.equal(ticket.userNote);
+          expect(ticketFromDb.adminComment).to.equal(ticket.adminComment);
+          expect(ticketFromDb.status).to.equal(Ticket.STATUS.CLOSED);
+          done();
+        }, done);
       });
 
-      describe('with admin comment ticket', () => {
-        it('should be ok and update admin comment and create "send ticket notification" job', done => {
-          ticket.closeTicket({
-            adminComment: 'xin duoc phep duoc close'
-          }).then(t => {
-            expect(t).to.be.ok;
-
-            let jobs = helper.queue.testMode.jobs;
-            expect(jobs).to.have.lengthOf(1);
-            expect(jobs[0].type).to.equal('send ticket notification');
-            expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.CLOSED});
-
-            return Ticket.findById(t.id);
-          }).then(ticketFromDb => {
-            expect(ticketFromDb.adminComment).to.equal('xin duoc phep duoc close');
-            expect(ticketFromDb.status).to.equal(Ticket.STATUS.CLOSED);
-            done();
-          }, done);
+      it('should not create "send ticket notification" job', done => {
+        ticket.closeTicketByUser().then(() => {
+          let jobs = helper.queue.testMode.jobs;
+          expect(jobs).to.have.lengthOf(0);
+          done();
         });
       });
     });
@@ -215,7 +192,7 @@ describe('Ticket models', () => {
       });
 
       it('should be return error', done => {
-        ticket.closeTicket().catch(error => {
+        ticket.closeTicketByUser().catch(error => {
           expect(error.status).to.equal(403);
           expect(error.message).to.equal('Only opening or investigating ticket can be closed');
           expect(error.type).to.equal('ticket');
@@ -225,6 +202,79 @@ describe('Ticket models', () => {
           expect(ticketFromDb.status).to.equal(Ticket.STATUS.CLOSED);
           done();
         }, done);
+      });
+    });
+  });
+
+  describe('#closeTicketByAdmin', () => {
+    describe('with opening ticket', () => {
+      let ticket;
+
+      beforeEach(done => {
+        helper.factory.createTicket().then(t => {
+          ticket = t;
+          helper.queue.testMode.clear();
+          done();
+        });
+      });
+
+      it('should return error', done => {
+        ticket.closeTicketByAdmin({
+          adminComment: 'minh close ticket nay nhe'
+        }).catch(error => {
+          expect(error.status).to.equal(403);
+          expect(error.message).to.equal('Only investigating ticket can be closed by admin');
+          expect(error.type).to.equal('ticket');
+          return Ticket.findById(ticket.id);
+        }).then(ticketFromDb => {
+          expect(ticketFromDb.userNote).to.equal(ticket.userNote);
+          expect(ticketFromDb.status).to.equal(Ticket.STATUS.OPENING);
+          done();
+        }, done);
+      });
+    });
+
+    describe('with investigating ticket', () => {
+      let ticket;
+
+      beforeEach(done => {
+        helper.factory.createTicket({status: Ticket.STATUS.INVESTIGATING}).then(t => {
+          ticket = t;
+          helper.queue.testMode.clear();
+          done();
+        });
+      });
+
+      describe('without adminMessage', () => {
+        it('should return error', done => {
+          ticket.closeTicketByAdmin().catch(error => {
+            expect(error.status).to.equal(404);
+            expect(error.message).to.equal('Must provide adminComment message when admin close ticket');
+            expect(error.type).to.equal('ticket');
+            return Ticket.findById(ticket.id);
+          }).then(ticketFromDb => {
+            expect(ticketFromDb.userNote).to.equal(ticket.userNote);
+            expect(ticketFromDb.adminComment).to.equal(ticket.adminComment);
+            expect(ticketFromDb.status).to.equal(Ticket.STATUS.INVESTIGATING);
+            done();
+          }, done);
+        });
+      });
+
+      describe('with adminMessage', () => {
+        it('should return error', done => {
+          ticket.closeTicketByAdmin({
+            adminComment: 'minh close ticket nay nhe, khong van de gi ca'
+          }).then(t => {
+            expect(t).to.be.ok;
+            return Ticket.findById(t.id);
+          }).then(ticketFromDb => {
+            expect(ticketFromDb.userNote).to.equal(ticket.userNote);
+            expect(ticketFromDb.adminComment).to.equal('minh close ticket nay nhe, khong van de gi ca');
+            expect(ticketFromDb.status).to.equal(Ticket.STATUS.CLOSED);
+            done();
+          }, done);
+        });
       });
     });
   });
