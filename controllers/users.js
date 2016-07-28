@@ -10,8 +10,6 @@ var models = require('../models');
 var User = models.User;
 var ShopOpeningRequest = models.ShopOpeningRequest;
 var Shop = models.Shop;
-var ShipPlace = models.ShipPlace;
-var Item = models.Item;
 var crypto = require('crypto');
 var oneSignal = require('../libs/onesignal');
 

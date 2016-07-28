@@ -294,9 +294,7 @@ describe('Ticket models', () => {
       it('should be ok', done => {
         ticket.reopenTicket().then(t => {
           let jobs = helper.queue.testMode.jobs;
-          expect(jobs).to.have.lengthOf(1);
-          expect(jobs[0].type).to.equal('send ticket notification');
-          expect(jobs[0].data).to.eql({ticketId: ticket.id, newStatus: Ticket.STATUS.OPENING});
+          expect(jobs).to.have.lengthOf(0);
           expect(t).to.be.ok;
           return Ticket.findById(t.id);
         }).then(ticketFromDb => {

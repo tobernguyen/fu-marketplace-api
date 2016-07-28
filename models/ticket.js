@@ -115,13 +115,11 @@ module.exports = function(sequelize, DataTypes) {
             }
           }
         }).then(result => {
-          // Only send notification if admin close ticket, not user self-close it
-          if (ticketInfo && ticketInfo.adminComment) {
-            kue.createSendTicketNotifcationJob({
-              ticketId: this.id,
-              newStatus: TICKET_STATUS.CLOSED
-            });
-          }
+          // Send notification to user
+          kue.createSendTicketNotifcationJob({
+            ticketId: this.id,
+            newStatus: TICKET_STATUS.CLOSED
+          });
 
           return Promise.resolve(result);
         });
@@ -158,13 +156,6 @@ module.exports = function(sequelize, DataTypes) {
               type: 'ticket'
             });
           }
-        }).then(result => {
-          kue.createSendTicketNotifcationJob({
-            ticketId: this.id,
-            newStatus: TICKET_STATUS.OPENING
-          });
-
-          return Promise.resolve(result);
         });
       }
     }
