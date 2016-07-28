@@ -159,7 +159,7 @@ exports.postCloseTicket = (req, res) => {
         let error = 'Ticket does not exist';
         return Promise.reject({status: 404, message: error, type: 'model'});
       } else {
-        return t.closeTicket(closeTicketInfo);
+        return t.closeTicketByAdmin(closeTicketInfo);
       }
     }).then(t => {
       let result = t.toJSON();

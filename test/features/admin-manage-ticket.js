@@ -280,16 +280,43 @@ describe('POST /api/v1/admin/tickets/:ticketId/close', () => {
         .expect(res => {
           let body = res.body;
           expect(body.status).to.equal(403);
-          expect(body.message).to.equal('Only opening or investigating ticket can be closed');
+          expect(body.message).to.equal('Only investigating ticket can be closed by admin');
         })
         .expect(403, done);
+    });
+  });
+
+  describe('with opening ticket', () => {
+    beforeEach(done => {
+      helper.factory.createTicket().then(t => {
+        ticket = t;
+        done();
+      });
+    });
+
+    it('should return 403', done => {
+      request(app)
+          .post(`/api/v1/admin/tickets/${ticket.id}/close`)
+          .set('X-Access-Token', adminToken)
+          .set('Content-Type', 'application/json')
+          .send({
+            adminComment: 'bon nay lam an chan qua'
+          })
+          .expect(res => {
+            let body = res.body;
+            expect(body.status).to.equal(403);
+            expect(body.message).to.equal('Only investigating ticket can be closed by admin');
+          })
+          .expect(403, done);
     });
   });
 
   describe('with investigating ticket', () => {
 
     beforeEach(done => {
-      helper.factory.createTicket().then(t => {
+      helper.factory.createTicket({
+        status: Ticket.STATUS.INVESTIGATING
+      }).then(t => {
         ticket = t;
         done();
       });
