@@ -15,9 +15,9 @@ module.exports = function(req, res, next) {
       if (user) {
         if (user.banned) {
           // User has been banned
-          res.status(403);
+          res.status(442);
           res.json({
-            'status': 403,
+            'status': 442,
             'message': 'You have been temporarily banned from FUM',
             'message_code': 'error.authentication.temporarily_banned'
           });
@@ -27,9 +27,9 @@ module.exports = function(req, res, next) {
         }
       } else {
         // No user with this name exists, respond back with a 401
-        res.status(401);
+        res.status(441);
         res.json({
-          'status': 401,
+          'status': 441,
           'message': 'Invalid User',
           'message_code': 'error.user.invalid_user'
         });
@@ -43,9 +43,9 @@ module.exports = function(req, res, next) {
           'message_code': 'error.authentication.token_expired'
         });
       } else if (err.name === 'JsonWebTokenError') {
-        res.status(401);
+        res.status(441);
         res.json({
-          'status': 401,
+          'status': 441,
           'message': 'Invalid Token or Key',
           'message_code': 'error.authentication.invalid_token'
         });

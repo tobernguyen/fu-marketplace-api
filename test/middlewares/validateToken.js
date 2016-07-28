@@ -24,7 +24,7 @@ describe('validateToken middleware', () => {
   });
   
   describe('when request contain invalid access token', () => {
-    it('should reject the request with code 401', done => {
+    it('should reject the request with code 441', done => {
       var request  = httpMocks.createRequest({
         headers: {
           'x-access-token': 'invalid.token'
@@ -35,7 +35,7 @@ describe('validateToken middleware', () => {
       });
       validateTokenMW(request, response);
       response.on('end', () => {
-        expect(response.statusCode).to.equal(401);
+        expect(response.statusCode).to.equal(441);
         done();     
       });
     });
@@ -100,7 +100,7 @@ describe('validateToken middleware', () => {
     });
 
     describe('access token is from banned user', () => {
-      it('should reject the request with code 403', done => {
+      it('should reject the request with code 442', done => {
         var stubValidateUser = sinon.stub();
         var fakeUser = {id: 1, banned: true};
         var tokenPayload = {id: 1};
@@ -121,7 +121,7 @@ describe('validateToken middleware', () => {
         validateTokenMW.__set__('validateUser', stubValidateUser);
         validateTokenMW(request, response);
         response.on('end', () => {
-          expect(response.statusCode).to.equal(403);
+          expect(response.statusCode).to.equal(442);
           done();
         });
       });
