@@ -95,10 +95,11 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
           .expect(200)
           .then(res => {
             let bodyOrder = res.body.orders;
-            let order = _.filter(orders, function(o) {
+            let activeOrders = _.filter(orders, function(o) {
               return _.indexOf([Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING], o.status) !== -1;
-            })[0];
-
+            });
+            let sortedOrder = _.orderBy(activeOrders, ['id'], ['desc']);
+            let order = sortedOrder[0];
             expect(bodyOrder).to.have.lengthOf(2);
             expect(bodyOrder[0].id).to.equal(order.id);
             expect(bodyOrder[0].note).to.equal(order.note);
