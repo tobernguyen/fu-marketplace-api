@@ -43,11 +43,7 @@ exports.getOrdersByShop = (req, res) => {
       }
     ],
     limit: perPage,
-    offset: offset,
-    order: [
-        ['status'],
-        ['id', 'DESC']
-    ]
+    offset: offset
   };
 
   if (type) {
@@ -55,6 +51,7 @@ exports.getOrdersByShop = (req, res) => {
       orderFindOption.where.status = {
         $in: [Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING]
       };
+      orderFindOption.order = [['id', 'DESC']];
     } else {
       let error = 'Invalid type query';
       errorHandlers.responseError(404, error, 'query', res);
@@ -66,6 +63,10 @@ exports.getOrdersByShop = (req, res) => {
       errorHandlers.responseError(404, error, 'query', res);
       return;
     } else {
+      orderFindOption.order = [
+        ['status'],
+        ['id', 'DESC']
+      ];
       orderFindOption.where.status = Order.STATUS[status];
     }
   }
