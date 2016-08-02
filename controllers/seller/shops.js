@@ -238,13 +238,15 @@ exports.postRequestOpenShop = (req, res) => {
   let shopInfo = req.body.shopInfo;
   let note = req.body.note || '';
 
-  ShopOpeningRequest.create({
-    name: shopInfo.name,
-    description: shopInfo.description,
-    address: shopInfo.address,
-    phone: shopInfo.phone,
-    ownerId: user.id,
-    note: note
+  validateRequestOpeningShop(user).then(() => {
+    return ShopOpeningRequest.create({
+      name: shopInfo.name,
+      description: shopInfo.description,
+      address: shopInfo.address,
+      phone: shopInfo.phone,
+      ownerId: user.id,
+      note: note
+    });
   }).then((shopOpeningRequest) => {
     res.json({
       sellerInfo: _.assign(sellerInfo, {identityPhoto: user.identityPhotoFile.versions[0].Url}),
@@ -252,7 +254,26 @@ exports.postRequestOpenShop = (req, res) => {
       note: shopOpeningRequest.note || ''
     });
   }).catch(error => {
-    errorHandlers.handleModelError(error, res);
+    if (error === 'already_requested') {
+      errorHandlers.responseError(400, 'A pending request is existed', 'open_shop_request', res);
+    } else {
+      errorHandlers.handleModelError(error, res);
+    }
+  });
+};
+
+var validateRequestOpeningShop = (user) => {
+  return ShopOpeningRequest.findOne({
+    where: {
+      ownerId: user.id,
+      status: ShopOpeningRequest.STATUS.PENDING
+    }
+  }).then(shopOpeningRequests => {
+    if (shopOpeningRequests) {
+      return Promise.reject('already_requested');
+    } else {
+      return Promise.resolve();
+    }
   });
 };
 
