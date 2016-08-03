@@ -98,7 +98,7 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
             let activeOrders = _.filter(orders, function(o) {
               return _.indexOf([Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING], o.status) !== -1;
             });
-            let sortedOrder = _.orderBy(activeOrders, ['id'], ['desc']);
+            let sortedOrder = _.orderBy(activeOrders, ['id'], ['asc']);
             let order = sortedOrder[0];
             expect(bodyOrder).to.have.lengthOf(2);
             expect(bodyOrder[0].id).to.equal(order.id);

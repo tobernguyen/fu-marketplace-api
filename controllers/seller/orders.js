@@ -51,7 +51,7 @@ exports.getOrdersByShop = (req, res) => {
       orderFindOption.where.status = {
         $in: [Order.STATUS.NEW, Order.STATUS.ACCEPTED, Order.STATUS.SHIPPING]
       };
-      orderFindOption.order = [['id', 'DESC']];
+      orderFindOption.order = [['id', 'ASC']];
     } else {
       let error = 'Invalid type query';
       errorHandlers.responseError(404, error, 'query', res);
