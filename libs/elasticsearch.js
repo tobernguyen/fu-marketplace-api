@@ -90,6 +90,9 @@ var searchShop = (query) => {
     esq.query('bool', ['must'], {
       multi_match: {
         type: 'best_fields',
+        fuzziness: 'AUTO',
+        prefix_length: 2,
+        operator: 'and',
         query: query.keyword,
         fields: [
           'name^2', 
@@ -107,28 +110,28 @@ var searchShop = (query) => {
     });
   }
 
-  esq.query('bool', ['must'], {
+  esq.query('bool', ['filter'], {
     term: { status: models.Shop.STATUS.PUBLISHED }
   });
 
-  esq.query('bool', ['must'], {
+  esq.query('bool', ['filter'], {
     term: { banned: false }
   });
 
   if (_.isArray(query.categoryIds)) {
-    esq.query('bool', ['must'], {
+    esq.query('bool', ['filter'], {
       terms: { categoryIds: query.categoryIds }
     });
   }
 
   if (_.isNumber(query.shipPlaceId)) {
-    esq.query('bool', ['must'], {
+    esq.query('bool', ['filter'], {
       term: { shipPlaceIds: query.shipPlaceId }
     });
   }
 
   esq.query('bool', 'should', {
-    term: { opening: true }
+    term: { opening: true, boost: 50 }
   });
 
   let perPage = _.isNumber(query.size) ? query.size : DEFAULT_PER_PAGE;
