@@ -91,7 +91,6 @@ var searchShop = (query) => {
       multi_match: {
         type: 'best_fields',
         fuzziness: 'AUTO',
-        prefix_length: 2,
         operator: 'and',
         query: query.keyword,
         fields: [
