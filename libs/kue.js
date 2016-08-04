@@ -69,7 +69,7 @@ queue.process('send order notification to seller', 5, (job, done) => {
 queue.process('send shop opening request notification', 5, (job, done) => {
   let data = job.data;
   let UserNotification = require('../models').UserNotification;
-  UserNotification.createShopRequestNotification(data.shopOpeningRequestId).then(() => done(), done);
+  UserNotification.createShopRequestNotification(data.shopOpeningRequestId, data.shopId).then(() => done(), done);
 });
 
 queue.process('send ticket notification', 5, (job, done) => {

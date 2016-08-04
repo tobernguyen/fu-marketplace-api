@@ -104,11 +104,13 @@ describe('POST /api/v1/admin/shopOpeningRequests/:id/accept', () => {
             // Promote user to seller if he/she is not
             expect(u.verifyRole('seller')).to.eventually.equal(true);
 
+            return Shop.findOne({order: [['id', 'DESC']]});
+          }).then(newShop => {
             // Check for sending notification to user
             let jobs = helper.queue.testMode.jobs;
             expect(jobs).to.have.lengthOf(3);
             expect(jobs[1].type).to.equal('send shop opening request notification');
-            expect(jobs[1].data).to.eql({shopOpeningRequestId: pendingRequest.id});
+            expect(jobs[1].data).to.eql({shopOpeningRequestId: pendingRequest.id, shopId: newShop.id});
 
             // Check for sending email to user
             expect(jobs[2].type).to.equal('email');

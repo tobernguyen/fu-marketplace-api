@@ -90,6 +90,8 @@ module.exports = function(sequelize, DataTypes) {
         return values;
       },
       accept: function(adminMessage) {
+        let newShopId;
+
         return sequelize.transaction(t => {
           // Create new shop by copying SOR attribute
           return sequelize.model('Shop').create({
@@ -101,7 +103,9 @@ module.exports = function(sequelize, DataTypes) {
             avatar: '',
             cover: '',
             phone: this.phone
-          }, {transaction: t}).then(() => {
+          }, {transaction: t}).then(shop => {
+            newShopId = shop.id;
+
             // Change status of this request to accepted
             return this.update({
               status: SHOP_OPENING_REQUEST_STATUS.ACCEPTED,
@@ -130,7 +134,7 @@ module.exports = function(sequelize, DataTypes) {
           });
         }).then(() => {
           // Create and send notification to user
-          kue.createSendShopOpeningRequestNotificationJob({shopOpeningRequestId: this.id});
+          kue.createSendShopOpeningRequestNotificationJob({shopOpeningRequestId: this.id, shopId: newShopId});
 
           // Send email to requester
           kue.createEmailJob({

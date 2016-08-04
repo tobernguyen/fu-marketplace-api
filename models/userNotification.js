@@ -108,34 +108,41 @@ module.exports = function(sequelize, DataTypes) {
     });
   };
   
-  UserNotification.createShopRequestNotification = (sorId) => {
+  UserNotification.createShopRequestNotification = (sorId, shopId) => {
     let ShopOpeningRequest = sequelize.model('ShopOpeningRequest');
     
     return ShopOpeningRequest.findById(sorId).then(sor => {
+      let userNotificationData = {
+        id: sor.id,
+        name: sor.name,
+        createdAt: sor.createdAt,
+        adminMessage: sor.adminMessage,
+        status: sor.status
+      };
+
+      // Include shopId in data if shopId is available
+      if (shopId) userNotificationData['shopId'] = shopId;
+
       return UserNotification.create({
         userId: sor.ownerId,
         type: NOTIFICATION_TYPE.OPEN_SHOP_REQUEST_CHANGE,
-        data: {
-          id: sor.id,
-          name: sor.name,
-          createdAt: sor.createdAt,
-          adminMessage: sor.adminMessage,
-          status: sor.status
-        }
+        data:userNotificationData
       }).then(notification => {
         // TODO: add test
         // Push real-time notification via socket.io
         pushRealTimeNotificationToUser(notification);
 
         // Push notification via OneSignal
-        let message;
+        let message, url;
 
         switch(notification.data.status) {
           case ShopOpeningRequest.STATUS.ACCEPTED:
             message = `Yêu cầu mở gian hàng ${notification.data.name} của bạn đã được chấp nhận. Bạn có thể bắt đầu bán hàng ngay từ bây giờ!`;
+            url = `${process.env.SITE_ROOT_URL}/dashboard/shops/${shopId}`;
             break;
           case ShopOpeningRequest.STATUS.REJECTED:
             message = `Yêu cầu mở gian hàng ${notification.data.name} của bạn đã bị từ chối: ${notification.data.adminMessage}`;
+            url = `${process.env.SITE_ROOT_URL}/`;
             break;
         }
         
@@ -148,7 +155,7 @@ module.exports = function(sequelize, DataTypes) {
             contents: {
               'en': message
             },
-            url: `${process.env.SITE_ROOT_URL}/`
+            url: url
           }
         });
 

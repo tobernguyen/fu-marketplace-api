@@ -88,13 +88,14 @@ describe('UserNotification Model', () => {
     it('should create notification for user about shop opening request changes', done => {
       helper.queue.testMode.clear();
 
-      UserNotification.createShopRequestNotification(sor.id).then(notification => {
+      UserNotification.createShopRequestNotification(sor.id, 123).then(notification => {
         expect(notification.userId).to.equal(sor.ownerId);
         expect(notification.type).to.equal(UserNotification.NOTIFICATION_TYPE.OPEN_SHOP_REQUEST_CHANGE);
         expect(notification.data.id).to.equal(sor.id);
         expect(notification.data.name).to.equal(sor.name);
         expect(notification.data.adminMessage).to.equal(sor.adminMessage);
         expect(notification.data.status).to.equal(sor.status);
+        expect(notification.data.shopId).to.equal(123);
         expect(new Date(notification.data.createdAt)).to.eql(sor.createdAt);
 
         // Expect it to enqueue job "push one signal notification"
@@ -109,7 +110,7 @@ describe('UserNotification Model', () => {
             contents: {
               'en': `Yêu cầu mở gian hàng ${notification.data.name} của bạn đã được chấp nhận. Bạn có thể bắt đầu bán hàng ngay từ bây giờ!`
             },
-            url: `${process.env.SITE_ROOT_URL}/`
+            url: `${process.env.SITE_ROOT_URL}/dashboard/shops/123`
           }
         });
 
