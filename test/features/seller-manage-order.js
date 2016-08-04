@@ -42,7 +42,7 @@ describe('GET /api/v1/seller/shops/:shopId/orders/', () => {
           expect(bodyOrder).to.have.lengthOf(4);
           let sortedBodyOrders = _.sortBy(bodyOrder, ['id']);
           let sortedOrder = _.sortBy(orders, ['id']);
-          
+
           _([0, 1, 2]).forEach(function(value) {
             expect(sortedBodyOrders[value].id).to.equal(sortedOrder[value].id);
             expect(sortedBodyOrders[value].note).to.equal(sortedOrder[value].note);

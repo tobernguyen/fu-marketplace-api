@@ -43,7 +43,8 @@ exports.getOrdersByShop = (req, res) => {
       }
     ],
     limit: perPage,
-    offset: offset
+    offset: offset,
+    order: [['id', 'DESC']]
   };
 
   if (type) {
