@@ -133,6 +133,51 @@ describe('POST /api/v1/seller/shops/:shopId/items', () => {
     });
   });
 
+  describe('with 50 char item name via multipart form', () => {
+    it('should return 200 with new item information', done => {
+      request(app)
+          .post(`/api/v1/seller/shops/${shop.id}/items`)
+          .set('X-Access-Token', sellerToken)
+          .attach('imageFile', 'test/fixtures/user-avatar.jpg')
+          .field('name', 'Bun ca nhap khau nguyen chiec Hoa Ky An Do Hoa Lac')
+          .field('description', 'Trà mình vừa mang lên, ngày nào cũng bán hết nên các cậu cứ yên tâm ạ')
+          .field('quantity', 300)
+          .field('price', 15000)
+          .field('status', Item.STATUS.FOR_SELL)
+          .field('sort', 0)
+          .field('categoryId', category.id)
+          .expect(res => {
+            let body = res.body;
+            expect(body.name).to.equal('Bun ca nhap khau nguyen chiec Hoa Ky An Do Hoa Lac');
+          })
+          .expect(200, done);
+    });
+  });
+
+  describe('with 51 char item name via multipart form', () => {
+    it('should return 200 with new item information', done => {
+      request(app)
+          .post(`/api/v1/seller/shops/${shop.id}/items`)
+          .set('X-Access-Token', sellerToken)
+          .attach('imageFile', 'test/fixtures/user-avatar.jpg')
+          .field('name', 'Bun ca nhap khau nguyen chiec Hoa Ky An Do Hoa  Lac')
+          .field('description', 'Trà mình vừa mang lên, ngày nào cũng bán hết nên các cậu cứ yên tâm ạ')
+          .field('quantity', 300)
+          .field('price', 15000)
+          .field('status', Item.STATUS.FOR_SELL)
+          .field('sort', 0)
+          .field('categoryId', category.id)
+          .expect(res => {
+            expect(res.body.status).to.equal(400);
+            let errors = res.body.errors;
+            expect(_.toPairs(errors)).to.have.lengthOf(1);
+            expect(errors.name.message).to.equal('Length of name must be in [1, 50]');
+            expect(errors.name.message_code).to.equal('error.form.validation_len_failed');
+          })
+          .expect(400, done);
+    });
+  });
+
   describe('with some invalid fields in multipart form data', () => {
     it('should return 400 with message about invalid fields', done => {
       request(app)
@@ -343,6 +388,60 @@ describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
           expect(body.image).to.equal(item.image);
         })
         .expect(200, done);
+    });
+  });
+
+  describe('with 50 char item name via multipart form', () => {
+    it('should return 200 with new item information', done => {
+      request(app)
+          .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
+          .set('X-Access-Token', sellerToken)
+          .attach('imageFile', 'test/fixtures/user-avatar.jpg')
+          .field('name', 'Bun ca nhap khau nguyen chiec Hoa Ky An Do Hoa Lac')
+          .field('description', 'Trà mình vừa mang lên, ngày nào cũng bán hết nên các cậu cứ yên tâm ạ')
+          .field('quantity', 300)
+          .field('price', 15000)
+          .field('status', Item.STATUS.FOR_SELL)
+          .field('sort', 0)
+          .field('categoryId', categories[1].id)
+          .expect(res => {
+            let body = res.body;
+            expect(body.id).to.equal(item.id);
+            expect(body.name).to.equal('Bun ca nhap khau nguyen chiec Hoa Ky An Do Hoa Lac');
+            expect(body.description).to.equal('Trà mình vừa mang lên, ngày nào cũng bán hết nên các cậu cứ yên tâm ạ');
+            expect(body.quantity).to.equal('300');
+            expect(body.price).to.equal('15000');
+            expect(body.status).to.equal(`${Item.STATUS.FOR_SELL}`);
+            expect(body.sort).to.equal('0');
+            expect(body.categoryId).to.equal(`${categories[1].id}`);
+            expect(body.image).to.have.string(`/shops/${shop.id}/items/`);
+            expect(body.image).to.not.equal(item.image);
+          })
+          .expect(200, done);
+    });
+  });
+
+  describe('with 51 char item name via multipart form', () => {
+    it('should return 200 with new item information', done => {
+      request(app)
+          .put(`/api/v1/seller/shops/${shop.id}/items/${item.id}`)
+          .set('X-Access-Token', sellerToken)
+          .attach('imageFile', 'test/fixtures/user-avatar.jpg')
+          .field('name', 'Bun ca nhap khau nguyen chiec Hoa Ky An Do Hoa  Lac')
+          .field('description', 'Trà mình vừa mang lên, ngày nào cũng bán hết nên các cậu cứ yên tâm ạ')
+          .field('quantity', 300)
+          .field('price', 15000)
+          .field('status', Item.STATUS.FOR_SELL)
+          .field('sort', 0)
+          .field('categoryId', categories[1].id)
+          .expect(res => {
+            expect(res.body.status).to.equal(400);
+            let errors = res.body.errors;
+            expect(_.toPairs(errors)).to.have.lengthOf(1);
+            expect(errors.name.message).to.equal('Length of name must be in [1, 50]');
+            expect(errors.name.message_code).to.equal('error.form.validation_len_failed');
+          })
+          .expect(400, done);
     });
   });
 
