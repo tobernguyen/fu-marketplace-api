@@ -25,7 +25,8 @@ exports.getShopOpeningRequests = (req, res) => {
   shopOpeningRequestQuery.findAll({
     include: User,
     limit: perPage,
-    offset: offset
+    offset: offset,
+    order: [['id', 'DESC']]
   }).then(shops => {
     let result = _.map(shops, s => {
       let shop = s.toJSON();
