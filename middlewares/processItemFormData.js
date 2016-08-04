@@ -175,7 +175,7 @@ var verifyFields = (name, value, errors, req) => {
         req.form.description = value;
       } else {
         errors['description'] = {
-          message: 'Length of name must be in [1, 125]',
+          message: 'Length of description must be in [1, 125]',
           message_code: 'error.form.validation_len_failed'
         };
       }
