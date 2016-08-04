@@ -181,6 +181,26 @@ module.exports = function(sequelize, DataTypes) {
         return this.getRoles().then(roles => {
           return Promise.resolve(_.findIndex(roles, r => r.name === roleName) !== -1); 
         });
+      },
+      verifyRoleCapability: function(roles) {
+        let promise = new Promise((resolve, reject) => {
+          let error;
+          let isValid = roles.every(r => {
+            switch(r.name) {
+              case 'seller':
+                if (!this.identityNumber || !this.identityPhotoFile || !this.phone) {
+                  error = 'User is not capable of becoming seller';
+                  return false;
+                }
+              default:
+                return true;
+            }
+          });
+
+          isValid ? resolve(true) : reject(error);
+        });
+
+        return promise;
       }
     }
   });

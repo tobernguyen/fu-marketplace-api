@@ -179,7 +179,41 @@ describe('User Model', () => {
       });
     });
   });
-  
+
+  describe('#verifyRoleCapability', () => {
+    let user, seller, allRoles;
+
+    before(done => {
+      helper.factory.createUserWithRole({}, 'user').then(u => {
+        user = u;
+        return helper.factory.createUserWithRole({}, 'seller');
+      }).then(s => {
+        seller = s;
+        return require('../../models').Role.findAll();
+      }).then(roles => {
+        allRoles = roles;
+        done();
+      });
+    });
+
+    it('should verify if user is capable of becoming passed roles', done => {
+      let sellerRole = _.filter(allRoles, r => r.name == 'seller');
+      let adminRole = _.filter(allRoles, r => r.name == 'admin');
+
+      user.verifyRoleCapability(sellerRole).catch(err => {
+        expect(err).to.equal('User is not capable of becoming seller');
+
+        seller.verifyRoleCapability(sellerRole.concat(adminRole)).then(isCapable => {
+          expect(isCapable).to.equal(true);
+          return user.verifyRoleCapability(adminRole);
+        }).then(isCapable => {
+          expect(isCapable).to.equal(true);
+          done();
+        });
+      });
+    });
+  });
+
   describe('#signOutAll', () => {
     let expectedTime;
     

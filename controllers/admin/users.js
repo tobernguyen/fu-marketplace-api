@@ -88,7 +88,7 @@ exports.postSetRoles = (req, res) => {
             }
           }).then(r => {
             if (r.length > 0) {
-              return user.setRoles(r);  
+              return user.verifyRoleCapability(r).then(() => user.setRoles(r));
             } else {
               return Promise.resolve();
             }
@@ -98,7 +98,11 @@ exports.postSetRoles = (req, res) => {
     }).then(() => {
       responseUser(user, res);
     }).catch(err => {
-      errorHandlers.handleModelError(err, res);
+      if (typeof err === 'string') {
+        errorHandlers.responseError(422, err, 'model', res)
+      } else {
+        errorHandlers.handleModelError(err, res);
+      }
     });
   }
 };

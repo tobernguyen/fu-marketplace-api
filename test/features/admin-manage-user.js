@@ -242,10 +242,11 @@ describe('GET /api/v1/admin/users/', () => {
 });
 
 describe('POST /api/v1/admin/users/:id/setRoles', () => {
-  let seller, adminToken;
+  let seller, adminToken, admin;
   
   before(done => {
     helper.factory.createUserWithRole({}, 'admin').then(u => {
+      admin = u;
       adminToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createUserWithRole({}, 'seller');
     }).then(u => {
@@ -304,6 +305,22 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
         .expect(200, done);  
     });
   });
+
+  describe('array contains role that user is not capable of becoming to', () => {
+    it('should return 200 OK and return user profile with new role', done => {
+      request(app)
+        .post(`/api/v1/admin/users/${admin.id}/setRoles`)
+        .set('X-Access-Token', adminToken)
+        .send({
+          roles: ['seller', 'admin']
+        })
+        .expect(res => {
+          expect(res.body.status).to.equal(422);
+          expect(res.body.message).to.equal('User is not capable of becoming seller');
+        })
+        .expect(422, done);
+    });
+  });
   
   describe('with an array of role contain invalid role', () => {
     it('should return 200 OK and return user profile without changing the role', done => {
@@ -327,7 +344,7 @@ describe('POST /api/v1/admin/users/:id/setRoles', () => {
           expect(res.body.roles).to.be.include('admin');
           expect(res.body.roles).to.be.not.include('invalid role');
         })
-        .expect(200, done);  
+        .expect(200, done);
     });
   });
   
