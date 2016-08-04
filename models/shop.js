@@ -379,7 +379,6 @@ module.exports = function(sequelize, DataTypes) {
           type: sequelize.QueryTypes.SELECT
         }).then(rawResult => {
           let result = {};
-
           _.each(rawResult, r => {
             if (result[`${r.year}${r.month}${r.day}`] === undefined) {
               result[`${r.year}${r.month}${r.day}`] = _.pick(r, ['year', 'month', 'day']);
@@ -388,7 +387,9 @@ module.exports = function(sequelize, DataTypes) {
             result[`${r.year}${r.month}${r.day}`]['itemSold'][r.categoryId] = r.itemSold;
           });
 
-          return Promise.resolve(_.values(result));
+          let sortedResult = _.sortBy(_.toArray(result), ['year', 'month', 'day']);
+
+          return Promise.resolve(sortedResult);
         });
       }
     }
