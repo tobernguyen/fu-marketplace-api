@@ -42,7 +42,7 @@ module.exports = (uploadConfig) => (req, res, next) => {
     }
     
     // Check for file size restriction
-    let maxFileSize = uploadConfig.maxFileSize || 5 * 1024 * 1024;
+    let maxFileSize = uploadConfig.maxFileSize || Item.MAXIMUM_IMAGE_SIZE;
     if (part.byteCount > maxFileSize) {
       errors['imageFile'] = {
         message: `File is too big. Maximum file size allow: ${maxFileSize / 1024}KB`,
@@ -161,7 +161,7 @@ var verifyFields = (name, value, errors, req) => {
   // Verify all field for item
   switch(name) {
     case 'name':
-      if (_.inRange(value.length, 1, 50)){
+      if (_.inRange(value.length, 1, 51)){
         req.form.name = value;
       } else {
         errors['name'] = {
@@ -171,7 +171,7 @@ var verifyFields = (name, value, errors, req) => {
       }
       break;
     case 'description':
-      if (_.inRange(value.length, 1, 125)) {
+      if (_.inRange(value.length, 1, 126)) {
         req.form.description = value;
       } else {
         errors['description'] = {
