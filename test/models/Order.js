@@ -144,7 +144,7 @@ describe('Order models', () => {
 
       it('should return error', done => {
         order.reject({}).catch(err => {
-          expect(err.status).to.equal(404);
+          expect(err.status).to.equal(400);
           expect(err.message).to.equal('Must provide seller message when reject');
           expect(err.type).to.equal('order');
           done();
@@ -560,7 +560,7 @@ describe('Order models', () => {
 
       it('should return error', done => {
         order.abort({}).catch(err => {
-          expect(err.status).to.equal(404);
+          expect(err.status).to.equal(400);
           expect(err.message).to.equal('Must provide seller message when abort');
           expect(err.type).to.equal('order');
           done();
@@ -691,7 +691,7 @@ describe('Order models', () => {
         order.rateOrder({
           comment: 'xxx'
         }).catch(err => {
-          expect(err.status).to.equal(404);
+          expect(err.status).to.equal(400);
           expect(err.message).to.equal('Must provide rate when rate order');
           expect(err.type).to.equal('order');
           done();

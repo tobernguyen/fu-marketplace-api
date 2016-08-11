@@ -403,9 +403,9 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
         .post(`/api/v1/seller/orders/${order.id}/reject`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
-        .expect(404)
+        .expect(400)
         .then(res => {
-          expect(res.body.status).to.equal(404);
+          expect(res.body.status).to.equal(400);
           expect(res.body.message_code).to.equal('error.order.must_provide_seller_message_when_reject');
           done();
         }).catch(done);
@@ -836,14 +836,14 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
       });
     });
 
-    it('should return 404', done => {
+    it('should return 400', done => {
       request(app)
         .post(`/api/v1/seller/orders/${order.id}/abort`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
-        .expect(404)
+        .expect(400)
         .then(res => {
-          expect(res.body.status).to.equal(404);
+          expect(res.body.status).to.equal(400);
           expect(res.body.message_code).to.equal('error.order.must_provide_seller_message_when_abort');
           done();
         }).catch(done);

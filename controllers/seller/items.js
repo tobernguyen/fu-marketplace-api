@@ -87,7 +87,7 @@ exports.postItems = (req, res) => {
       let validatedData = req.form;
       if (!validatedData.image) {
         let error = 'Item must contain image';
-        errorHandlers.responseError(404, error, 'model', res);
+        errorHandlers.responseError(422, error, 'model', res);
         return;
       }
 

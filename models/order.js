@@ -110,7 +110,7 @@ module.exports = function(sequelize, DataTypes) {
           if (!reason.sellerMessage) {
             let error = 'Must provide seller message when reject';
             reject({
-              status: 404,
+              status: 400,
               message: error,
               type: 'order'
             });
@@ -195,7 +195,7 @@ module.exports = function(sequelize, DataTypes) {
           if (!reason.sellerMessage) {
             let error = 'Must provide seller message when abort';
             reject({
-              status: 404,
+              status: 400,
               message: error,
               type: 'order'
             });
@@ -226,7 +226,7 @@ module.exports = function(sequelize, DataTypes) {
           if (!rawInfo.rate) {
             let error = 'Must provide rate when rate order';
             reject({
-              status: 404,
+              status: 400,
               message: error,
               type: 'order'
             });

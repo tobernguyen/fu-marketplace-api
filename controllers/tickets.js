@@ -41,7 +41,7 @@ exports.getTickets = (req, res) => {
   if (status){
     if (!_.isNumber(Ticket.STATUS[status])) {
       let error = 'Invalid status query';
-      errorHandlers.responseError(404, error, 'query', res);
+      errorHandlers.responseError(400, error, 'query', res);
       return;
     } else {
       ticketFindOption.where = {

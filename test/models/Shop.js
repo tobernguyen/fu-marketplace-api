@@ -77,7 +77,7 @@ describe('Shop Model', () => {
           rate: 3,
           comment: 'xxx'
         }).catch(err => {
-          expect(err.status).to.equal(404);
+          expect(err.status).to.equal(403);
           expect(err.type).to.equal('review');
           expect(err.message).to.equal('You must order at this shop at least one time');
           return Review.findAll({
@@ -207,7 +207,7 @@ describe('Shop Model', () => {
                 comment: 'yyy'
               });
             }).catch(err => {
-              expect(err.status).to.equal(404);
+              expect(err.status).to.equal(400);
               expect(err.message).to.equal('Must provide rate when review shop');
               expect(err.type).to.equal('review');
               return Review.findById(review.id);
@@ -228,7 +228,7 @@ describe('Shop Model', () => {
             rate: 3,
             comment: 'xxx'
           }).catch(err => {
-            expect(err.status).to.equal(404);
+            expect(err.status).to.equal(400);
             expect(err.message).to.equal('Must provide userId when review shop');
             expect(err.type).to.equal('review');
             done();

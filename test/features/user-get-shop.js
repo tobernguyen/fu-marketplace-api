@@ -123,7 +123,7 @@ describe('POST /api/v1/shops/:shopId/review', () => {
       });
 
       describe('with n|| !rawInfo.commentot placed order user token', () => {
-        it('should return 404', done => {
+        it('should return 403', done => {
           request(app)
             .post(`/api/v1/shops/${order.shopId}/review`)
             .set('X-Access-Token', userToken1)
@@ -133,16 +133,16 @@ describe('POST /api/v1/shops/:shopId/review', () => {
               comment: 'xyz'
             })
             .expect(res => {
-              expect(res.body.status).to.equal(404);
+              expect(res.body.status).to.equal(403);
               expect(res.body.message_code).to.equal('error.review.you_must_order_at_this_shop_at_least_one_time');
             })
-            .expect(404, done);  
+            .expect(403, done);  
         });
       });
     });
 
     describe('with not provide rate  attribute', () => {
-      it('should return 200 OK with shop detail', done => {
+      it('should return 400', done => {
         request(app)
             .post(`/api/v1/shops/${order.shopId}/review`)
             .set('X-Access-Token', userToken2)
@@ -151,10 +151,10 @@ describe('POST /api/v1/shops/:shopId/review', () => {
               comment: 'abc'
             })
             .expect(res => {
-              expect(res.body.status).to.equal(404);
+              expect(res.body.status).to.equal(400);
               expect(res.body.message_code).to.equal('error.review.must_provide_rate_when_review_shop');
             })
-            .expect(404, done);
+            .expect(400, done);
       });
     });
   });

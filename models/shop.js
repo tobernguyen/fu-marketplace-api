@@ -223,7 +223,7 @@ module.exports = function(sequelize, DataTypes) {
           if (!userId && userId!==0) {
             let error = 'Must provide userId when review shop';
             reject({
-              status: 404,
+              status: 400,
               message: error,
               type: 'review'
             });
@@ -236,7 +236,7 @@ module.exports = function(sequelize, DataTypes) {
           if (!reviewInfo.rate) {
             let error = 'Must provide rate when review shop';
             reject({
-              status: 404,
+              status: 400,
               message: error,
               type: 'review'
             });
@@ -253,7 +253,7 @@ module.exports = function(sequelize, DataTypes) {
               if (!order) {
                 let error = 'You must order at this shop at least one time';
                 return Promise.reject({
-                  status: 404,
+                  status: 403,
                   message: error,
                   type: 'review'
                 });

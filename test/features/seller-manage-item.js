@@ -229,7 +229,7 @@ describe('POST /api/v1/seller/shops/:shopId/items', () => {
   });
 
   describe('without image file', () => {
-    it('should return 400 with message about invalid image', done => {
+    it('should return 422', done => {
       request(app)
         .post(`/api/v1/seller/shops/${shop.id}/items`)
         .set('X-Access-Token', sellerToken)
@@ -241,11 +241,11 @@ describe('POST /api/v1/seller/shops/:shopId/items', () => {
         .field('sort', 0)
         .field('categoryId', category.id)
         .expect(res => {
-          expect(res.body.status).to.equal(404);
+          expect(res.body.status).to.equal(422);
           expect(res.body.message).to.equal('Item must contain image');
           expect(res.body.message_code).to.equal('error.model.item_must_contain_image');
         })
-        .expect(404, done);
+        .expect(422, done);
     });
   });
 });

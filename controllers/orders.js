@@ -135,13 +135,13 @@ exports.getOrders = (req, res) => {
       };
     } else {
       let error = 'Invalid type query';
-      errorHandlers.responseError(404, error, 'query', res);
+      errorHandlers.responseError(400, error, 'query', res);
       return;
     }
   } else if (status){
     if (!_.isNumber(Order.STATUS[status])) {
       let error = 'Invalid status query';
-      errorHandlers.responseError(404, error, 'query', res);
+      errorHandlers.responseError(400, error, 'query', res);
       return;
     } else {
       orderFindOption.where.status = Order.STATUS[status];

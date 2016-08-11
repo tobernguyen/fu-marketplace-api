@@ -248,7 +248,7 @@ describe('Ticket models', () => {
       describe('without adminMessage', () => {
         it('should return error', done => {
           ticket.closeTicketByAdmin().catch(error => {
-            expect(error.status).to.equal(404);
+            expect(error.status).to.equal(400);
             expect(error.message).to.equal('Must provide adminComment message when admin close ticket');
             expect(error.type).to.equal('ticket');
             return Ticket.findById(ticket.id);

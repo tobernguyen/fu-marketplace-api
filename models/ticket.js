@@ -96,7 +96,7 @@ module.exports = function(sequelize, DataTypes) {
           if (!rawInfo.adminComment) {
             let error = 'Must provide adminComment message when admin close ticket';
             reject({
-              status: 404,
+              status: 400,
               message: error,
               type: 'ticket'
             });

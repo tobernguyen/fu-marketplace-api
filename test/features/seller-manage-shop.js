@@ -202,7 +202,7 @@ describe('PUT /api/v1/seller/shops/:id', () => {
   
   describe('with owner access token', () => {
     describe('with banned shop', () => {
-      it('should return 404 error', done => {
+      it('should return 403 error', done => {
         request(app)
           .put(`/api/v1/seller/shops/${bannedShop.id}`)
           .set('X-Access-Token', ownerToken)
@@ -213,11 +213,11 @@ describe('PUT /api/v1/seller/shops/:id', () => {
             invalidattribute: 'invalid'
           })
           .expect(res => {
-            expect(res.body.status).to.equal(404);
+            expect(res.body.status).to.equal(403);
             expect(res.body.message).to.equal('Cannot update info for banned shop');
             expect(res.body.message_code).to.equal('error.banned.cannot_update_info_for_banned_shop');
           })
-          .expect(404, done);  
+          .expect(403, done);  
       });
     });
 
@@ -323,7 +323,7 @@ describe('POST /api/v1/seller/shops/:id/uploadAvatar', () => {
   
   describe('with valid access token and ', () => {
     describe('with banned shop', () => {
-      it('should return 404 error', done => {
+      it('should return 403 error', done => {
         request(app)
           .post(`/api/v1/seller/shops/${bannedShop.id}/uploadAvatar`)
           .set('X-Access-Token', sellerToken)
@@ -334,11 +334,11 @@ describe('POST /api/v1/seller/shops/:id/uploadAvatar', () => {
             invalidattribute: 'invalid'
           })
           .expect(res => {
-            expect(res.body.status).to.equal(404);
+            expect(res.body.status).to.equal(403);
             expect(res.body.message).to.equal('Cannot update avatar for banned shop');
             expect(res.body.message_code).to.equal('error.banned.cannot_update_avatar_for_banned_shop');
           })
-          .expect(404, done);  
+          .expect(403, done);  
       });
     });
 
@@ -418,7 +418,7 @@ describe('POST /api/v1/seller/shops/:id/uploadCover', () => {
 
   describe('with valid access token and ', () => {
     describe('with banned shop', () => {
-      it('should return 404 error', done => {
+      it('should return 403 error', done => {
         request(app)
           .post(`/api/v1/seller/shops/${bannedShop.id}/uploadCover`)
           .set('X-Access-Token', sellerToken)
@@ -429,11 +429,11 @@ describe('POST /api/v1/seller/shops/:id/uploadCover', () => {
             invalidattribute: 'invalid'
           })
           .expect(res => {
-            expect(res.body.status).to.equal(404);
+            expect(res.body.status).to.equal(403);
             expect(res.body.message).to.equal('Cannot update cover for banned shop');
             expect(res.body.message_code).to.equal('error.banned.cannot_update_cover_for_banned_shop');
           })
-          .expect(404, done);  
+          .expect(403, done);  
       });
     });
 
@@ -560,7 +560,7 @@ describe('POST /api/v1/seller/shops/:id/shipPlaces', () => {
   
   describe('with owner access token', () => {
     describe('with banned shop', () => {
-      it('should return 404 error', done => {
+      it('should return 403 error', done => {
         request(app)
           .post(`/api/v1/seller/shops/${bannedShop.id}/shipPlaces`)
           .set('X-Access-Token', ownerToken)
@@ -569,11 +569,11 @@ describe('POST /api/v1/seller/shops/:id/shipPlaces', () => {
             shipPlaces: shipPlace
           })
           .expect(res => {
-            expect(res.body.status).to.equal(404);
+            expect(res.body.status).to.equal(403);
             expect(res.body.message).to.equal('Cannot update shipPlace for banned shop');
             expect(res.body.message_code).to.equal('error.banned.cannot_update_ship_place_for_banned_shop');
           })
-          .expect(404, done);  
+          .expect(403, done);  
       });
     });
 

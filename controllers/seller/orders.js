@@ -55,13 +55,13 @@ exports.getOrdersByShop = (req, res) => {
       orderFindOption.order = [['id', 'ASC']];
     } else {
       let error = 'Invalid type query';
-      errorHandlers.responseError(404, error, 'query', res);
+      errorHandlers.responseError(400, error, 'query', res);
       return;
     }
   } else if (status){
     if (!_.isNumber(Order.STATUS[status])) {
       let error = 'Invalid status query';
-      errorHandlers.responseError(404, error, 'query', res);
+      errorHandlers.responseError(400, error, 'query', res);
       return;
     } else {
       orderFindOption.order = [
@@ -187,7 +187,7 @@ var tryToChangeOrderStatus = (req, res, action) => {
       if (!req.body.sellerMessage) {
         let error = `Must provide seller message when ${action}`;
         return Promise.reject({
-          status: 404,
+          status: 400,
           message: error,
           type: 'order'
         });

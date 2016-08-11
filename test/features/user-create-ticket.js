@@ -184,15 +184,15 @@ describe('GET /api/v1/tickets/', () => {
     });
 
     describe('with invalid status filter', () => {
-      it('should return 403', done => {
+      it('should return 400', done => {
         request(app)
             .get('/api/v1/tickets/?status=INVALID')
             .set('X-Access-Token', userToken)
             .expect(res => {
-              expect(res.body.status).to.equal(404);
+              expect(res.body.status).to.equal(400);
               expect(res.body.message).to.equal('Invalid status query');
             })
-            .expect(404, done);
+            .expect(400, done);
       });
     });
   });

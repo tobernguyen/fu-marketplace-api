@@ -54,7 +54,7 @@ exports.putShop = (req, res) => {
       let banned = shop.banned || false;
       if (banned) {
         let error = 'Cannot update info for banned shop';
-        errorHandlers.responseError(404, error, 'banned', res);
+        errorHandlers.responseError(403, error, 'banned', res);
       } else {
         sanitizeUpdateRequest(req, false);
         shop.update(getUpdateParams(req, false)).then(shop => {
@@ -85,7 +85,7 @@ exports.postShopUploadAvatar = (req, res) => {
       let banned = shop.banned || false;
       if (banned) {
         let error = 'Cannot update avatar for banned shop';
-        errorHandlers.responseError(404, error, 'banned', res);
+        errorHandlers.responseError(403, error, 'banned', res);
       } else {
         imageUploader.useMiddlewareWithConfig({
           maxFileSize: Shop.MAXIMUM_AVATAR_SIZE,
@@ -134,7 +134,7 @@ exports.postShopUploadCover = (req, res) => {
       let banned = shop.banned || false;
       if (banned) {
         let error = 'Cannot update cover for banned shop';
-        errorHandlers.responseError(404, error, 'banned', res);
+        errorHandlers.responseError(403, error, 'banned', res);
       } else {
         imageUploader.useMiddlewareWithConfig({
           maxFileSize: Shop.MAXIMUM_COVER_SIZE,
@@ -187,7 +187,7 @@ exports.postChangeShopShipPlaces = (req, res) => {
         let banned = shop.banned || false;
         if (banned) {
           let error = 'Cannot update shipPlace for banned shop';
-          errorHandlers.responseError(404, error, 'banned', res);
+          errorHandlers.responseError(403, error, 'banned', res);
         } else {
           ShipPlace.findAll({
             where: {
