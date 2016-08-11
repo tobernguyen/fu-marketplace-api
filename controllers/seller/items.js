@@ -64,6 +64,12 @@ exports.postItems = (req, res) => {
       errorHandlers.responseError(404, error, 'model', res);
       return;
     }
+
+    if (shop.banned) {
+      let error = 'Cannot update info for banned shop';
+      errorHandlers.responseError(403, error, 'banned', res);
+      return;
+    }
     
     let imageFileName = `shops/${shop.id}/items/${new Date().getTime()}`;
 
@@ -167,6 +173,12 @@ exports.putItem = (req, res) => {
       return;
     }
 
+    if (shop.banned) {
+      let error = 'Cannot update info for banned shop';
+      errorHandlers.responseError(403, error, 'banned', res);
+      return;
+    }
+
     if (shop.Items.length == 0) {
       let error ='Item does not exist';
       errorHandlers.responseError(404, error, 'model', res);
@@ -250,6 +262,13 @@ exports.deleteItem = (req, res) => {
       return;
     }
 
+
+    if (shop.banned) {
+      let error = 'Cannot update info for banned shop';
+      errorHandlers.responseError(403, error, 'banned', res);
+      return;
+    }
+
     if (shop.Items.length == 0) {
       let error ='Item does not exist';
       errorHandlers.responseError(404, error, 'model', res);
@@ -291,6 +310,13 @@ exports.putSetItemStatus = (req, res) => {
     if (!shop) {
       let error ='Shop does not exist';
       errorHandlers.responseError(404, error, 'model', res);
+      return;
+    }
+
+    
+    if (shop.banned) {
+      let error = 'Cannot update info for banned shop';
+      errorHandlers.responseError(403, error, 'banned', res);
       return;
     }
 
