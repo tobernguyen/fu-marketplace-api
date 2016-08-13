@@ -120,10 +120,8 @@ module.exports = function(sequelize, DataTypes) {
           updateData.status = ORDER_STATUS.REJECTED;
           if (this.status === ORDER_STATUS.NEW) {
             this.update(updateData).then(resolve, reject);
-          }  else if (this.status === ORDER_STATUS.ACCEPTED) {
-            changeStatusAndUpdateQuantityItem.apply(this, [updateData, resolve, reject]);
-          } else {
-            let error = 'Only new or accepted order can be rejected';
+          }  else {
+            let error = 'Only new order can be rejected';
             reject({
               status: 403,
               message: error,
@@ -161,7 +159,7 @@ module.exports = function(sequelize, DataTypes) {
           if (this.status === ORDER_STATUS.ACCEPTED) {
             this.update({status: ORDER_STATUS.SHIPPING}).then(resolve, reject);
           } else {
-            let error = 'Only accepted order has able to be start shipping';
+            let error = 'Only accepted order can be start shipping';
             reject({               
               status: 403,               
               message: error,               
@@ -178,7 +176,7 @@ module.exports = function(sequelize, DataTypes) {
           if (this.status === ORDER_STATUS.SHIPPING) {
             this.update({status: ORDER_STATUS.COMPLETED}).then(resolve, reject);
           } else {
-            let error = 'Only shipping order has able to be completed';
+            let error = 'Only shipping order can be completed';
             reject({               
               status: 403,               
               message: error,               
@@ -206,8 +204,10 @@ module.exports = function(sequelize, DataTypes) {
 
           if (this.status === ORDER_STATUS.SHIPPING) {
             changeStatusAndUpdateQuantityItem.apply(this, [updateData, resolve, reject]);
+          } else if (this.status === ORDER_STATUS.ACCEPTED) {
+            changeStatusAndUpdateQuantityItem.apply(this, [updateData, resolve, reject]);
           } else {
-            let error = 'Only shipping order has able to be aborted';
+            let error = 'Only accepted or shipping order can be aborted';
             reject({               
               status: 403,               
               message: error,               

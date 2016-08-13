@@ -506,108 +506,6 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
     });
   });
 
-  describe('with accepted order', () => {
-    beforeEach(done => {
-      order.update({
-        status: Order.STATUS.ACCEPTED
-      }).then(o => {
-        expect(o.status).to.equal(Order.STATUS.ACCEPTED);
-        expect(o.id).to.equal(order.id);
-        done();
-      });
-    });
-
-    describe('with valid accesToken and item has quantity is 100', () => {
-      beforeEach(done => {
-        item.update({
-          quantity: 100
-        }).then(i => {
-          expect(i.quantity).to.equal(100);
-          expect(i.id).to.equal(item.id);
-          done();
-        });
-      });
-
-      it('should return 200 with all orderInfo and quantity of item is 101', done => {
-        request(app)
-          .post(`/api/v1/seller/orders/${order.id}/reject`)
-          .set('X-Access-Token', sellerToken)
-          .set('Content-Type', 'application/json')
-          .send({
-            sellerMessage: 'minh het hang roi ban a'
-          })
-          .expect(200)
-          .then(res => {
-            let body = res.body;
-            expect(body.id).to.equal(order.id);
-            expect(body.status).to.equal(Order.STATUS.REJECTED);
-            return Item.findById(item.id);
-          }).then(i => {
-            expect(i.name).to.equal(item.name);
-            expect(i.quantity).to.equal(101);
-            done();
-          }).catch(done);
-      });
-    });
-
-    describe('with valid accesToken and item has quantity is -1', () => {
-      beforeEach(done => {
-        item.update({
-          quantity: -1
-        }).then(i => {
-          expect(i.quantity).to.equal(-1);
-          expect(i.id).to.equal(item.id);
-          done();
-        });
-      });
-
-      it('should return 200 with all orderInfo and quantity of item is 0', done => {
-        request(app)
-          .post(`/api/v1/seller/orders/${order.id}/reject`)
-          .set('X-Access-Token', sellerToken)
-          .set('Content-Type', 'application/json')
-          .send({
-            sellerMessage: 'minh het hang roi ban a'
-          })
-          .expect(200)
-          .then(res => {
-            let body = res.body;
-            expect(body.id).to.equal(order.id);
-            expect(body.status).to.equal(Order.STATUS.REJECTED);
-            return Item.findById(item.id);
-          }).then(i => {
-            expect(i.name).to.equal(item.name);
-            expect(i.quantity).to.equal(0);
-            done();
-          }).catch(done);
-      });
-    });
-
-    describe('with valid accesToken and item has no quantity', () => {
-
-      it('should return 200 with all orderInfo', done => {
-        request(app)
-          .post(`/api/v1/seller/orders/${order.id}/reject`)
-          .set('X-Access-Token', sellerToken)
-          .set('Content-Type', 'application/json')
-          .send({
-            sellerMessage: 'minh het hang roi ban a'
-          })
-          .expect(200)
-          .then(res => {
-            let body = res.body;
-            expect(body.id).to.equal(order.id);
-            expect(body.status).to.equal(Order.STATUS.REJECTED);
-            return Item.findById(item.id);
-          }).then(i => {
-            expect(i.name).to.equal(item.name);
-            expect(i.quantity).not.to.be.ok;
-            done();
-          }).catch(done);
-      });
-    });
-  });
-
   describe('with invalid accesToken', () => {
     it('should return 404 order is not exits', done => {
       request(app)
@@ -650,7 +548,7 @@ describe('POST /api/v1/seller/orders/:id/reject', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(403);
-          expect(res.body.message_code).to.equal('error.order.only_new_or_accepted_order_can_be_rejected');
+          expect(res.body.message_code).to.equal('error.order.only_new_order_can_be_rejected');
         })
         .expect(403, done);
     });
@@ -819,6 +717,18 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
     });
   });
 
+  beforeEach(done => {
+    helper.factory.createItem({shopId: shop.id}).then(i => {
+      item = i;
+      expect(item.quantity).not.to.be.ok;
+      return helper.factory.createOrder({ shopId: shop.id, items: [item]});
+    }).then(o => {
+      order = o;
+      expect(o.status).to.equal(Order.STATUS.NEW);
+      done();
+    });
+  });
+
   describe('with valid accessToken and without sellerMessage', () => {
     beforeEach(done => {
       helper.factory.createItem({shopId: shop.id}).then(i => {
@@ -852,17 +762,11 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
 
   describe('with shipping order', () => {
     beforeEach(done => {
-      helper.factory.createItem({shopId: shop.id}).then(i => {
-        item = i;
-        expect(item.quantity).not.to.be.ok;
-        return helper.factory.createOrder({ 
-          shopId: shop.id, 
-          items: [item],
-          status: Order.STATUS.SHIPPING
-        });
+      order.update({
+        status: Order.STATUS.SHIPPING
       }).then(o => {
-        order = o;
         expect(o.status).to.equal(Order.STATUS.SHIPPING);
+        expect(o.id).to.equal(order.id);
         done();
       });
     });
@@ -958,6 +862,108 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
     });
   });
 
+  describe('with accepted order', () => {
+    beforeEach(done => {
+      order.update({
+        status: Order.STATUS.ACCEPTED
+      }).then(o => {
+        expect(o.status).to.equal(Order.STATUS.ACCEPTED);
+        expect(o.id).to.equal(order.id);
+        done();
+      });
+    });
+
+    describe('with valid accesToken and item has quantity is 100', () => {
+      beforeEach(done => {
+        item.update({
+          quantity: 100
+        }).then(i => {
+          expect(i.quantity).to.equal(100);
+          expect(i.id).to.equal(item.id);
+          done();
+        });
+      });
+
+      it('should return 200 with all orderInfo and quantity of item is 101', done => {
+        request(app)
+          .post(`/api/v1/seller/orders/${order.id}/abort`)
+          .set('X-Access-Token', sellerToken)
+          .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
+          .expect(200)
+          .then(res => {
+            let body = res.body;
+            expect(body.id).to.equal(order.id);
+            expect(body.status).to.equal(Order.STATUS.ABORTED);
+            return Item.findById(item.id);
+          }).then(i => {
+            expect(i.name).to.equal(item.name);
+            expect(i.quantity).to.equal(101);
+            done();
+          }).catch(done);
+      });
+    });
+
+    describe('with valid accesToken and item has quantity is -1', () => {
+      beforeEach(done => {
+        item.update({
+          quantity: -1
+        }).then(i => {
+          expect(i.quantity).to.equal(-1);
+          expect(i.id).to.equal(item.id);
+          done();
+        });
+      });
+
+      it('should return 200 with all orderInfo and quantity of item is 0', done => {
+        request(app)
+          .post(`/api/v1/seller/orders/${order.id}/abort`)
+          .set('X-Access-Token', sellerToken)
+          .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
+          .expect(200)
+          .then(res => {
+            let body = res.body;
+            expect(body.id).to.equal(order.id);
+            expect(body.status).to.equal(Order.STATUS.ABORTED);
+            return Item.findById(item.id);
+          }).then(i => {
+            expect(i.name).to.equal(item.name);
+            expect(i.quantity).to.equal(0);
+            done();
+          }).catch(done);
+      });
+    });
+
+    describe('with valid accesToken and item has no quantity', () => {
+
+      it('should return 200 with all orderInfo', done => {
+        request(app)
+          .post(`/api/v1/seller/orders/${order.id}/abort`)
+          .set('X-Access-Token', sellerToken)
+          .set('Content-Type', 'application/json')
+          .send({
+            sellerMessage: 'minh het hang roi ban a'
+          })
+          .expect(200)
+          .then(res => {
+            let body = res.body;
+            expect(body.id).to.equal(order.id);
+            expect(body.status).to.equal(Order.STATUS.ABORTED);
+            return Item.findById(item.id);
+          }).then(i => {
+            expect(i.name).to.equal(item.name);
+            expect(i.quantity).not.to.be.ok;
+            done();
+          }).catch(done);
+      });
+    });
+  });
+
   describe('with invalid accesToken', () => {
     it('should return 404 order is not exits', done => {
       request(app)
@@ -976,21 +982,10 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
   });
 
   describe('with new order', () => {
-    let newOrder;
-    beforeEach(done => {
-      helper.factory.createOrder({
-        shopId: order.shopId,
-        userId: order.userId
-      }).then(o => {
-        expect(o.status).to.equal(Order.STATUS.NEW);
-        newOrder = o;
-        done();
-      });
-    });
 
     it('should return 403', done => {
       request(app)
-        .post(`/api/v1/seller/orders/${newOrder.id}/abort`)
+        .post(`/api/v1/seller/orders/${order.id}/abort`)
         .set('X-Access-Token', sellerToken)
         .set('Content-Type', 'application/json')
         .send({
@@ -998,7 +993,7 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(403);
-          expect(res.body.message_code).to.equal('error.order.only_shipping_order_has_able_to_be_aborted');
+          expect(res.body.message_code).to.equal('error.order.only_accepted_or_shipping_order_has_able_to_be_aborted');
         })
         .expect(403, done);
     });
