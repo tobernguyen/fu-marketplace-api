@@ -8,14 +8,14 @@ const User = models.User;
 
 describe('GET /api/v1/shops/:shopId', () => {
   let shop, accessToken, seller;
-  
+
   before(done => {
     helper.factory.createUser().then(u => {
       accessToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createShopWithShipPlace({}, 'Dom A');
     }).then(s => {
       shop = s;
-      return helper.factory.createItem({ shopId: s.id});
+      return helper.factory.createItem({shopId: s.id});
     }).then(() => {
       return User.findById(shop.ownerId);
     }).then(s => {
@@ -23,27 +23,27 @@ describe('GET /api/v1/shops/:shopId', () => {
       done();
     });
   });
-  
+
   describe('with valid access token and existing shop ', () => {
     it('should return 200 OK with shop detail', done => {
       request(app)
-        .get(`/api/v1/shops/${shop.id}`)
-        .set('X-Access-Token', accessToken)
-        .expect(res => {
-          expect(res.body.name).to.equal(shop.name);
-          expect(res.body.id).to.equal(shop.id);
-          expect(res.body.ownerId).to.equal(shop.ownerId);
-          expect(res.body.description).to.equal(shop.description);
-          expect(res.body.avatar).to.equal(shop.avatar);
-          expect(res.body.cover).to.equal(shop.cover);
-          expect(res.body.shipPlaces.length).to.equal(1);
-          expect(res.body.items.length).to.equal(1);
-          expect(res.body.seller.fullName).to.equal(seller.fullName);
-          expect(res.body.seller.phone).to.equal(seller.phone);
-          expect(res.body.seller.avatar).to.equal(seller.avatar);
-          expect(res.body.phone).to.equal('0987654321');
-        })
-        .expect(200, done);  
+          .get(`/api/v1/shops/${shop.id}`)
+          .set('X-Access-Token', accessToken)
+          .expect(res => {
+            expect(res.body.name).to.equal(shop.name);
+            expect(res.body.id).to.equal(shop.id);
+            expect(res.body.ownerId).to.equal(shop.ownerId);
+            expect(res.body.description).to.equal(shop.description);
+            expect(res.body.avatar).to.equal(shop.avatar);
+            expect(res.body.cover).to.equal(shop.cover);
+            expect(res.body.shipPlaces.length).to.equal(1);
+            expect(res.body.items.length).to.equal(1);
+            expect(res.body.seller.fullName).to.equal(seller.fullName);
+            expect(res.body.seller.phone).to.equal(seller.phone);
+            expect(res.body.seller.avatar).to.equal(seller.avatar);
+            expect(res.body.phone).to.equal('0987654321');
+          })
+          .expect(200, done);
     });
   });
 

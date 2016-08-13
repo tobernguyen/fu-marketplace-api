@@ -189,74 +189,6 @@ describe('Order models', () => {
       });
     });
 
-    describe('with accepted order', () => {
-      let order, item;
-
-      describe('with item has quantity', () => {
-        beforeEach(done => {
-          helper.factory.createItem({
-            quantity: 100
-          }).then(i => {
-            item = i;
-            return helper.factory.createOrder({ 
-              items: [item],
-              status: Order.STATUS.ACCEPTED
-            });
-          }).then(o => {
-            order = o;
-            done();
-          });
-        });
-
-        it('should be ok', done => {
-          order.reject(options).then(o => {
-            expect(o).to.be.ok;
-            return Order.findById(o.id);
-          }).then(orderFromDb => {
-            expect(orderFromDb.note).to.equal(order.note);
-            expect(orderFromDb.shipAddress).to.equal(order.shipAddress);
-            expect(orderFromDb.id).to.equal(order.id);
-            expect(orderFromDb.status).to.equal(Order.STATUS.REJECTED);
-            return Item.findById(item.id);
-          }).then(i => {
-            expect(i.quantity).to.equal(101);
-            done();
-          }, done);
-        });
-      });
-
-      describe('with item has no quantity', () => {
-        beforeEach(done => {
-          helper.factory.createItem().then(i => {
-            item = i;
-            return helper.factory.createOrder({ 
-              items: [item],
-              status: Order.STATUS.ACCEPTED
-            });
-          }).then(o => {
-            order = o;
-            done();
-          });
-        });
-
-        it('should be ok', done => {
-          order.reject(options).then(o => {
-            expect(o).to.be.ok;
-            return Order.findById(o.id);
-          }).then(orderFromDb => {
-            expect(orderFromDb.note).to.equal(order.note);
-            expect(orderFromDb.shipAddress).to.equal(order.shipAddress);
-            expect(orderFromDb.id).to.equal(order.id);
-            expect(orderFromDb.status).to.equal(Order.STATUS.REJECTED);
-            return Item.findById(item.id);
-          }).then(i => {
-            expect(i.quantity).not.to.be.ok;
-            done();
-          }, done);
-        });
-      });
-    });
-
     describe('with completed order', () => {
       let order;
 
@@ -270,7 +202,7 @@ describe('Order models', () => {
       it('should be return error', done => {
         order.reject(options).catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only new or accepted order can be rejected');
+          expect(error.message).to.equal('Only new order can be rejected');
           expect(error.type).to.equal('order');
           return Order.findById(order.id);
         }).then(orderFromDb => {
@@ -648,6 +580,74 @@ describe('Order models', () => {
       });
     });
 
+    describe('with accepted order', () => {
+      let order, item;
+
+      describe('with item has quantity', () => {
+        beforeEach(done => {
+          helper.factory.createItem({
+            quantity: 100
+          }).then(i => {
+            item = i;
+            return helper.factory.createOrder({
+              items: [item],
+              status: Order.STATUS.ACCEPTED
+            });
+          }).then(o => {
+            order = o;
+            done();
+          });
+        });
+
+        it('should be ok', done => {
+          order.abort(options).then(o => {
+            expect(o).to.be.ok;
+            return Order.findById(o.id);
+          }).then(orderFromDb => {
+            expect(orderFromDb.note).to.equal(order.note);
+            expect(orderFromDb.shipAddress).to.equal(order.shipAddress);
+            expect(orderFromDb.id).to.equal(order.id);
+            expect(orderFromDb.status).to.equal(Order.STATUS.ABORTED);
+            return Item.findById(item.id);
+          }).then(i => {
+            expect(i.quantity).to.equal(101);
+            done();
+          }, done);
+        });
+      });
+
+      describe('with item has no quantity', () => {
+        beforeEach(done => {
+          helper.factory.createItem().then(i => {
+            item = i;
+            return helper.factory.createOrder({
+              items: [item],
+              status: Order.STATUS.ACCEPTED
+            });
+          }).then(o => {
+            order = o;
+            done();
+          });
+        });
+
+        it('should be ok', done => {
+          order.abort(options).then(o => {
+            expect(o).to.be.ok;
+            return Order.findById(o.id);
+          }).then(orderFromDb => {
+            expect(orderFromDb.note).to.equal(order.note);
+            expect(orderFromDb.shipAddress).to.equal(order.shipAddress);
+            expect(orderFromDb.id).to.equal(order.id);
+            expect(orderFromDb.status).to.equal(Order.STATUS.ABORTED);
+            return Item.findById(item.id);
+          }).then(i => {
+            expect(i.quantity).not.to.be.ok;
+            done();
+          }, done);
+        });
+      });
+    });
+
     describe('with complete order', () => {
       let order;
 
@@ -661,7 +661,7 @@ describe('Order models', () => {
       it('should be return error', done => {
         order.abort(options).catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only shipping order has able to be aborted');
+          expect(error.message).to.equal('Only accepted or shipping order has able to be aborted');
           expect(error.type).to.equal('order');
           return Order.findById(order.id);
         }).then(orderFromDb => {
