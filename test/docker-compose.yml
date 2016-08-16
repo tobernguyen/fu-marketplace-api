@@ -1,0 +1,23 @@
+version: '2'
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=fu_marketplace_test
+  redis:
+    image: redis
+  elasticsearch:
+    image: elasticsearch
+  api:
+    build: ..
+    command: bash -c "while ! curl -s elasticsearch:9200 > /dev/null; do sleep 0.2; done; npm test --silent"
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    environment:
+      - NODE_ENV=test
+    env_file: ../.env.test
+    volumes:
+      - '..:/home/app/api'
+      - '/home/app/api/node_modules'

@@ -1,0 +1,18 @@
+version: '2'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    command: bash -c "while ! curl -s elasticsearch:9200 > /dev/null; do sleep 0.2; done; node app.js"
+    environment:
+      - NODE_ENV=production
+    env_file: .env.production
+  socket-io:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    command: bash -c "while ! curl -s elasticsearch:9200 > /dev/null; do sleep 0.2; done; node app.js"
+    environment:
+      - NODE_ENV=production
+    env_file: .env.production
