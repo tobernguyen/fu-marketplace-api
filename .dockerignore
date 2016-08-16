@@ -1,0 +1,8 @@
+.git
+.vscode
+.idea
+.gitignore
+docker-compose.yml
+node_modules
+coverage
+public

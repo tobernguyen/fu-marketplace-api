@@ -1,0 +1,34 @@
+variables:
+  CONTAINER_TEST_IMAGE: registry.gitlab.com/fu-marketplace/fu-marketplace-api:$CI_BUILD_REF_NAME
+  CONTAINER_RELEASE_IMAGE: registry.gitlab.com/fu-marketplace/fu-marketplace-api:latest
+
+stages:
+- build
+- test
+- cleanup
+
+before_script:
+- docker info
+- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+
+build:
+  stage: build
+  script:
+    - docker build -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
+
+test:
+  stage: test
+  script:
+    - docker run -d --name db postgres
+    - docker run -d --name elasticsearch elasticsearch
+    - docker run -d --name redis redis
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run --link db:db --link elasticsearch:elasticsearch --link redis:redis -e NO_LOAD_ENV_FILE=true --env-file ./.env.test-ci $CONTAINER_TEST_IMAGE sh ./ci-test.sh
+
+cleanup_test:
+  stage: cleanup
+  script:
+    - docker stop db elasticsearch redis
+    - docker rm db elasticsearch redis
+  when: always

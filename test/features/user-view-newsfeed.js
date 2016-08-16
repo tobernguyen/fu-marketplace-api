@@ -9,11 +9,12 @@ const ShipPlace = require('../../models').ShipPlace;
 var _ = require('lodash');
 var elasticsearchHelper = require('../utils/elasticsearch-helper');
 
-describe('POST /api/v1/feed/shops', () => {
+describe('POST /api/v1/feed/shops', function() {
+  this.retries(3);
   let userToken, shops = [];
 
   before(function(done) {
-    this.timeout(5000);
+    this.timeout(10000);
     helper.queue.testMode.enter(true);
 
     // This test case is sensitive to number of shops

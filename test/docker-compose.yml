@@ -1,0 +1,25 @@
+version: '2'
+services:
+  db:
+    image: postgres
+  redis:
+    image: redis
+  elasticsearch:
+    image: elasticsearch
+  api:
+    build: ..
+    command: sh ./ci-test.sh
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    environment:
+      - NODE_ENV=test
+      - NO_LOAD_ENV_FILE=true
+      - DB_CONNECTION_STRING=postgres://postgres@db/postgres
+      - ELASTIC_SEARCH_HOST=elasticsearch:9200
+      - REDIS_URI=redis://redis
+    env_file: ../.env.test
+    volumes:
+      - '..:/src/app/api'
+      - '/src/app/api/node_modules'

@@ -268,13 +268,15 @@ describe('Shop Model', () => {
       shop.getSalesStatistic().then(result => {
         expect(result).to.have.lengthOf(7); // There should be most recent 7 days only
 
-        expect(result[0].year).to.equal(orders[1].createdAt.getFullYear());
-        expect(result[0].month).to.equal(orders[1].createdAt.getMonth() + 1);
-        expect(result[0].day).to.equal(orders[1].createdAt.getDate());
+        let expectedDate = moment.tz(orders[1].createdAt, 'Asia/Bangkok');
+        expect(result[0].year).to.equal(expectedDate.year());
+        expect(result[0].month).to.equal(expectedDate.month() + 1);
+        expect(result[0].day).to.equal(expectedDate.date());
 
-        expect(result[6].year).to.equal(orders[7].createdAt.getFullYear());
-        expect(result[6].month).to.equal(orders[7].createdAt.getMonth() + 1);
-        expect(result[6].day).to.equal(orders[7].createdAt.getDate());
+        expectedDate = moment.tz(orders[7].createdAt, 'Asia/Bangkok');
+        expect(result[6].year).to.equal(expectedDate.year());
+        expect(result[6].month).to.equal(expectedDate.month() + 1);
+        expect(result[6].day).to.equal(expectedDate.date());
 
         orders[1].getOrderLines().then(orderLines => {
           let expectedTotalSales = _.reduce(orderLines, (sum, ol) => sum + ol.item.price * ol.quantity, 0);
@@ -287,7 +289,7 @@ describe('Shop Model', () => {
 
           done();
         });
-      });
+      }).catch(done);
     });
   });
 
@@ -329,17 +331,19 @@ describe('Shop Model', () => {
 
         let firstDayOrders = ordersByDays[1];
         let firstDayOrderCount = _.countBy(firstDayOrders, o => o.status === Order.STATUS.COMPLETED ? 'completed' : 'incomplete');
-        expect(result[0].year).to.equal(firstDayOrders[0].createdAt.getFullYear());
-        expect(result[0].month).to.equal(firstDayOrders[0].createdAt.getMonth() + 1);
-        expect(result[0].day).to.equal(firstDayOrders[0].createdAt.getDate());
+        let expectedDate = moment.tz(firstDayOrders[0].createdAt, 'Asia/Bangkok');
+        expect(result[0].year).to.equal(expectedDate.year());
+        expect(result[0].month).to.equal(expectedDate.month() + 1);
+        expect(result[0].day).to.equal(expectedDate.date());
         expect(result[0].completedOrders).to.equal(firstDayOrderCount.completed || 0);
         expect(result[0].incompleteOrders).to.equal(firstDayOrderCount.incomplete || 0);
 
         let lastDayOrders = ordersByDays[7];
         let lastDayOrderCount = _.countBy(lastDayOrders, o => o.status === Order.STATUS.COMPLETED ? 'completed' : 'incomplete');
-        expect(result[6].year).to.equal(lastDayOrders[0].createdAt.getFullYear());
-        expect(result[6].month).to.equal(lastDayOrders[0].createdAt.getMonth() + 1);
-        expect(result[6].day).to.equal(lastDayOrders[0].createdAt.getDate());
+        expectedDate = moment.tz(lastDayOrders[0].createdAt, 'Asia/Bangkok');
+        expect(result[6].year).to.equal(expectedDate.year());
+        expect(result[6].month).to.equal(expectedDate.month() + 1);
+        expect(result[6].day).to.equal(expectedDate.date());
         expect(result[6].completedOrders).to.equal(lastDayOrderCount.completed || 0);
         expect(result[6].incompleteOrders).to.equal(lastDayOrderCount.incomplete || 0);
 
@@ -395,9 +399,10 @@ describe('Shop Model', () => {
             }
           });
         });
-        expect(result[0].year).to.equal(firstDayOrders[0].createdAt.getFullYear());
-        expect(result[0].month).to.equal(firstDayOrders[0].createdAt.getMonth() + 1);
-        expect(result[0].day).to.equal(firstDayOrders[0].createdAt.getDate());
+        let expectedDate = moment.tz(firstDayOrders[0].createdAt, 'Asia/Bangkok');
+        expect(result[0].year).to.equal(expectedDate.year());
+        expect(result[0].month).to.equal(expectedDate.month() + 1);
+        expect(result[0].day).to.equal(expectedDate.date());
         expect(result[0].itemSold).to.eql(firstDayItemSoldStat);
 
         let lastDayOrders = ordersByDays[7];
@@ -411,9 +416,11 @@ describe('Shop Model', () => {
             }
           });
         });
-        expect(result[6].year).to.equal(lastDayOrders[0].createdAt.getFullYear());
-        expect(result[6].month).to.equal(lastDayOrders[0].createdAt.getMonth() + 1);
-        expect(result[6].day).to.equal(lastDayOrders[0].createdAt.getDate());
+
+        expectedDate = moment.tz(lastDayOrders[0].createdAt, 'Asia/Bangkok');
+        expect(result[6].year).to.equal(expectedDate.year());
+        expect(result[6].month).to.equal(expectedDate.month() + 1);
+        expect(result[6].day).to.equal(expectedDate.date());
         expect(result[6].itemSold).to.eql(lastDayItemSoldStat);
 
         done();

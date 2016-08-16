@@ -1,0 +1,28 @@
+version: '2'
+services:
+  db:
+    image: postgres
+  redis:
+    image: redis
+  elasticsearch:
+    image: elasticsearch
+  api:
+    build: .
+    command: bash -c "while ! curl -s elasticsearch:9200 > /dev/null; do sleep 0.2; done; npm run dev"
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    environment:
+      - NODE_ENV=development
+      - NO_LOAD_ENV_FILE=true
+      - DB_CONNECTION_STRING=postgres://postgres@db/postgres
+      - ELASTIC_SEARCH_HOST=elasticsearch:9200
+      - REDIS_URI=redis://redis
+    env_file: .env.development
+    ports:
+      - '3000:3000'
+      - '8081:8081'
+    volumes:
+      - '.:/src/app/api'
+      - '/src/app/api/node_modules'

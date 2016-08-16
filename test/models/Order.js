@@ -398,7 +398,7 @@ describe('Order models', () => {
       it('should be return error', done => {
         order.startShipping().catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only accepted order has able to be start shipping');
+          expect(error.message).to.equal('Only accepted order can be start shipping');
           expect(error.type).to.equal('order');
           return Order.findById(order.id);
         }).then(orderFromDb => {
@@ -462,7 +462,7 @@ describe('Order models', () => {
       it('should be return error', done => {
         order.complete().catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only shipping order has able to be completed');
+          expect(error.message).to.equal('Only shipping order can be completed');
           expect(error.type).to.equal('order');
           return Order.findById(order.id);
         }).then(orderFromDb => {
@@ -661,7 +661,7 @@ describe('Order models', () => {
       it('should be return error', done => {
         order.abort(options).catch(error => {
           expect(error.status).to.equal(403);
-          expect(error.message).to.equal('Only accepted or shipping order has able to be aborted');
+          expect(error.message).to.equal('Only accepted or shipping order can be aborted');
           expect(error.type).to.equal('order');
           return Order.findById(order.id);
         }).then(orderFromDb => {
