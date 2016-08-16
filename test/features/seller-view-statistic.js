@@ -5,6 +5,7 @@ const request = require('supertest-as-promised');
 const Order = require('../../models').Order;
 const app = require('../../app.js');
 var _ = require('lodash');
+var moment = require('moment-timezone');
 
 describe('GET /api/v1/seller/shops/:id/salesStatistic', () => {
   let  sellerToken, seller, shop, order;
@@ -37,9 +38,10 @@ describe('GET /api/v1/seller/shops/:id/salesStatistic', () => {
           expect(salesStatistic.data).to.have.lengthOf(1);
 
           let firstStat = salesStatistic.data[0];
-          expect(firstStat.year).to.equal(order.createdAt.getFullYear());
-          expect(firstStat.month).to.equal(order.createdAt.getMonth() + 1);
-          expect(firstStat.day).to.equal(order.createdAt.getDate());
+          let expectedDate = moment.tz(order.createdAt, 'Asia/Bangkok');
+          expect(firstStat.year).to.equal(expectedDate.year());
+          expect(firstStat.month).to.equal(expectedDate.month() + 1);
+          expect(firstStat.day).to.equal(expectedDate.date());
 
           order.getOrderLines().then(orderLines => {
             let expectedTotalSales = _.reduce(orderLines, (sum, ol) => sum + ol.item.price * ol.quantity, 0);
@@ -85,9 +87,10 @@ describe('GET /api/v1/seller/shops/:id/ordersStatistic', () => {
           expect(ordersStatistic.data).to.have.lengthOf(1);
 
           let firstStat = ordersStatistic.data[0];
-          expect(firstStat.year).to.equal(completedOrder.createdAt.getFullYear());
-          expect(firstStat.month).to.equal(completedOrder.createdAt.getMonth() + 1);
-          expect(firstStat.day).to.equal(completedOrder.createdAt.getDate());
+          let expectedDate = moment.tz(completedOrder.createdAt, 'Asia/Bangkok');
+          expect(firstStat.year).to.equal(expectedDate.year());
+          expect(firstStat.month).to.equal(expectedDate.month() + 1);
+          expect(firstStat.day).to.equal(expectedDate.date());
           expect(firstStat.completedOrders).to.equal(1);
           expect(firstStat.incompleteOrders).to.equal(1);
 
@@ -131,9 +134,10 @@ describe('GET /api/v1/seller/shops/:id/itemSoldStatistic', () => {
           expect(itemSoldStatistic.data).to.have.lengthOf(1);
 
           let firstStat = itemSoldStatistic.data[0];
-          expect(firstStat.year).to.equal(firstOrder.createdAt.getFullYear());
-          expect(firstStat.month).to.equal(firstOrder.createdAt.getMonth() + 1);
-          expect(firstStat.day).to.equal(firstOrder.createdAt.getDate());
+          let expectedDate = moment.tz(firstOrder.createdAt, 'Asia/Bangkok');
+          expect(firstStat.year).to.equal(expectedDate.year());
+          expect(firstStat.month).to.equal(expectedDate.month() + 1);
+          expect(firstStat.day).to.equal(expectedDate.date());
 
           let expectedItemSold = {};
           expectedItemSold[firstOrder['__test__'].orderLines[0].item.categoryId] = 1;
