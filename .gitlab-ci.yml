@@ -1,7 +1,11 @@
 variables:
   CONTAINER_TEST_IMAGE: registry.gitlab.com/fu-marketplace/fu-marketplace-api:$CI_BUILD_REF_NAME
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/fu-marketplace/fu-marketplace-api:latest
-  TEST_COMMAND: bash -c "while ! curl -s elasticsearch:9200 > /dev/null; do echo wait for elasticsearch; sleep 0.5; done; npm test --silent"
+
+stages:
+- build
+- test
+- cleanup
 
 before_script:
 - docker info
@@ -20,4 +24,11 @@ test:
     - docker run -d --name elasticsearch elasticsearch
     - docker run -d --name redis redis
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run --link db:db --link elasticsearch:elasticsearch --link redis:redis $CONTAINER_TEST_IMAGE $TEST_COMMAND
+    - docker run --link db:db --link elasticsearch:elasticsearch --link redis:redis $CONTAINER_TEST_IMAGE sh ./ci-test.sh
+
+cleanup_test:
+  stage: cleanup
+  script:
+    - docker stop db elasticsearch redis
+    - docker rm db elasticsearch redis
+  when: always

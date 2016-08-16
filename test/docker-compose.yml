@@ -8,7 +8,7 @@ services:
     image: elasticsearch
   api:
     build: ..
-    command: npm test --silent
+    command: sh ./ci-test.sh
     depends_on:
       - db
       - redis
