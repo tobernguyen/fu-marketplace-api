@@ -1,5 +1,3 @@
-image: docker:latest
-
 variables:
   CONTAINER_TEST_IMAGE: registry.gitlab.com/fu-marketplace/fu-marketplace-api:$CI_BUILD_REF_NAME
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/fu-marketplace/fu-marketplace-api:latest
