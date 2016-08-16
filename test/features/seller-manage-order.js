@@ -622,7 +622,7 @@ describe('POST /api/v1/seller/orders/:id/ship', () => {
         .set('Content-Type', 'application/json')
         .expect(res => {
           expect(res.body.status).to.equal(403);
-          expect(res.body.message_code).to.equal('error.order.only_accepted_order_has_able_to_be_start_shipping');
+          expect(res.body.message_code).to.equal('error.order.only_accepted_order_can_be_start_shipping');
         })
         .expect(403, done);
     });
@@ -696,7 +696,7 @@ describe('POST /api/v1/seller/orders/:id/complete', () => {
         .set('Content-Type', 'application/json')
         .expect(res => {
           expect(res.body.status).to.equal(403);
-          expect(res.body.message_code).to.equal('error.order.only_shipping_order_has_able_to_be_completed');
+          expect(res.body.message_code).to.equal('error.order.only_shipping_order_can_be_completed');
         })
         .expect(403, done);
     });
@@ -993,7 +993,7 @@ describe('POST /api/v1/seller/orders/:id/abort', () => {
         })
         .expect(res => {
           expect(res.body.status).to.equal(403);
-          expect(res.body.message_code).to.equal('error.order.only_accepted_or_shipping_order_has_able_to_be_aborted');
+          expect(res.body.message_code).to.equal('error.order.only_accepted_or_shipping_order_can_be_aborted');
         })
         .expect(403, done);
     });

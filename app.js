@@ -1,8 +1,7 @@
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
-const dotenv = require('dotenv');
-dotenv.load({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+require('./libs/load-env');
 
 /**
  * Module dependencies.

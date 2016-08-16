@@ -16,6 +16,7 @@ tmp
 # API keys and secrets
 .env.production
 .env.development
+.env.test
 
 # Dependency directory
 node_modules

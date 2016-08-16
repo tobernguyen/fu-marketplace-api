@@ -1,6 +1,5 @@
 // Helper file for sequelize-cli to load database config when run migration
-const dotenv = require('dotenv');
-dotenv.load({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+require('../libs/load-env');
 
 module.exports = {
   'production': {
