@@ -25,7 +25,7 @@ test:
     - docker run -d --name elasticsearch elasticsearch
     - docker run -d --name redis redis
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker run --link db:db --link elasticsearch:elasticsearch --link redis:redis -e NO_LOAD_ENV_FILE=true --env-file ./.env.test-ci $CONTAINER_TEST_IMAGE sh ./ci-test.sh
+    - docker run --link db:db --link elasticsearch:elasticsearch --link redis:redis -e NO_LOAD_ENV_FILE=true -e CI_TEST=true --env-file ./.env.test-ci $CONTAINER_TEST_IMAGE sh ./ci-test.sh
 
 release-image:
   stage: release
@@ -41,4 +41,3 @@ cleanup_test:
     - docker stop db elasticsearch redis
     - docker rm db elasticsearch redis
   when: always
-  

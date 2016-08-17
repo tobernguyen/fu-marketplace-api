@@ -78,9 +78,9 @@ describe('GET /api/v1/admin/shops/', () => {
     });
   });
 
-  describe('with admin access token', () => {
-    it('should return 200 OK and return an array which contain created shop info', function(done) {
-      this.retries(3);
+  describe('with admin access token', function() {
+    this.retries(3);
+    it('should return 200 OK and return an array which contain created shop info', (done) => {
       request(app)
         .get('/api/v1/admin/shops/')
         .set('X-Access-Token', adminToken)

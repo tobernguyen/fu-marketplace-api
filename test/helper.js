@@ -25,7 +25,12 @@ var kue = require('../libs/kue');
 var moment = require('moment');
 
 before(function(done) {
-  this.timeout(10000);
+  if (process.env.CI_TEST) {
+    this.timeout(20000);
+    this.retries(5);
+  } else {
+    this.timeout(10000);
+  }
   kue.queue.testMode.enter();
   dbUtils.clearDatabase()
     .then(elasticsearchHelper.deleteAll)
