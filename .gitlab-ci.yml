@@ -4,7 +4,6 @@ variables:
 
 stages:
 - build
-- pretest
 - test
 - cleanup
 - release
@@ -36,11 +35,12 @@ release-image:
   only:
     - production
 
-cleanup_pretest:
- stage: pretest
- script:
+cleanup_manual:
+  stage: cleanup
+  script:
    - docker stop db elasticsearch redis
    - docker rm db elasticsearch redis
+  when: manual
 
 cleanup_test:
   stage: cleanup
