@@ -36,3 +36,6 @@ public/uploads/
 
 # Istanbul Coverage Reports
 coverage
+
+# Docker local data
+/docker-data

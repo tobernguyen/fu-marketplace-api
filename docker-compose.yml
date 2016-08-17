@@ -2,10 +2,16 @@ version: '2'
 services:
   db:
     image: postgres
+    volumes:
+      - './docker-data/postgres:/var/lib/postgres/data'
   redis:
     image: redis
+    volumes:
+      - './docker-data/redis:/data'
   elasticsearch:
     image: elasticsearch
+    volumes:
+      - './docker-data/elasticsearch:/var/lib/elasticsearch/data'
   api:
     build: .
     command: bash -c "while ! curl -s elasticsearch:9200 > /dev/null; do sleep 0.2; done; npm run dev"

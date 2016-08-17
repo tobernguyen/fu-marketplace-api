@@ -30,9 +30,9 @@ ELASTIC_SEARCH_INDEX_NAME=fum_test
 
 Run migrations, seeds and elasticsearch setup
 ```bash
+npm run setup:elasticsearch
 npm run db:migrate
 npm run db:seed:all
-npm run setup:elasticsearch
 ```
 
 ## SEED
