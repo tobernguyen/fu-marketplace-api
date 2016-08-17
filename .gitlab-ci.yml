@@ -38,9 +38,9 @@ release-image:
 
 cleanup_pretest:
  stage: pretest
-   script:
-     - docker stop db elasticsearch redis
-     - docker rm db elasticsearch redis
+ script:
+   - docker stop db elasticsearch redis
+   - docker rm db elasticsearch redis
 
 cleanup_test:
   stage: cleanup
