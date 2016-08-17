@@ -100,7 +100,8 @@ describe('GET /api/v1/seller/shops/:id/ordersStatistic', () => {
   });
 });
 
-describe('GET /api/v1/seller/shops/:id/itemSoldStatistic', () => {
+describe('GET /api/v1/seller/shops/:id/itemSoldStatistic', function() {
+  this.retries(5);
   let  sellerToken, seller, shop, firstOrder, secondOrder;
 
   before(done => {

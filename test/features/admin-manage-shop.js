@@ -79,7 +79,7 @@ describe('GET /api/v1/admin/shops/', () => {
   });
 
   describe('with admin access token', function() {
-    this.retries(3);
+    this.retries(5);
     it('should return 200 OK and return an array which contain created shop info', (done) => {
       request(app)
         .get('/api/v1/admin/shops/')

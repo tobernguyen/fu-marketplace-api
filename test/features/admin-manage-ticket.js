@@ -7,7 +7,8 @@ const models = require('../../models');
 const Ticket = models.Ticket;
 var _ = require('lodash');
 
-describe('GET /api/v1/admin/tickets/', () => {
+describe('GET /api/v1/admin/tickets/', function() {
+  this.retries(5);
   let ticket1, ticket3, adminToken;
 
   before(done => {

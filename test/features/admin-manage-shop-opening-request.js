@@ -9,7 +9,8 @@ const User = require('../../models').User;
 const _ = require('lodash');
 const emailer = require('../../libs/emailer');
 
-describe('GET /api/v1/admin/shopOpeningRequests', () => {
+describe('GET /api/v1/admin/shopOpeningRequests', function() {
+  this.retries(5);
   let pendingRequest, acceptedRequest, rejectedRequest, adminToken;
 
   before(done => {
