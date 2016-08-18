@@ -310,7 +310,7 @@ describe('libs/elasticsearch', () => {
           });
         });
 
-        return Promise.all(promises).then(s => {
+        Promise.all(promises).then(s => {
           return elasticsearchHelper.refreshIndexNow();
         }).then(() => done(), done);
       });
