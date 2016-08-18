@@ -31,43 +31,6 @@ const app = express();
  */
 app.set('port', process.env.PORT || 3000);
 app.use(compression());
-if (process.env.NODE_ENV !== 'test') {
-  app.use(require('express-bunyan-logger')({
-    name: process.env.LOGGER_NAME,
-    format: ':method :url :status-code :res-headers[content-length] - :response-time ms',
-    parseUA: false,
-    levelFn: function(status, err, meta) {
-      meta['route'] = `${meta['method']} ${_.get(meta, 'req.route.path')}`;
-
-      if (meta['status-code'] >= 500 || meta['response-time'] > 1000) {
-        meta['debug-data'] = {
-          req: _.pick(meta['req'], ['headers', 'params', 'query', 'body', 'user'])
-        };
-        return 'fatal';
-      } else if (meta['response-time'] > 500) {
-        meta['debug-data'] = {
-          req: _.pick(meta['req'], ['headers', 'params', 'query', 'body', 'user'])
-        };
-        return 'warn';
-      } else {
-        return 'info';
-      }
-    },
-    excludes: [
-      'remote-address', 
-      'pid', 'req_id',
-      'ip', 'referer', 
-      'user-agent', 
-      'short-body', 
-      'body', 'response-hrtime',
-      'http-version',
-      'req-headers',
-      'res-headers',
-      'req', 'res',
-      'incoming'
-    ]
-  }));
-}
 app.use(bodyParser.json());
 app.use(expressValidator());
 app.all('/*', function(req, res, next) {
@@ -82,6 +45,48 @@ app.all('/*', function(req, res, next) {
     next();
   }
 });
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(require('express-bunyan-logger')({
+    name: process.env.LOGGER_NAME,
+    format: ':method :url :status-code :res-headers[content-length] - :response-time ms',
+    parseUA: false,
+    levelFn: function(status, err, meta) {
+      meta['route'] = `${meta['method']} ${_.get(meta, 'req.route.path')}`;
+
+      if (meta['status-code'] >= 500 || meta['response-time'] > 1000) {
+        meta['debug-data'] = {
+          req: _.pick(meta['req'], ['headers', 'params', 'query', 'body', 'user'])
+        };
+
+        // Delete access token from debug-data
+        _.unset(meta, 'debug-data.req.headers.x-access-token');
+
+        return 'fatal';
+      } else if (meta['response-time'] > 500) {
+        meta['debug-data'] = {
+          req: _.pick(meta['req'], ['headers', 'params', 'query', 'body', 'user'])
+        };
+        return 'warn';
+      } else {
+        return 'info';
+      }
+    },
+    excludes: [
+      'remote-address',
+      'pid', 'req_id',
+      'ip', 'referer',
+      'user-agent',
+      'short-body',
+      'body', 'response-hrtime',
+      'http-version',
+      'req-headers',
+      'res-headers',
+      'req', 'res',
+      'incoming'
+    ]
+  }));
+}
 
 // Auth Middleware - This will check if the token is valid
 // Only the requests that start with /api/v1/* will be checked for the token.

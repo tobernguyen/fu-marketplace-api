@@ -3,7 +3,14 @@
  */
 require('./libs/load-env');
 
-var io = require('socket.io')(process.env.SOCKET_IO_PORT);
+var app = require('http').createServer(handler);
+
+function handler (req, res) {
+  res.writeHead(200);
+  res.end();
+}
+
+var io = require('socket.io')(app);
 var redis = require('socket.io-redis');
 io.adapter(redis(process.env.REDIS_URI.replace('redis://', ''), {key: process.env.SOCKET_IO_REDIS_PREFIX || 'socket.io'}));
 
@@ -11,8 +18,6 @@ io.adapter(redis(process.env.REDIS_URI.replace('redis://', ''), {key: process.en
 process.env.LOGGER_NAME = process.env.SOCKET_IO_LOGGER_NAME;
 var logger = require('./libs/logger');
 var validateSocketIOToken = require('./middlewares/validateSocketIOToken');
-
-logger.info(`SocketIO server listening on port ${process.env.SOCKET_IO_PORT} in ${process.env.NODE_ENV} mode`);
 
 io.on('connection', validateSocketIOToken)
   .on('authenticated', socket => {
@@ -24,3 +29,6 @@ io.on('connection', validateSocketIOToken)
     // Join current socket to private channel
     socket.join(`user.${socket.user.id}`);
   });
+
+app.listen(process.env.SOCKET_IO_PORT);
+logger.info(`SocketIO server listening on port ${process.env.SOCKET_IO_PORT} in ${process.env.NODE_ENV} mode`);

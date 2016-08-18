@@ -61,7 +61,7 @@ describe('GET /api/v1/admin/shops/:id', () => {
   });
 });
 
-describe('GET /api/v1/admin/shops/', () => {
+describe('GET /api/v1/admin/shops/', function() {
   let adminToken, normalUserAccessToken, createdShop, owner;
 
   before(done => {
@@ -79,8 +79,8 @@ describe('GET /api/v1/admin/shops/', () => {
   });
 
   describe('with admin access token', function() {
-    this.retries(5);
-    it('should return 200 OK and return an array which contain created shop info', (done) => {
+    it('should return 200 OK and return an array which contain created shop info', function(done) {
+      this.retries(5);
       request(app)
         .get('/api/v1/admin/shops/')
         .set('X-Access-Token', adminToken)
