@@ -8,8 +8,7 @@
   "scripts": {
     "start": "NODE_ENV=development node app.js | bunyan -o short",
     "dev": "NODE_ENV=development nodemon app.js | bunyan -o short",
-    "test": "gulp mocha",
-    "test:watch": "gulp",
+    "test": "NODE_ENV=test mocha test/**/*.js",
     "test:file": "NODE_ENV=test mocha",
     "test:debug": "NODE_ENV=test mocha --debug-brk",
     "db:migrate": "sequelize db:migrate",

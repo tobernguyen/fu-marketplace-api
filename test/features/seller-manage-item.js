@@ -85,7 +85,8 @@ describe('GET /api/v1/seller/shops/:shopId/items', () => {
   });
 });
 
-describe('POST /api/v1/seller/shops/:shopId/items', () => {
+describe('POST /api/v1/seller/shops/:shopId/items', function() {
+  this.retries(5);
   let  shop, sellerToken, category;
 
   before(done => {
@@ -318,10 +319,12 @@ describe('GET /api/v1/seller/shops/:shopId/items/:itemId', () => {
   });
 });
 
-describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', () => {
+describe('PUT /api/v1/seller/shops/:shopId/items/:itemId', function() {
+  this.retries(5);
   let  shop, sellerToken, categories, item;
 
-  before(done => {
+  before(function(done) {
+    this.timeout(10000);
     helper.factory.createUserWithRole({}, 'seller').then(u => {
       sellerToken = helper.createAccessTokenForUserId(u.id);
       return helper.factory.createShopWithShipPlace({ ownerId: u.id}, 'dom A');

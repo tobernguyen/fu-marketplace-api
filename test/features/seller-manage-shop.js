@@ -399,7 +399,8 @@ describe('POST /api/v1/seller/shops/:id/uploadAvatar', () => {
   });
 });
 
-describe('POST /api/v1/seller/shops/:id/uploadCover', () => {
+describe('POST /api/v1/seller/shops/:id/uploadCover', function() {
+  this.retries(5);
   let  sellerToken, shop, bannedShop, ownerId;
   
   before(done => {

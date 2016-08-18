@@ -41,7 +41,7 @@ describe('GET /api/v1/admin/tickets/', function() {
             expect(ticket.orderId).to.equal(ticket1.orderId);
             expect(ticket.id).to.equal(ticket1.id);
 
-            Ticket.findOne({
+            return Ticket.findOne({
               where: {id: ticket1.id},
               include: {
                 model: models.Order,
@@ -60,7 +60,7 @@ describe('GET /api/v1/admin/tickets/', function() {
               expect(ticket.user.fullName).to.equal(t.Order.User.fullName);
               done();
             });
-          });
+          }).catch(done);
       });
     });
 
