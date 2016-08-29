@@ -104,7 +104,8 @@ var searchShop = (query) => {
           'items.name.folded^5', 
           'items.description^10', 
           'items.description.folded^5'
-        ]
+        ],
+        minimum_should_match: '75%'
       }
     });
   }
