@@ -91,6 +91,7 @@ var searchShop = (query) => {
       multi_match: {
         type: 'best_fields',
         fuzziness: 'AUTO',
+        max_expansions: 1,
         operator: 'and',
         query: query.keyword,
         fields: [
@@ -104,8 +105,7 @@ var searchShop = (query) => {
           'items.name.folded^5', 
           'items.description^10', 
           'items.description.folded^5'
-        ],
-        minimum_should_match: '75%'
+        ]
       }
     });
   }
@@ -145,11 +145,6 @@ var searchShop = (query) => {
     body: {
       query: esq.getQuery(),
       aggregations: {
-        category: {
-          terms: {
-            field: 'categoryIds'
-          }
-        },
         shipPlace: {
           terms: {
             field: 'shipPlaceIds'
