@@ -145,9 +145,9 @@ var searchShop = (query) => {
     body: {
       query: esq.getQuery(),
       aggregations: {
-        shipPlace: {
+        category: {
           terms: {
-            field: 'shipPlaceIds'
+            field: 'categoryIds'
           }
         }
       }
