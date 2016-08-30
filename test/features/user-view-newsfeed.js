@@ -165,19 +165,6 @@ describe('POST /api/v1/feed/shops', function() {
           done();
         });
     });
-
-    it('should return the count of shop for each available shipPlaces in the system', done => {
-      request(app)
-        .post('/api/v1/feed/shops')
-        .set('X-Access-Token', userToken)
-        .set('Content-Type', 'application/json')
-        .expect(200)
-        .then(res => {
-          let shipPlaceAgg = _.get(res, 'body.result.aggregations.category');
-          expect(shipPlaceAgg).to.be.an('array');
-          done();
-        });
-    });
   });
 
   describe('with keyword', () => {

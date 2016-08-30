@@ -193,14 +193,11 @@ describe('libs/elasticsearch', () => {
         }).catch(done);
       });
 
-      it('should return aggregations for categoryIds and shipPlaceIds', done => {
+      it('should return aggregations for categoryIds', done => {
         elasticsearch.searchShop().then(resp => {
           let aggregations = resp.aggregations;
-          let shipPlace = aggregations.shipPlace;
           let category = aggregations.category;
-          expect(shipPlace).to.be.ok;
           expect(category).to.be.ok;
-          expect(shipPlace.buckets).to.have.lengthOf(6); // Because all shops ship to total 6 places
           expect(category.buckets).to.be.an('array');
           done();
         }).catch(done);
