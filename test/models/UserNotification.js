@@ -170,7 +170,7 @@ describe('UserNotification Model', () => {
               contents: {
                 'en': `Bạn có đơn hàng mới tại ${notificationData.shopName} với mã số #${notificationData.orderId} được đặt bởi ${notificationData.buyerName}`
               },
-              url: `${process.env.SITE_ROOT_URL}/dashboard/shops/${notificationData.shopId}`
+              url: `${process.env.SITE_ROOT_URL}/dashboard/shops/${notificationData.shopId}/orders`
             }
           });
           
