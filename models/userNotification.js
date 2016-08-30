@@ -301,7 +301,7 @@ module.exports = function(sequelize, DataTypes) {
           contents: {
             'en': message
           },
-          url: `${process.env.SITE_ROOT_URL}/dashboard/shops/${notification.data.shopId}`
+          url: `${process.env.SITE_ROOT_URL}/dashboard/shops/${notification.data.shopId}/orders`
         }
       });
 
